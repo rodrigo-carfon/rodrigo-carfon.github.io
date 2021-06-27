@@ -17,7 +17,7 @@
 
 ---
 [Project 4 Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
+<img src="creditfraud.jpeg?raw=true"/>
 
 ---
 

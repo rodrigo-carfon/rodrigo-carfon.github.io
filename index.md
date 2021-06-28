@@ -2,13 +2,16 @@
 
 ---
 
-### Projects
+### Unsupervised Learning
 
 [Project 1: Mean Shift as a way to find optimal K in KMeans](https://www.kaggle.com/carfonrod/notebook7d061440cc)
 <img src="images/mean_shift.jpeg?raw=true"/>
 
 ---
-[Project 2: Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)
+
+### Supervised Learning
+
+[Project 1: Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)
 <img src="images/creditfraud.jpeg?raw=true"/>
 
 ---

@@ -5,7 +5,7 @@
 ### Projects
 
 [Project 1: Mean Shift as a way to find optimal K in KMeans](https://www.kaggle.com/carfonrod/notebook7d061440cc)
-<img src="images/dmean_shift.jpg?raw=true"/>
+<img src="images/mean_shift.jpg?raw=true"/>
 
 ---
 [Project 2: Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)

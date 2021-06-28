@@ -2,34 +2,18 @@
 
 ---
 
-### Category Name 12 
+### Projects
 
-[Project 1 Title](/sample_page)
+[Project 1: Mean Shift as a way to find optimal K in KMeans](https://www.kaggle.com/carfonrod/notebook7d061440cc)
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
 
 ---
-[Project 2 Title](/pdf/sample_presentation.pdf)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
-
----
-[Project 3 Title](http://example.com/)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
-
----
-[Project 4 Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)
+[Project 2: Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)
 <img src="images/creditfraud.jpeg?raw=true"/>
 
 ---
 
-### Category Name 13
 
-- [Project 1 Title](http://example.com/)
-- [Project 2 Title](http://example.com/)
-- [Project 3 Title](http://example.com/)
-- [Project 4 Title](http://example.com/)
-- [Project 5 Title](http://example.com/)
-
----
 
 
 

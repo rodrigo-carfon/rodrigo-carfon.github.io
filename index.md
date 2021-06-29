@@ -9,7 +9,7 @@
 
 ---
 
-[Project 2: MBA Analysis on Grocery shop purchase history](https://www.kaggle.com/carfonrod/mba-on-grocery-dataset
+[Project 2: MBA Analysis on Grocery shop purchase history](https://www.kaggle.com/carfonrod/mba-on-grocery-dataset)
 <img src="images/mba.png?raw=true"/>
 
 ---

@@ -9,6 +9,11 @@
 
 ---
 
+[Project 2: MBA Analysis on Grocery shop purchase history](https://www.kaggle.com/carfonrod/mba-on-grocery-dataset
+<img src="images/mba.png?raw=true"/>
+
+---
+
 ### Supervised Learning
 
 [Project 1: Credit Card Fraud Detection](https://www.kaggle.com/carfonrod/credfraud)

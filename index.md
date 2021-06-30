@@ -4,7 +4,7 @@
 
 ### Unsupervised Learning
 
-[Project 1: Mean Shift as a way to find optimal K in KMeans Clustering](https://www.kaggle.com/carfonrod/notebook7d061440cc)
+[Project 1: Mean Shift as a way to find optimal K in KMeans Clustering](https://www.kaggle.com/carfonrod/mean-shift)
 <img src="images/mean_shift.jpeg?raw=true"/>
 
 ---

@@ -21,7 +21,7 @@
 
 ---
 
-### Random Research
+### Rent Price Research
 
 [Project 1: Kitnet rent price on Barao Geraldo](https://www.kaggle.com/carfonrod/barao-geraldo-rent)
 <img src="images/aluguel.jpg?raw=true"/>

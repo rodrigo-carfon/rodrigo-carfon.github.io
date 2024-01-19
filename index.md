@@ -8,7 +8,7 @@
 <img src="images/aluguel.jpg?raw=true"/>
 ---
 
-[Project 2: NYT Web Scrapper based on search input, category and date range](https://www.kaggle.com/carfonrod/barao-geraldo-rent)
+[Project 2: NYT Web Scrapper based on search input, category and date](pdf/nyt_scrape.pdf)
 <img src="images/nyt.png?raw=true"/>
 ---
 

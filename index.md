@@ -2,6 +2,12 @@
 
 ---
 
+### Web Scrapping and Web Automation
+
+[Project 1: Kitnet rent price on Barao Geraldo](https://www.kaggle.com/carfonrod/barao-geraldo-rent)
+<img src="images/aluguel.jpg?raw=true"/>
+---
+
 ### Unsupervised Learning
 
 [Project 1: Mean Shift as a way to find optimal K in KMeans Clustering](https://www.kaggle.com/carfonrod/mean-shift)
@@ -19,12 +25,6 @@
 [Project 1: Credit Card Fraud Detection with XGBoost](https://www.kaggle.com/carfonrod/credfraud)
 <img src="images/creditfraud.jpeg?raw=true"/>
 
----
-
-### Rent Price Research
-
-[Project 1: Kitnet rent price on Barao Geraldo](https://www.kaggle.com/carfonrod/barao-geraldo-rent)
-<img src="images/aluguel.jpg?raw=true"/>
 
 
 

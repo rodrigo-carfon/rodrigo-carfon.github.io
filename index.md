@@ -8,6 +8,10 @@
 <img src="images/aluguel.jpg?raw=true"/>
 ---
 
+[Project 2: NYT Web Scrapper based on search input, category and date range](https://www.kaggle.com/carfonrod/barao-geraldo-rent)
+<img src="images/nyt.jpg?raw=true"/>
+---
+
 ### Unsupervised Learning
 
 [Project 1: Mean Shift as a way to find optimal K in KMeans Clustering](https://www.kaggle.com/carfonrod/mean-shift)

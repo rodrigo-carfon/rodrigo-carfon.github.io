@@ -48,6 +48,7 @@
 	        initialMessages: [
 		        'Olá! Seja bem vindo',
 		        'Como posso ajudar?'
+	  	],
         });
 </script>
 

@@ -43,7 +43,7 @@
         import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
         createChat({
-                webhookUrl: 'https://d08c-2804-1b3-a800-126f-1558-3324-49c6-f57.ngrok-free.app'
+                webhookUrl: 'https://d08c-2804-1b3-a800-126f-1558-3324-49c6-f57.ngrok-free.app/webhook/b62953ac-14e0-4208-a26d-937d2027f65f/chat'
         });
 </script>
 

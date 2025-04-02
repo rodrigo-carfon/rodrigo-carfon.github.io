@@ -44,10 +44,6 @@
 
         createChat({
                 webhookUrl: 'https://608c-2804-1b3-a800-126f-1558-3324-49c6-f57.ngrok-free.app/webhook/b62953ac-14e0-4208-a26d-937d2027f65f/chat',
-	        initialMessages: [
-		        'Olá! Seja bem vindo',
-		        'Como posso ajudar?'
-	  	],
         });
 </script>
 

@@ -43,7 +43,7 @@
         import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
         createChat({
-                webhookUrl: 'https://06aa-2804-1b3-a800-39fa-dcb-d351-7ac4-347b.ngrok-free.app/webhook/6229c19c-461c-47c4-8064-1542856b35b9/chat',
+                webhookUrl: 'https://a97e-2804-1b3-a800-da41-f863-ea28-f1c3-f310.ngrok-free.app/webhook-test/webhook-chat',
                 initialMessages: [
                 'Seja bem vindo ao meu portfolio!'
                 ],

@@ -43,7 +43,7 @@
         import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
         createChat({
-                webhookUrl: 'https://troll-popular-guinea.ngrok-free.app/webhook-test/webhook-chat',
+                webhookUrl: 'https://troll-popular-guinea.ngrok-free.app/webhook/webhook-chat',
                 initialMessages: [
                 'Seja bem vindo ao meu portfolio!'
                 ],

@@ -44,7 +44,7 @@
         createChat({
                 webhookUrl: 'https://troll-popular-guinea.ngrok-free.app/webhook/chat',
                 initialMessages: [
-                'Seja bem vindo ao meu portfolio!'
+                'Seja bem vindo ao meu portfolio.'
                 ],
         });
 </script>

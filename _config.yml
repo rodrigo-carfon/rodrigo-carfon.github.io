@@ -1,11 +1,11 @@
-title: John Doe # your name (or website title) here
+title: Rodrigo Carvalho # your name (or website title) here
 logo: "/images/logo.png?raw=true" # your photo (or logo) here
 description: > # your text below (remove <br> elements if you don't need line breaks)
-  First description 
+  Data professional with 3+ years of experience in analytics, automation, and machine learning, building solutions with Python, SQL, and cloud technologies.
   <br><br>
-  Second description 
+  Experienced in data science and process automation, delivering business impact through analytics, AI, and scalable data-driven solutions.
   <br><br>
-  <a href="https://www.linkedin.com/in/example/">View My LinkedIn Profile</a> 
+  <a href="https://www.linkedin.com/in/rodrigo-fonseca-de-carvalho-0a50241b0/">LinkedIn Profile</a> 
   
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:

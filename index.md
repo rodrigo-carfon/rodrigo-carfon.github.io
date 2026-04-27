@@ -4,7 +4,7 @@
 
 ### Category Name 1 
 
-[Maplead - Local Business Scraper](/pdf/madlead_en.html)
+[Maplead - Local Business Scraper](/pdf/maplead_en.html)
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
 
 ---

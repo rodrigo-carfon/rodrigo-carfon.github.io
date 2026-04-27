@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MapLead Intelligence — Rodrigo Carfon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal:     #1D9E75;
+    --teal-l:   #E1F5EE;
+    --teal-d:   #0F6E56;
+    --ink:      #141412;
+    --ink-2:    #4a4946;
+    --ink-3:    #8a8884;
+    --surface:  #fafaf8;
+    --surface-2:#f2f1ee;
+    --border:   #e4e2dc;
+    --mono:     'DM Mono', monospace;
+    --serif:    'Instrument Serif', serif;
+    --sans:     'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,250,248,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-logo { font-family: var(--mono); font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-logo span { color: var(--teal); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { font-size: 13px; color: var(--ink-2); text-decoration: none; transition: color .2s; }
+  .nav-links a:hover { color: var(--teal); }
+
+  /* ── Layout ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+  section { padding: 5rem 0; }
+  section + section { border-top: 1px solid var(--border); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 6rem 0 5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .08em;
+    color: var(--teal); text-transform: uppercase; margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: .75rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: inline-block;
+    width: 24px; height: 1px; background: var(--teal);
+  }
+  .hero h1 {
+    font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 400; line-height: 1.15; letter-spacing: -.01em;
+    color: var(--ink); margin-bottom: 1.5rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--teal); }
+  .hero-sub {
+    font-size: 18px; color: var(--ink-2); max-width: 580px;
+    line-height: 1.65; margin-bottom: 2.5rem;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2.5rem; }
+  .badge {
+    font-family: var(--mono); font-size: 11px;
+    border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: 4px;
+    color: var(--ink-2); background: white;
+  }
+  .badge.accent { background: var(--teal-l); border-color: #9FE1CB; color: var(--teal-d); }
+  .hero-meta {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+  }
+  .hero-stat { }
+  .hero-stat .num {
+    font-family: var(--mono); font-size: 28px; font-weight: 500;
+    color: var(--ink); display: block;
+  }
+  .hero-stat .lbl { font-size: 12px; color: var(--ink-3); }
+
+  /* ── Section headers ── */
+  .section-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400; line-height: 1.2; margin-bottom: 1.25rem;
+  }
+  h3 { font-size: 17px; font-weight: 500; margin-bottom: .6rem; color: var(--ink); }
+  p { color: var(--ink-2); margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Problem / Solution ── */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+  }
+  .card.accent-teal { border-top: 3px solid var(--teal); }
+  .card.accent-red  { border-top: 3px solid #D85A30; }
+  .card-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 1rem;
+  }
+  .card-icon.teal { background: var(--teal-l); }
+  .card-icon.red  { background: #FAECE7; }
+
+  /* ── Pipeline diagram ── */
+  .pipeline {
+    display: flex; align-items: center; gap: 0;
+    margin: 2.5rem 0; overflow-x: auto;
+    padding-bottom: .5rem;
+  }
+  .pipe-step {
+    flex-shrink: 0;
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; padding: .875rem 1.25rem;
+    text-align: center; min-width: 120px;
+  }
+  .pipe-step .ps-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .pipe-step .ps-name { font-size: 13px; font-weight: 500; color: var(--ink); display: block; }
+  .pipe-step .ps-tech { font-family: var(--mono); font-size: 10px; color: var(--ink-3); display: block; margin-top: 2px; }
+  .pipe-step.highlight { background: var(--teal-l); border-color: #9FE1CB; }
+  .pipe-step.highlight .ps-name { color: var(--teal-d); }
+  .pipe-arrow {
+    flex-shrink: 0; color: var(--ink-3);
+    font-size: 18px; padding: 0 .5rem;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #141412; border-radius: 10px;
+    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  .code-block .cb-bar {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 1rem; padding-bottom: .75rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .cb-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cb-dot.r { background: #FF5F57; }
+  .cb-dot.y { background: #FFBD2E; }
+  .cb-dot.g { background: #28CA41; }
+  .cb-filename { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.35); margin-left: 6px; }
+  .code-block pre {
+    font-family: var(--mono); font-size: 13px; line-height: 1.7;
+    color: #e8e6e0; white-space: pre; margin: 0;
+  }
+  .kw  { color: #C792EA; }
+  .fn  { color: #82AAFF; }
+  .st  { color: #C3E88D; }
+  .cm  { color: #637777; font-style: italic; }
+  .nm  { color: #F78C6C; }
+  .op  { color: #89DDFF; }
+
+  /* ── CSV mockup ── */
+  .csv-wrap {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin: 2rem 0;
+  }
+  .csv-bar {
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+    padding: .75rem 1rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .csv-bar .cb-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .csv-bar-name { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-left: 4px; }
+  .csv-table { width: 100%; border-collapse: collapse; font-size: 12px; overflow-x: auto; display: block; }
+  .csv-table th {
+    background: var(--surface-2); color: var(--ink-3);
+    font-family: var(--mono); font-weight: 500; font-size: 11px;
+    padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  .csv-table td {
+    padding: 7px 12px; color: var(--ink-2);
+    border-bottom: 1px solid #f0eeea; white-space: nowrap;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .csv-table tr:last-child td { border-bottom: none; }
+  .csv-table tr:hover td { background: var(--surface); }
+  .tag-g { background: #EAF3DE; color: #3B6D11; padding: 2px 7px; border-radius: 3px; font-size: 10px; }
+  .tag-r { background: #FAECE7; color: #993C1D; padding: 2px 7px; border-radius: 3px; font-size: 10px; }
+  .csv-fade {
+    text-align: center; padding: .75rem;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    border-top: 1px solid var(--border); background: var(--surface);
+  }
+
+  /* ── Docker compose visual ── */
+  .compose-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+    margin: 2rem 0;
+  }
+  .compose-service {
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.25rem;
+  }
+  .cs-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+  .cs-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  .cs-name { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--ink); }
+  .cs-image { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-bottom: .5rem; }
+  .cs-port { display: inline-block; font-family: var(--mono); font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; color: var(--ink-2); margin-right: 4px; }
+  .cs-desc { font-size: 12px; color: var(--ink-3); margin-top: .5rem; }
+
+  /* ── Schema ── */
+  .schema-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+  .schema-table {
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+  .schema-header {
+    background: var(--ink); padding: .75rem 1rem;
+    font-family: var(--mono); font-size: 12px; color: #a8d5c2;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .schema-header .pk { color: #F78C6C; font-size: 10px; }
+  .schema-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 1rem; border-bottom: 1px solid #f0eeea;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .schema-row:last-child { border-bottom: none; }
+  .schema-row .col-name { color: var(--ink); }
+  .schema-row .col-type { color: var(--ink-3); }
+  .schema-row .col-fk {
+    font-size: 9px; background: #EEEDFE; color: #534AB7;
+    padding: 1px 5px; border-radius: 3px;
+  }
+  .schema-row .col-pk {
+    font-size: 9px; background: #FAEEDA; color: #633806;
+    padding: 1px 5px; border-radius: 3px;
+  }
+  .schema-row .col-calc {
+    font-size: 9px; background: var(--teal-l); color: var(--teal-d);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  .fk-line {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    gap: .5rem; margin: .5rem 0;
+  }
+  .fk-line .arrow { color: var(--teal); font-size: 16px; }
+
+  /* ── Charts section ── */
+  .charts-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+  .chart-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem;
+  }
+  .chart-label { font-size: 12px; color: var(--ink-3); margin-bottom: 1rem; font-family: var(--mono); }
+  .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1.5rem; }
+  .metric {
+    background: var(--surface-2); border-radius: 8px;
+    padding: .875rem 1rem; text-align: center;
+  }
+  .metric .m-num { font-size: 24px; font-weight: 500; color: var(--ink); font-family: var(--mono); }
+  .metric .m-lbl { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+
+  /* ── Reviews mockup ── */
+  .reviews-list { display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0; }
+  .review-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.25rem;
+  }
+  .review-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+  .review-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--teal-l); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; color: var(--teal-d); flex-shrink: 0;
+  }
+  .review-meta .r-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .review-meta .r-info { font-size: 11px; color: var(--ink-3); font-family: var(--mono); }
+  .stars { color: #BA7517; font-size: 13px; }
+  .review-text { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+
+  /* ── Roadmap ── */
+  .roadmap { margin: 2rem 0; }
+  .rm-item { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .rm-item:last-child { border-bottom: none; }
+  .rm-badge {
+    flex-shrink: 0; font-family: var(--mono); font-size: 11px; font-weight: 500;
+    width: 40px; height: 22px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+  }
+  .rm-badge.done { background: var(--teal-l); color: var(--teal-d); }
+  .rm-badge.next { background: #EEEDFE; color: #534AB7; }
+  .rm-badge.later { background: var(--surface-2); color: var(--ink-3); }
+  .rm-content h4 { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .rm-content p { font-size: 13px; color: var(--ink-3); margin: 0; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 0; text-align: center;
+  }
+  footer p { font-size: 13px; color: var(--ink-3); }
+  footer a { color: var(--teal); text-decoration: none; }
+
+  /* ── Utilities ── */
+  .mt-xs { margin-top: .5rem; }
+  .mt-sm { margin-top: 1rem; }
+  .mt-md { margin-top: 1.5rem; }
+  .mt-lg { margin-top: 2.5rem; }
+  .text-mono { font-family: var(--mono); }
+  .text-muted { color: var(--ink-3); }
+  .divider { height: 1px; background: var(--border); margin: 2rem 0; }
+
+  @media (max-width: 640px) {
+    .two-col, .compose-grid, .schema-wrap, .charts-grid { grid-template-columns: 1fr; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    .pipeline { flex-direction: column; align-items: flex-start; }
+    .pipe-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="https://rodrigo-carfon.github.io"><span>~/</span>rodrigo-carfon</a>
+  <ul class="nav-links">
+    <li><a href="#problema">problem</a></li>
+    <li><a href="#pipeline">pipeline</a></li>
+    <li><a href="#dados">data</a></li>
+    <li><a href="#resultados">results</a></li>
+    <li><a href="https://rodrigo-carfon.github.io">← portfolio</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════ HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Portfolio project · Data Engineering</div>
+    <h1>MapLead<br><em>Intelligence</em></h1>
+    <p class="hero-sub">
+      End-to-end pipeline for collecting, storing and analyzing local business data
+      from Google Maps — from scraper to database, fully orchestrated by automation.
+    </p>
+    <div class="badges">
+      <span class="badge accent">Python</span>
+      <span class="badge accent">Playwright</span>
+      <span class="badge accent">FastAPI</span>
+      <span class="badge accent">PostgreSQL</span>
+      <span class="badge accent">Docker</span>
+      <span class="badge accent">n8n</span>
+      <span class="badge">Metabase</span>
+      <span class="badge">playwright-stealth</span>
+      <span class="badge">pandas</span>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <span class="num">57</span>
+        <span class="lbl">businesses collected</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">994</span>
+        <span class="lbl">reviews extracted</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">4</span>
+        <span class="lbl">Docker containers</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">1</span>
+        <span class="lbl">HTTP call to trigger everything</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ PROBLEMA -->
+<section id="problem">
+  <div class="container">
+    <div class="section-label">01 · context</div>
+    <h2>The problem this project solves</h2>
+    <p>
+      Marketing agencies, consultants and growth teams constantly need data on local
+      businesses — to prospect clients, map competitors or audit digital presence.
+      The manual process is slow, repetitive and does not scale.
+    </p>
+
+    <div class="two-col">
+      <div class="card accent-red">
+        <div class="card-icon red">✗</div>
+        <h3>Without MapLead</h3>
+        <p>Manual Google Maps research, copy-pasting data one by one, disorganized spreadsheets. Hours to map 20 businesses — no standardization, no history.</p>
+      </div>
+      <div class="card accent-teal">
+        <div class="card-icon teal">✓</div>
+        <h3>With MapLead</h3>
+        <p>A single command collects hundreds of businesses with name, rating, reviews, phone, website and hours — all saved to the database automatically, ready for analysis.</p>
+      </div>
+    </div>
+
+    <div class="mt-lg">
+      <p class="text-muted" style="font-size:14px;">
+        To validate the project, I chose the segment of <strong style="color:var(--ink)">ophthalmologists in Campinas, Brazil</strong>
+        — a niche with good data density and high variation in digital presence.
+        The result: 57 businesses and 994 reviews collected in a single run.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ PIPELINE -->
+<section id="pipeline">
+  <div class="container">
+    <div class="section-label">02 · architecture</div>
+    <h2>How the pipeline works</h2>
+    <p>
+      Todos os serviços rodam em Docker containers na mesma rede interna.
+      O n8n orquestra o fluxo via webhook — uma única chamada HTTP aciona
+      o crawler, que salva os dados diretamente no PostgreSQL.
+    </p>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <span class="ps-icon">🗺️</span>
+        <span class="ps-name">Google Maps</span>
+        <span class="ps-tech">data source</span>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">
+        <span class="ps-icon">🕷️</span>
+        <span class="ps-name">Playwright</span>
+        <span class="ps-tech">scraper · stealth</span>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">
+        <span class="ps-icon">⚡</span>
+        <span class="ps-name">FastAPI</span>
+        <span class="ps-tech">internal api</span>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <span class="ps-icon">🗄️</span>
+        <span class="ps-name">PostgreSQL</span>
+        <span class="ps-tech">storage</span>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <span class="ps-icon">📊</span>
+        <span class="ps-name">Metabase</span>
+        <span class="ps-tech">visualization</span>
+      </div>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin:1rem 0;">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#7F77DD;"></div>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:500;">n8n</span>
+        <span style="font-size:12px;color:var(--ink-3);">orchestrator</span>
+      </div>
+      <p style="font-size:13px;color:var(--ink-3);margin:0;">
+        Receives the query via webhook → calls the Crawler API → waits for the result → logs to the database.
+        Next: triggered by a mobile message via Telegram.
+      </p>
+    </div>
+
+    <!-- docker-compose -->
+    <h3 class="mt-lg">Docker infrastructure</h3>
+    <p>Four services, one single <span class="text-mono" style="font-size:13px;background:var(--surface-2);padding:2px 6px;border-radius:4px;">docker-compose.yml</span>, shared internal network.</p>
+
+    <div class="compose-grid">
+      <div class="compose-service">
+        <div class="cs-header">
+          <div class="cs-dot"></div>
+          <span class="cs-name">postgres</span>
+        </div>
+        <div class="cs-image">postgres:15</div>
+        <span class="cs-port">5432</span>
+        <p class="cs-desc">Main database. Stores n8n data, collected businesses and reviews.</p>
+      </div>
+      <div class="compose-service">
+        <div class="cs-header">
+          <div class="cs-dot" style="background:#7F77DD;"></div>
+          <span class="cs-name">n8n</span>
+        </div>
+        <div class="cs-image">n8nio/n8n:latest</div>
+        <span class="cs-port">5678</span>
+        <p class="cs-desc">Workflow orchestrator. Exposes webhook to trigger the pipeline.</p>
+      </div>
+      <div class="compose-service">
+        <div class="cs-header">
+          <div class="cs-dot" style="background:#378ADD;"></div>
+          <span class="cs-name">metabase</span>
+        </div>
+        <div class="cs-image">metabase/metabase:latest</div>
+        <span class="cs-port">3000</span>
+        <p class="cs-desc">Dashboards and visualizations connected directly to PostgreSQL.</p>
+      </div>
+      <div class="compose-service" style="border-top:3px solid var(--teal);">
+        <div class="cs-header">
+          <div class="cs-dot"></div>
+          <span class="cs-name">crawler</span>
+        </div>
+        <div class="cs-image">python:playwright · FastAPI</div>
+        <span class="cs-port">8000</span>
+        <p class="cs-desc">Dedicated scraper container. Exposes <span class="text-mono" style="font-size:10px;">POST /scrape</span> e <span class="text-mono" style="font-size:10px;">GET /health</span>.</p>
+      </div>
+    </div>
+
+    <!-- código de execução -->
+    <h3 class="mt-lg">Triggering the pipeline</h3>
+    <p>The collection is started with a simple HTTP call — from the terminal, n8n, or any HTTP client.</p>
+
+    <div class="code-block">
+      <div class="cb-bar">
+        <div class="cb-dot r"></div><div class="cb-dot y"></div><div class="cb-dot g"></div>
+        <span class="cb-filename">PowerShell · chamada de teste</span>
+      </div>
+      <pre><span class="cm"># triggers the scraper directly on the container</span>
+<span class="fn">Invoke-RestMethod</span> <span class="op">-Method</span> POST <span class="op">-Uri</span> <span class="st">"http://localhost:8000/scrape"</span> <span class="op">`</span>
+  <span class="op">-ContentType</span> <span class="st">"application/json"</span> <span class="op">`</span>
+  <span class="op">-Body</span> <span class="st">'{"query": "ophthalmologists campinas", "max_results": 20}'</span>
+
+<span class="cm"># resposta</span>
+{
+  <span class="st">"search_id"</span>:    <span class="nm">1</span>,
+  <span class="st">"query"</span>:        <span class="st">"ophthalmologists campinas"</span>,
+  <span class="st">"total_found"</span>:  <span class="nm">20</span>,
+  <span class="st">"message"</span>:      <span class="st">"Collection complete. 20 businesses saved (search_id=1)."</span>
+}</pre>
+    </div>
+
+    <!-- execução local via CLI -->
+    <p>Ou diretamente pelo terminal, usando o script standalone:</p>
+
+    <div class="code-block">
+      <div class="cb-bar">
+        <div class="cb-dot r"></div><div class="cb-dot y"></div><div class="cb-dot g"></div>
+        <span class="cb-filename">terminal · collection with integrated reviews</span>
+      </div>
+      <pre><span class="cm"># collects businesses + reviews in a single run</span>
+python gmaps_scraper.py <span class="op">--query</span> <span class="st">"ophthalmologists campinas"</span> <span class="op">--max</span> <span class="nm">20</span> <span class="op">--max-reviews</span> <span class="nm">50</span>
+
+<span class="cm"># terminal output</span>
+[✓] Browser started with stealth mode
+[→] Searching: 'ophthalmologists campinas'
+[✓] Results panel loaded
+[→] Loading up to 20 results...
+[✓] 20 URLs collected
+
+  [ 1/20] Opening listing...
+         ✓ Clínica de Olhos Campinas | ⭐ 4.8
+      [→] Collecting reviews (50)...
+         ✓ 20 reviews collected
+
+  [ 2/20] Opening listing...
+         ✓ Centro Médico de Oftalmologia | ⭐ 4.0
+      [→] Collecting reviews (50)...
+         ✓ 20 reviews collected
+<span class="cm"># ...</span>
+✅ Done: 57 businesses | 994 reviews
+[✓] results_businesses.csv  (57 businesses)
+[✓] results_reviews.csv  (994 reviews)</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ DADOS -->
+<section id="data">
+  <div class="container">
+    <div class="section-label">03 · database</div>
+    <h2>Collected data structure</h2>
+    <p>
+      The pipeline generates two relatable CSV files — designed as database tables
+      from the start, with explicit primary and foreign keys.
+    </p>
+
+    <!-- schema -->
+    <div class="schema-wrap">
+      <div class="schema-table">
+        <div class="schema-header">
+          <span class="pk">PK</span> gmaps_businesses
+        </div>
+        <div class="schema-row"><span class="col-name">business_id</span><span><span class="col-pk">PK</span> <span class="col-type">serial</span></span></div>
+        <div class="schema-row"><span class="col-name">name</span><span class="col-type">text</span></div>
+        <div class="schema-row"><span class="col-name">rating</span><span class="col-type">numeric(3,1)</span></div>
+        <div class="schema-row"><span class="col-name">reviews_count</span><span class="col-type">integer</span></div>
+        <div class="schema-row"><span class="col-name">category</span><span class="col-type">text</span></div>
+        <div class="schema-row"><span class="col-name">address</span><span class="col-type">text</span></div>
+        <div class="schema-row"><span class="col-name">phone</span><span class="col-type">text</span></div>
+        <div class="schema-row"><span class="col-name">website</span><span class="col-type">text</span></div>
+        <div class="schema-row"><span class="col-name">has_phone</span><span><span class="col-calc">computed</span> <span class="col-type">boolean</span></span></div>
+        <div class="schema-row"><span class="col-name">has_website</span><span><span class="col-calc">computed</span> <span class="col-type">boolean</span></span></div>
+        <div class="schema-row"><span class="col-name">presence_score</span><span class="col-type">integer 0–100</span></div>
+        <div class="schema-row"><span class="col-name">google_maps_url</span><span class="col-type">text</span></div>
+        <div class="schema-row"><span class="col-name">collected_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+
+      <div>
+        <div class="fk-line" style="margin-top:4rem;">
+          <span>business_id</span>
+          <span class="arrow">→</span>
+          <span>business_id</span>
+        </div>
+        <div class="schema-table" style="margin-top:.5rem;">
+          <div class="schema-header">
+            <span class="pk">PK</span> gmaps_reviews
+          </div>
+          <div class="schema-row"><span class="col-name">review_id</span><span><span class="col-pk">PK</span> <span class="col-type">serial</span></span></div>
+          <div class="schema-row"><span class="col-name">business_id</span><span><span class="col-fk">FK</span> <span class="col-type">integer</span></span></div>
+          <div class="schema-row"><span class="col-name">author_name</span><span class="col-type">text</span></div>
+          <div class="schema-row"><span class="col-name">rating</span><span class="col-type">smallint 1–5</span></div>
+          <div class="schema-row"><span class="col-name">date_text</span><span class="col-type">text</span></div>
+          <div class="schema-row"><span class="col-name">text</span><span class="col-type">text</span></div>
+          <div class="schema-row"><span class="col-name">owner_reply</span><span class="col-type">text</span></div>
+          <div class="schema-row"><span class="col-name">has_reply</span><span><span class="col-calc">computed</span> <span class="col-type">boolean</span></span></div>
+          <div class="schema-row"><span class="col-name">google_maps_url</span><span class="col-type">text</span></div>
+          <div class="schema-row"><span class="col-name">collected_at</span><span class="col-type">timestamptz</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSV mockup businesses -->
+    <h3 class="mt-lg">results_businesses.csv</h3>
+    <p style="font-size:14px;color:var(--ink-3);margin-bottom:.75rem;">57 rows · 13 columns · real data collected in Campinas, Brazil</p>
+
+    <div class="csv-wrap">
+      <div class="csv-bar">
+        <div class="cb-dot" style="background:#FF5F57;"></div>
+        <div class="cb-dot" style="background:#FFBD2E;"></div>
+        <div class="cb-dot" style="background:#28CA41;"></div>
+        <span class="csv-bar-name">results_businesses.csv</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="csv-table">
+          <thead>
+            <tr>
+              <th>business_id</th><th>name</th><th>rating</th><th>reviews_count</th>
+              <th>category</th><th>phone</th><th>has_website</th><th>presence_score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Clínica de Olhos Campinas</td><td>4.8</td><td>1006</td><td>Eye clinic</td><td>(19) 3237-9000</td><td><span class="tag-g">true</span></td><td>100</td></tr>
+            <tr><td>2</td><td>Centro Médico de Oftalmologia</td><td>4.0</td><td>161</td><td>Eye clinic</td><td>(19) 2515-5500</td><td><span class="tag-g">true</span></td><td>85</td></tr>
+            <tr><td>3</td><td>Oftalmocenter - Galleria Shopping</td><td>4.5</td><td>214</td><td>Eye clinic</td><td>(19) 3254-0303</td><td><span class="tag-g">true</span></td><td>100</td></tr>
+            <tr><td>4</td><td>Oftalmo Centro</td><td>4.3</td><td>661</td><td>Eye clinic</td><td>(19) 3251-6226</td><td><span class="tag-g">true</span></td><td>100</td></tr>
+            <tr><td>5</td><td>Dr. Danniel Martins Goncalves</td><td>5.0</td><td>1370</td><td>Ophthalmologist</td><td>(19) 99999-0000</td><td><span class="tag-g">true</span></td><td>100</td></tr>
+            <tr><td>6</td><td>Clinica oftalmologica</td><td>5.0</td><td>6</td><td>Ophthalmologist</td><td>—</td><td><span class="tag-r">false</span></td><td>30</td></tr>
+            <tr><td>7</td><td>HOC Hospital de Olhos OFTCAMP</td><td>4.2</td><td>834</td><td>Specialized hospital</td><td>(19) 3243-0900</td><td><span class="tag-g">true</span></td><td>100</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="csv-fade">… +50 rows · 57 businesses total</div>
+    </div>
+
+    <!-- CSV mockup reviews -->
+    <h3 class="mt-lg">results_reviews.csv</h3>
+    <p style="font-size:14px;color:var(--ink-3);margin-bottom:.75rem;">994 rows · real reviews · authors anonymized for the portfolio</p>
+
+    <div class="csv-wrap">
+      <div class="csv-bar">
+        <div class="cb-dot" style="background:#FF5F57;"></div>
+        <div class="cb-dot" style="background:#FFBD2E;"></div>
+        <div class="cb-dot" style="background:#28CA41;"></div>
+        <span class="csv-bar-name">results_reviews.csv</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="csv-table">
+          <thead>
+            <tr>
+              <th>review_id</th><th>business_id</th><th>business_name</th><th>author</th><th>text (preview)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td>Clínica de Olhos Campinas</td><td>A. S.</td><td>O atendimento foi ótimo desde o primeiro momento...</td></tr>
+            <tr><td>2</td><td>1</td><td>Clínica de Olhos Campinas</td><td>S. F.</td><td>I was well attended at reception and also by Dr. Frederico, always very attentive...</td></tr>
+            <tr><td>3</td><td>1</td><td>Clínica de Olhos Campinas</td><td>K. M.</td><td>The consultation with Dr. Paulo was excellent, very thorough and attentive...</td></tr>
+            <tr><td>4</td><td>2</td><td>Centro Médico de Oftalmologia</td><td>R. C.</td><td>Well-structured clinic, attentive and punctual staff...</td></tr>
+            <tr><td>5</td><td>2</td><td>Centro Médico de Oftalmologia</td><td>M. L.</td><td>Great clinic, very competent doctors...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="csv-fade">… +989 rows · 994 reviews total · authors anonymized</div>
+    </div>
+
+    <!-- JOIN example -->
+    <h3 class="mt-lg">Joining the tables</h3>
+    <div class="code-block">
+      <div class="cb-bar">
+        <div class="cb-dot r"></div><div class="cb-dot y"></div><div class="cb-dot g"></div>
+        <span class="cb-filename">SQL · cross-analysis of businesses and reviews</span>
+      </div>
+      <pre><span class="kw">SELECT</span>
+  b.name,
+  b.rating         <span class="kw">AS</span> overall_rating,
+  b.presence_score,
+  <span class="fn">COUNT</span>(r.review_id) <span class="kw">AS</span> total_reviews,
+  <span class="fn">AVG</span>(r.rating)      <span class="kw">AS</span> avg_review_rating
+<span class="kw">FROM</span>  gmaps_businesses b
+<span class="kw">JOIN</span>  gmaps_reviews    r <span class="kw">ON</span> r.business_id <span class="op">=</span> b.business_id
+<span class="kw">WHERE</span> b.has_website <span class="op">=</span> <span class="kw">false</span>  <span class="cm">-- hot leads: no digital presence</span>
+<span class="kw">GROUP BY</span> b.business_id
+<span class="kw">ORDER BY</span> avg_review_rating <span class="kw">DESC</span>;</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ RESULTADOS -->
+<section id="results">
+  <div class="container">
+    <div class="section-label">04 · results</div>
+    <h2>Real data from the analyzed segment</h2>
+    <p>
+      Collection run on the ophthalmologist segment in Campinas, São Paulo, Brazil.
+      The numbers below reflect exactly what the pipeline extracted.
+    </p>
+
+    <div class="metrics-row mt-md">
+      <div class="metric">
+        <div class="m-num">57</div>
+        <div class="m-lbl">businesses collected</div>
+      </div>
+      <div class="metric">
+        <div class="m-num">994</div>
+        <div class="m-lbl">reviews extracted</div>
+      </div>
+      <div class="metric">
+        <div class="m-num">4.59</div>
+        <div class="m-lbl">average rating</div>
+      </div>
+      <div class="metric">
+        <div class="m-num">23%</div>
+        <div class="m-lbl">no website</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-label">top businesses by review volume</div>
+        <div style="position:relative;height:240px;">
+          <canvas id="topChart" role="img" aria-label="Top businesses by review volume">Dr. Danniel Martins: 1370, Clínica de Olhos Campinas: 1006, HOC OFTCAMP: 834, CMO: 739, Oftalmo Centro: 661.</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-label">category breakdown</div>
+        <div style="position:relative;height:240px;">
+          <canvas id="catChart" role="img" aria-label="Categorias dos negócios">Clínica oftalmológica: 24, Oftalmologista: 18, Outros: 15.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-top:1.5rem;">
+      <div class="chart-label">digital presence — website and phone</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="presChart" role="img" aria-label="Presença digital">Com website: 44, Sem website: 13, Com telefone: 55, Sem telefone: 2.</canvas>
+      </div>
+    </div>
+
+    <!-- Reviews mockup -->
+    <h3 class="mt-lg">Amostra de reviews collected</h3>
+    <p style="font-size:14px;color:var(--ink-3);">Real text extracted — authors anonymized for the portfolio.</p>
+
+    <div class="reviews-list">
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">A</div>
+          <div class="review-meta">
+            <div class="r-name">A. S. · Clínica de Olhos Campinas</div>
+            <div class="r-info">2 weeks ago · <span class="stars">★★★★★</span></div>
+          </div>
+        </div>
+        <p class="review-text">The service was excellent from the first moment. Very pleasant and organized clinic. Attentive reception, competent doctors and exemplary punctuality. I left very satisfied.</p>
+      </div>
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">S</div>
+          <div class="review-meta">
+            <div class="r-name">S. F. · Clínica de Olhos Campinas</div>
+            <div class="r-info">1 month ago · <span class="stars">★★★★★</span></div>
+          </div>
+        </div>
+        <p class="review-text">I was well attended at reception and also by Dr. Frederico, always very attentive. I will recommend to all my friends and family.</p>
+      </div>
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">K</div>
+          <div class="review-meta">
+            <div class="r-name">K. M. · Clínica de Olhos Campinas</div>
+            <div class="r-info">3 weeks ago · <span class="stars">★★★★★</span></div>
+          </div>
+        </div>
+        <p class="review-text">The consultation with Dr. Paulo was excellent — a great professional, very attentive. He explained everything in detail. The clinic is very well structured.</p>
+      </div>
+    </div>
+
+    <!-- Digital Presence Score -->
+    <h3 class="mt-lg">Digital Presence Score</h3>
+    <p>
+      Each business receives a score from 0 to 100, computed automatically at insertion time — turning raw data into actionable intelligence.
+    </p>
+    <div class="two-col mt-sm">
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:white;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+          <span style="font-family:var(--mono);">has website</span>
+          <span style="font-family:var(--mono);color:var(--teal);font-weight:500;">+30 pts</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:white;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+          <span style="font-family:var(--mono);">has phone</span>
+          <span style="font-family:var(--mono);color:var(--teal);font-weight:500;">+25 pts</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:white;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+          <span style="font-family:var(--mono);">rating ≥ 4.0</span>
+          <span style="font-family:var(--mono);color:var(--teal);font-weight:500;">+30 pts</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:white;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+          <span style="font-family:var(--mono);">50+ reviews</span>
+          <span style="font-family:var(--mono);color:var(--teal);font-weight:500;">+15 pts</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <div style="padding:1rem;background:#FAECE7;border-radius:8px;">
+          <div style="font-family:var(--mono);font-size:12px;color:#993C1D;font-weight:500;">0 — 40 · hot lead</div>
+          <div style="font-size:12px;color:#712B13;margin-top:4px;">No website or phone. Prime opportunity for digital marketing services.</div>
+        </div>
+        <div style="padding:1rem;background:#FAEEDA;border-radius:8px;">
+          <div style="font-family:var(--mono);font-size:12px;color:#633806;font-weight:500;">41 — 70 · established</div>
+          <div style="font-size:12px;color:#412402;margin-top:4px;">Basic presence in place. Room for improvement identified.</div>
+        </div>
+        <div style="padding:1rem;background:var(--teal-l);border-radius:8px;">
+          <div style="font-family:var(--mono);font-size:12px;color:var(--teal-d);font-weight:500;">71 — 100 · benchmark</div>
+          <div style="font-size:12px;color:#085041;margin-top:4px;">Digitally dominant in the niche. Competitive reference point.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ FOOTER -->
+<footer>
+  <div class="container">
+    <p>
+      <a href="https://rodrigo-carfon.github.io">← back to portfolio</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/rodrigo-carfon">github</a>
+    </p>
+    <p style="margin-top:.5rem;">Rodrigo Carfon · Data Engineering · Automation · Market Intelligence</p>
+  </div>
+</footer>
+
+<script>
+const TEAL  = '#1D9E75';
+const TEALL = '#9FE1CB';
+const BLUE  = '#378ADD';
+const AMBER = '#BA7517';
+const GRAY  = '#B4B2A9';
+const CORAL = '#D85A30';
+
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#8a8884';
+
+const gridCol = 'rgba(0,0,0,0.05)';
+
+new Chart(document.getElementById('topChart'), {
+  type: 'bar', indexAxis: 'y',
+  data: {
+    labels: ['Dr. Danniel Martins','Clínica de Olhos Cpns.','HOC OFTCAMP','Centro Médico Oftalmo.','Oftalmo Centro'],
+    datasets: [{
+      data: [1370, 1006, 834, 739, 661],
+      backgroundColor: [TEAL, TEALL, TEALL, TEALL, TEALL],
+      borderRadius: 3, borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridCol }, border: { display: false } },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Eye clinic','Ophthalmologist','Others'],
+    datasets: [{
+      data: [24, 18, 15],
+      backgroundColor: [TEAL, BLUE, GRAY],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { padding: 16, usePointStyle: true, pointStyleWidth: 8, font: { size: 11 } }
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById('presChart'), {
+  type: 'bar',
+  data: {
+    labels: ['with website','no website','with phone','no phone'],
+    datasets: [{
+      data: [44, 13, 55, 2],
+      backgroundColor: [TEAL, GRAY, TEAL, GRAY],
+      borderRadius: 4, borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: { grid: { color: gridCol }, border: { display: false }, ticks: { stepSize: 10 } }
+    }
+  }
+});
+</script>
+</body>
+</html>

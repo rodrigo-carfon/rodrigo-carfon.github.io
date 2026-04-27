@@ -5,7 +5,7 @@
 ### Category Name 1 
 
 [Maplead - Local Business Scraper](/pdf/maplead_en.html)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
+<img src="images/maplead.jpg?raw=true"/>
 
 ---
 

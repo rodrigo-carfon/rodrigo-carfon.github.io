@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MapLead Intelligence — Rodrigo Carfon</title>
+<title>MapLead — Local Market Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -25,25 +25,14 @@
   }
 
   html { scroll-behavior: smooth; }
-
-  body {
-    font-family: var(--sans);
-    background: var(--surface);
-    color: var(--ink);
-    font-size: 16px;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-  }
+  body { font-family: var(--sans); background: var(--surface); color: var(--ink); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
 
   /* ── Nav ── */
   nav {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(250,250,248,0.92);
-    backdrop-filter: blur(12px);
+    background: rgba(250,250,248,0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 56px;
+    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px;
   }
   .nav-logo { font-family: var(--mono); font-size: 13px; color: var(--ink-2); text-decoration: none; }
   .nav-logo span { color: var(--teal); }
@@ -51,7 +40,7 @@
   .nav-links a { font-size: 13px; color: var(--ink-2); text-decoration: none; transition: color .2s; }
   .nav-links a:hover { color: var(--teal); }
   .nav-cta { font-family: var(--mono); font-size: 12px; color: white !important; background: var(--teal); padding: 6px 14px; border-radius: 6px; }
-  .nav-cta:hover { background: var(--teal-d); }
+  .nav-cta:hover { background: var(--teal-d) !important; }
 
   /* ── Layout ── */
   .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
@@ -66,28 +55,15 @@
     display: flex; align-items: center; gap: .75rem;
   }
   .hero-eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--teal); }
-  .hero h1 {
-    font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.6rem);
-    font-weight: 400; line-height: 1.15; letter-spacing: -.01em;
-    color: var(--ink); margin-bottom: 1.5rem;
-  }
+  .hero h1 { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 400; line-height: 1.15; letter-spacing: -.01em; margin-bottom: 1.5rem; }
   .hero h1 em { font-style: italic; color: var(--teal); }
-  .hero-sub { font-size: 18px; color: var(--ink-2); max-width: 600px; line-height: 1.65; margin-bottom: 2.5rem; }
-  .badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2.5rem; }
-  .badge {
-    font-family: var(--mono); font-size: 11px; border: 1px solid var(--border);
-    padding: 4px 10px; border-radius: 4px; color: var(--ink-2); background: white;
-  }
-  .badge.accent { background: var(--teal-l); border-color: #9FE1CB; color: var(--teal-d); }
+  .hero-sub { font-size: 18px; color: var(--ink-2); max-width: 620px; line-height: 1.65; margin-bottom: 2.5rem; }
   .hero-meta { display: flex; gap: 2rem; flex-wrap: wrap; }
   .hero-stat .num { font-family: var(--mono); font-size: 28px; font-weight: 500; color: var(--ink); display: block; }
   .hero-stat .lbl { font-size: 12px; color: var(--ink-3); }
 
   /* ── Section headers ── */
-  .section-label {
-    font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
-    color: var(--teal); text-transform: uppercase; margin-bottom: 1rem;
-  }
+  .section-label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--teal); text-transform: uppercase; margin-bottom: 1rem; }
   h2 { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 400; line-height: 1.2; margin-bottom: 1.25rem; }
   h3 { font-size: 17px; font-weight: 500; margin-bottom: .6rem; color: var(--ink); }
   p { color: var(--ink-2); margin-bottom: 1rem; }
@@ -98,75 +74,18 @@
   .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
   .card.accent-teal { border-top: 3px solid var(--teal); }
   .card.accent-red  { border-top: 3px solid #D85A30; }
-  .card-icon {
-    width: 36px; height: 36px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; margin-bottom: 1rem;
-  }
+  .card-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 1rem; }
   .card-icon.teal { background: var(--teal-l); }
   .card-icon.red  { background: #FAECE7; }
 
-  /* ── Feature grid ── */
-  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 2.5rem 0; }
-  .feature { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-  .feature .f-icon {
-    width: 38px; height: 38px; border-radius: 9px; background: var(--teal-l);
-    display: flex; align-items: center; justify-content: center; font-size: 19px; margin-bottom: 1rem;
-  }
-  .feature h3 { margin-bottom: .4rem; }
-  .feature p { font-size: 14px; color: var(--ink-3); margin: 0; }
-  .feature .f-fields { margin-top: .85rem; display: flex; flex-wrap: wrap; gap: 5px; }
-  .f-fields span {
-    font-family: var(--mono); font-size: 10px; color: var(--ink-2);
-    background: var(--surface-2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px;
-  }
+  /* ── What you get ── */
+  .output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 2.5rem 0; }
+  .output-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .output-card .o-icon { font-size: 28px; margin-bottom: .75rem; }
+  .output-card h3 { font-size: 16px; margin-bottom: .4rem; }
+  .output-card p { font-size: 14px; color: var(--ink-3); margin: 0; }
 
-  /* ── Pipeline diagram ── */
-  .pipeline { display: flex; align-items: center; gap: 0; margin: 2.5rem 0; overflow-x: auto; padding-bottom: .5rem; }
-  .pipe-step {
-    flex-shrink: 0; background: white; border: 1px solid var(--border);
-    border-radius: 10px; padding: .875rem 1.25rem; text-align: center; min-width: 116px;
-  }
-  .pipe-step .ps-icon { font-size: 20px; display: block; margin-bottom: 4px; }
-  .pipe-step .ps-name { font-size: 13px; font-weight: 500; color: var(--ink); display: block; }
-  .pipe-step .ps-tech { font-family: var(--mono); font-size: 10px; color: var(--ink-3); display: block; margin-top: 2px; }
-  .pipe-step.highlight { background: var(--teal-l); border-color: #9FE1CB; }
-  .pipe-step.highlight .ps-name { color: var(--teal-d); }
-  .pipe-arrow { flex-shrink: 0; color: var(--ink-3); font-size: 18px; padding: 0 .5rem; }
-
-  /* ── Code block ── */
-  .code-block { background: #141412; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
-  .code-block .cb-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid rgba(255,255,255,.08); }
-  .cb-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .cb-dot.r { background: #FF5F57; } .cb-dot.y { background: #FFBD2E; } .cb-dot.g { background: #28CA41; }
-  .cb-filename { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.35); margin-left: 6px; }
-  .code-block pre { font-family: var(--mono); font-size: 13px; line-height: 1.7; color: #e8e6e0; white-space: pre; margin: 0; }
-  .kw { color: #C792EA; } .fn { color: #82AAFF; } .st { color: #C3E88D; }
-  .cm { color: #637777; font-style: italic; } .nm { color: #F78C6C; } .op { color: #89DDFF; }
-
-  /* ── Single container card ── */
-  .container-card { background: white; border: 1px solid var(--border); border-top: 3px solid var(--teal); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
-  .cc-head { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
-  .cc-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--teal); }
-  .cc-name { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--ink); }
-  .cc-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: .75rem 0; }
-  .cc-meta span { font-family: var(--mono); font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; color: var(--ink-2); }
-
-  /* ── Schema list (CSV columns explained) ── */
-  .schema-list { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 1.25rem 0 2rem; }
-  .sl-head {
-    background: var(--ink); color: #a8d5c2; font-family: var(--mono); font-size: 13px;
-    padding: .8rem 1.25rem; display: flex; align-items: center; gap: .5rem;
-  }
-  .sl-head .sl-file { color: #fff; } .sl-head .sl-count { color: var(--ink-3); margin-left: auto; font-size: 11px; }
-  .sl-row { display: flex; align-items: baseline; gap: 1rem; padding: .7rem 1.25rem; border-bottom: 1px solid #f0eeea; }
-  .sl-row:last-child { border-bottom: none; }
-  .sl-row:hover { background: var(--surface); }
-  .sl-col { font-family: var(--mono); font-size: 12px; color: var(--ink); min-width: 150px; flex-shrink: 0; }
-  .sl-col .pill { font-size: 9px; background: var(--teal-l); color: var(--teal-d); padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
-  .sl-desc { font-size: 13px; color: var(--ink-3); }
-
-  /* ── Score rubric ── */
+  /* ── Score section ── */
   .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
   .score-rule { display: flex; justify-content: space-between; align-items: center; padding: .625rem 1rem; background: white; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
   .score-rule span:first-child { font-family: var(--mono); }
@@ -175,20 +94,16 @@
   .tier .t-name { font-family: var(--mono); font-size: 12px; font-weight: 500; }
   .tier .t-desc { font-size: 12px; margin-top: 4px; }
 
-  /* ── Discoveries ── */
-  .discovery { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
-  .disc-problem { padding: 1.5rem; border-right: 1px solid var(--border); }
-  .disc-solution { padding: 1.5rem; background: var(--surface-2); }
-  .disc-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .65rem; display: inline-block; padding: 2px 8px; border-radius: 4px; }
-  .disc-tag.problem { background: #FAECE7; color: #993C1D; }
-  .disc-tag.solution { background: var(--teal-l); color: var(--teal-d); }
-  .discovery h4 { font-size: 15px; font-weight: 500; margin-bottom: .5rem; color: var(--ink); }
-  .discovery p { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin: 0; }
-  .discovery code { font-family: var(--mono); font-size: 12px; background: rgba(0,0,0,.05); padding: 1px 5px; border-radius: 4px; color: var(--ink); }
-
-  /* ── Callout ── */
-  .callout { background: var(--teal-l); border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.5rem 0; }
-  .callout p { color: var(--teal-d); margin: 0; font-size: 14px; }
+  /* ── Divider ── */
+  .section-divider {
+    border: none; border-top: 2px dashed var(--border);
+    margin: 0; position: relative;
+  }
+  .section-divider-label {
+    text-align: center; padding: 1.5rem 0 0;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    letter-spacing: .1em; text-transform: uppercase;
+  }
 
   /* ── Demo form ── */
   .demo-section { background: var(--ink); color: #e8e6e0; }
@@ -202,17 +117,10 @@
   .demo-form { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 1.75rem; }
   .demo-form label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #8a8884; margin-bottom: .4rem; margin-top: 1.1rem; }
   .demo-form label:first-of-type { margin-top: 0; }
-  .demo-form input {
-    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 8px; padding: .7rem .9rem; color: #fafaf8; font-family: var(--sans); font-size: 14px; transition: border-color .2s;
-  }
+  .demo-form input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: .7rem .9rem; color: #fafaf8; font-family: var(--sans); font-size: 14px; transition: border-color .2s; }
   .demo-form input:focus { outline: none; border-color: var(--teal); }
   .demo-form input::placeholder { color: #6a6864; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .demo-btn {
-    width: 100%; margin-top: 1.5rem; background: var(--teal); color: white; border: none; border-radius: 8px;
-    padding: .85rem; font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: .03em; cursor: pointer; transition: background .2s;
-  }
+  .demo-btn { width: 100%; margin-top: 1.5rem; background: var(--teal); color: white; border: none; border-radius: 8px; padding: .85rem; font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: .03em; cursor: pointer; transition: background .2s; }
   .demo-btn:hover:not(:disabled) { background: #25b485; }
   .demo-btn:disabled { background: #3a4a44; color: #8a988f; cursor: not-allowed; }
   .form-msg { margin-top: 1.1rem; font-size: 13px; line-height: 1.6; border-radius: 8px; padding: .9rem 1rem; display: none; }
@@ -222,25 +130,65 @@
   .form-hint { font-size: 11px; color: #6a6864; margin-top: .6rem; font-family: var(--mono); }
   .demo-scope { display: flex; align-items: flex-start; gap: .6rem; margin-top: 1.4rem; padding: .75rem .9rem; background: rgba(29,158,117,0.08); border: 1px solid rgba(29,158,117,0.25); border-radius: 8px; font-size: 12.5px; color: #b4b2a9; line-height: 1.5; }
   .demo-scope strong { color: #7fe3bf; }
-  .demo-scope .ds-icon { color: var(--teal); flex-shrink: 0; }
+
+  /* ── Technical sections ── */
+  .tech-intro { text-align: center; padding: 3rem 0 1rem; }
+  .tech-intro p { color: var(--ink-3); font-size: 14px; max-width: 500px; margin: 0 auto; }
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 2.5rem 0; }
+  .feature { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .feature .f-icon { width: 38px; height: 38px; border-radius: 9px; background: var(--teal-l); display: flex; align-items: center; justify-content: center; font-size: 19px; margin-bottom: 1rem; }
+  .feature h3 { margin-bottom: .4rem; }
+  .feature p { font-size: 14px; color: var(--ink-3); margin: 0; }
+  .feature .f-fields { margin-top: .85rem; display: flex; flex-wrap: wrap; gap: 5px; }
+  .f-fields span { font-family: var(--mono); font-size: 10px; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px; }
+  .pipeline { display: flex; align-items: center; gap: 0; margin: 2.5rem 0; overflow-x: auto; padding-bottom: .5rem; }
+  .pipe-step { flex-shrink: 0; background: white; border: 1px solid var(--border); border-radius: 10px; padding: .875rem 1.25rem; text-align: center; min-width: 116px; }
+  .pipe-step .ps-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .pipe-step .ps-name { font-size: 13px; font-weight: 500; color: var(--ink); display: block; }
+  .pipe-step .ps-tech { font-family: var(--mono); font-size: 10px; color: var(--ink-3); display: block; margin-top: 2px; }
+  .pipe-step.highlight { background: var(--teal-l); border-color: #9FE1CB; }
+  .pipe-step.highlight .ps-name { color: var(--teal-d); }
+  .pipe-arrow { flex-shrink: 0; color: var(--ink-3); font-size: 18px; padding: 0 .5rem; }
+  .code-block { background: #141412; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .code-block .cb-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .cb-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cb-dot.r { background: #FF5F57; } .cb-dot.y { background: #FFBD2E; } .cb-dot.g { background: #28CA41; }
+  .cb-filename { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.35); margin-left: 6px; }
+  .code-block pre { font-family: var(--mono); font-size: 13px; line-height: 1.7; color: #e8e6e0; white-space: pre; margin: 0; }
+  .kw { color: #C792EA; } .fn { color: #82AAFF; } .st { color: #C3E88D; }
+  .cm { color: #637777; font-style: italic; } .nm { color: #F78C6C; } .op { color: #89DDFF; }
+  .discovery { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
+  .disc-problem { padding: 1.5rem; border-right: 1px solid var(--border); }
+  .disc-solution { padding: 1.5rem; background: var(--surface-2); }
+  .disc-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .65rem; display: inline-block; padding: 2px 8px; border-radius: 4px; }
+  .disc-tag.problem { background: #FAECE7; color: #993C1D; }
+  .disc-tag.solution { background: var(--teal-l); color: var(--teal-d); }
+  .discovery h4 { font-size: 15px; font-weight: 500; margin-bottom: .5rem; color: var(--ink); }
+  .discovery p { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin: 0; }
+  .discovery code { font-family: var(--mono); font-size: 12px; background: rgba(0,0,0,.05); padding: 1px 5px; border-radius: 4px; color: var(--ink); }
+  .callout { background: var(--teal-l); border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .callout p { color: var(--teal-d); margin: 0; font-size: 14px; }
+  .inline-code { font-family: var(--mono); font-size: 13px; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
+  .text-mono { font-family: var(--mono); }
+  .mt-sm { margin-top: 1rem; } .mt-md { margin-top: 1.5rem; } .mt-lg { margin-top: 2.5rem; }
+
+  /* ── CTA bottom ── */
+  .cta-bottom { text-align: center; padding: 3rem 0; border-top: 1px solid var(--border); }
+  .cta-bottom p { color: var(--ink-3); margin-bottom: 1.25rem; }
+  .cta-btn { display: inline-block; background: var(--teal); color: white; text-decoration: none; font-family: var(--mono); font-size: 13px; padding: .85rem 2rem; border-radius: 8px; transition: background .2s; }
+  .cta-btn:hover { background: var(--teal-d); }
 
   /* ── Footer ── */
   footer { border-top: 1px solid var(--border); padding: 3rem 0; text-align: center; }
   footer p { font-size: 13px; color: var(--ink-3); }
   footer a { color: var(--teal); text-decoration: none; }
 
-  /* ── Utilities ── */
-  .mt-sm { margin-top: 1rem; } .mt-md { margin-top: 1.5rem; } .mt-lg { margin-top: 2.5rem; }
-  .text-mono { font-family: var(--mono); }
-  .inline-code { font-family: var(--mono); font-size: 13px; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
-
   @media (max-width: 640px) {
-    .two-col, .feature-grid, .score-grid, .discovery, .demo-wrap, .form-row { grid-template-columns: 1fr; }
+    .two-col, .output-grid, .score-grid, .discovery, .demo-wrap, .feature-grid { grid-template-columns: 1fr; }
     .pipeline { flex-direction: column; align-items: flex-start; }
     .pipe-arrow { transform: rotate(90deg); }
     .disc-problem { border-right: none; border-bottom: 1px solid var(--border); }
-    .sl-col { min-width: 120px; }
-    .nav-links { gap: 1rem; }
+    .nav-links { display: none; }
   }
 </style>
 </head>
@@ -249,138 +197,191 @@
 <nav>
   <a class="nav-logo" href="https://rodrigo-carfon.github.io"><span>~/</span>rodrigo-carfon</a>
   <ul class="nav-links">
-    <li><a href="#features">features</a></li>
-    <li><a href="#architecture">architecture</a></li>
-    <li><a href="#discoveries">discoveries</a></li>
-    <li><a href="#demo" class="nav-cta">try it live →</a></li>
+    <li><a href="#problem">the problem</a></li>
+    <li><a href="#output">what you get</a></li>
+    <li><a href="#score">the score</a></li>
+    <li><a href="#demo" class="nav-cta">try it free →</a></li>
   </ul>
 </nav>
 
-<!-- ══════════════════════════════════════════════════════ HERO -->
+<!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
 <section class="hero">
   <div class="container">
-    <div class="hero-eyebrow">Portfolio Project · Web Scraping &amp; Automation</div>
-    <h1>MapLead<br><em>Intelligence</em></h1>
+    <div class="hero-eyebrow">Market Intelligence Tool</div>
+    <h1>Your next 20 prospects,<br><em>researched and scored</em><br>in minutes.</h1>
     <p class="hero-sub">
-      A web-scraping pipeline that searches Google Maps for local businesses, collects their
-      listings and individual reviews, scores their digital presence, and emails the structured
-      results back as ready-to-use CSVs. One HTTP request triggers it all — packaged as a single
-      Docker container on a free-tier host.
+      Type a business category and city. MapLead searches Google Maps, collects every listing,
+      scores each business's digital presence, detects which tracking pixels they're running
+      (Meta, Google, TikTok and more) — then emails you a clean spreadsheet, ready to sort,
+      filter, and act on.
     </p>
-    <div class="badges">
-      <span class="badge accent">Python</span>
-      <span class="badge accent">Playwright</span>
-      <span class="badge accent">FastAPI</span>
-      <span class="badge accent">Docker</span>
-      <span class="badge accent">SendGrid</span>
-      <span class="badge">pandas</span>
-      <span class="badge">asyncio</span>
-      <span class="badge">Render</span>
-    </div>
     <div class="hero-meta">
-      <div class="hero-stat"><span class="num">4</span><span class="lbl">data layers per business</span></div>
-      <div class="hero-stat"><span class="num">2</span><span class="lbl">CSVs emailed per run</span></div>
+      <div class="hero-stat"><span class="num">20</span><span class="lbl">businesses per run</span></div>
       <div class="hero-stat"><span class="num">0</span><span class="lbl">manual steps</span></div>
-      <div class="hero-stat"><span class="num">1</span><span class="lbl">HTTP call to trigger everything</span></div>
+      <div class="hero-stat"><span class="num">~5 min</span><span class="lbl">to your inbox</span></div>
+      <div class="hero-stat"><span class="num">free</span><span class="lbl">to try right now</span></div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════ PROBLEM -->
+<!-- ══ PROBLEM ═══════════════════════════════════════════════════════════ -->
 <section id="problem">
   <div class="container">
-    <div class="section-label">01 · context</div>
-    <h2>The problem this solves</h2>
+    <div class="section-label">01 · the problem</div>
+    <h2>Prospecting local businesses<br>is painfully slow</h2>
     <p>
-      Marketing agencies, consultants, and growth teams constantly need structured data on local
-      businesses — to prospect clients, map competitors, or audit digital presence. Doing it by hand
-      means opening each Google Maps listing one by one, copy-pasting names, ratings, phones, and
-      websites into a spreadsheet, then repeating it for dozens of businesses. Slow, inconsistent,
-      impossible to scale.
+      Marketing agencies and consultants constantly need lists of local businesses — to pitch
+      new clients, benchmark competitors, or audit a market. The manual process means opening
+      Google Maps, clicking into each listing one by one, and copying data into a spreadsheet.
+      Twenty businesses can take two hours. And you still don't know which ones actually
+      need your help.
     </p>
 
     <div class="two-col">
       <div class="card accent-red">
         <div class="card-icon red">✗</div>
-        <h3>The manual way</h3>
-        <p>Open each listing, copy data one by one, fragmented spreadsheets. Hours to map 20
-        businesses — no standardization, no reviews at scale, no signal on who actually needs help.</p>
+        <h3>Doing it by hand</h3>
+        <p>Hours of copy-pasting. No reviews at scale. No way to tell who's digitally behind
+        and who already has a solid presence. Just a raw list with no signal.</p>
       </div>
       <div class="card accent-teal">
         <div class="card-icon teal">✓</div>
         <h3>With MapLead</h3>
-        <p>Fill one form. Minutes later, two clean CSVs land in your inbox: every business with a
-        computed <strong>Digital Presence Score</strong> and tracking-pixel detection, plus every
-        individual review with its own rating — ready for analysis.</p>
+        <p>Search once. Minutes later, every business lands in your inbox — already scored by
+        digital presence, with reviews collected, and marketing pixels detected on their sites.
+        Sorted so your best prospects are at the top.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════ FEATURES -->
-<section id="features">
+<!-- ══ OUTPUT ═════════════════════════════════════════════════════════════ -->
+<section id="output">
   <div class="container">
-    <div class="section-label">02 · what it collects</div>
-    <h2>Four layers of intelligence per business</h2>
+    <div class="section-label">02 · what you get</div>
+    <h2>Two spreadsheets, everything you need<br>to qualify a prospect</h2>
     <p>
-      For every establishment a search returns, MapLead extracts the raw listing, every review it can
-      load, and then derives two intelligence signals on top of the raw data — all in a single pass.
+      Every run emails you two files. The first ranks businesses by how digitally present they
+      are — so you know immediately who needs help and who doesn't. The second gives you
+      every customer review, with its own rating, ready for sentiment analysis or social proof research.
     </p>
 
-    <div class="feature-grid">
-      <div class="feature">
-        <div class="f-icon">🏪</div>
-        <h3>Establishment listing</h3>
-        <p>Walks each result and pulls the full Google Maps listing for the business.</p>
-        <div class="f-fields">
-          <span>name</span><span>rating</span><span>reviews_count</span><span>category</span>
-          <span>address</span><span>phone</span><span>website</span><span>hours</span><span>price_range</span>
-        </div>
+    <div class="output-grid">
+      <div class="output-card">
+        <div class="o-icon">📋</div>
+        <h3>Business list</h3>
+        <p>Name, rating, category, address, phone, website, hours — plus the Digital Presence Score and pixel detection.</p>
       </div>
-
-      <div class="feature">
-        <div class="f-icon">💬</div>
-        <h3>Reviews with per-review rating</h3>
-        <p>Opens the reviews tab and collects each review — author, its own star rating, date, and
-        full text — deduplicated by Google's stable review id so nothing is double-counted.</p>
-        <div class="f-fields">
-          <span>author</span><span>rating&nbsp;1–5</span><span>date_text</span><span>text</span><span>review_id</span>
-        </div>
+      <div class="output-card">
+        <div class="o-icon">💬</div>
+        <h3>Reviews list</h3>
+        <p>Every review collected: who wrote it, what they said, their individual star rating, and when they posted it.</p>
       </div>
-
-      <div class="feature">
-        <div class="f-icon">📊</div>
-        <h3>Digital Presence Score</h3>
-        <p>A 0–100 score computed at collection time that classifies each business as a hot lead,
-        established, or benchmark — turning raw data into an instantly sortable prospect list.</p>
-        <div class="f-fields">
-          <span>digital_score</span><span>digital_tier</span>
-        </div>
+      <div class="output-card">
+        <div class="o-icon">🎯</div>
+        <h3>Pixel detection</h3>
+        <p>For each business with a website, MapLead checks whether they're running Meta, Google, TikTok, or other marketing pixels.</p>
       </div>
+      <div class="output-card">
+        <div class="o-icon">📩</div>
+        <h3>Straight to email</h3>
+        <p>No dashboard to log into. Results arrive as attachments — open in Excel or Sheets and you're ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <div class="feature">
-        <div class="f-icon">🎯</div>
-        <h3>Tracking-pixel detection</h3>
-        <p>Checks each business website for marketing pixels (Meta, GA4, GTM, TikTok, Hotjar…) —
-        a direct read on how digitally mature a prospect already is.</p>
-        <div class="f-fields">
-          <span>has_pixel</span><span>pixels</span>
+<!-- ══ SCORE ══════════════════════════════════════════════════════════════ -->
+<section id="score">
+  <div class="container">
+    <div class="section-label">03 · the score</div>
+    <h2>Know who needs you<br>before you make the call</h2>
+    <p>
+      Every business gets a <strong>Digital Presence Score</strong> — a simple 0 to 100 number
+      that tells you at a glance how digitally mature they are. Sort your list by score and your
+      coldest prospects (the ones with the most room to grow) rise straight to the top.
+    </p>
+
+    <div class="score-grid">
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <div class="score-rule"><span>has a website</span><span class="pts">+30 pts</span></div>
+        <div class="score-rule"><span>has a phone number</span><span class="pts">+25 pts</span></div>
+        <div class="score-rule"><span>rating 4.0 or above</span><span class="pts">+30 pts</span></div>
+        <div class="score-rule"><span>50+ reviews</span><span class="pts">+15 pts</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <div class="tier" style="background:#FAECE7;">
+          <div class="t-name" style="color:#993C1D;">0 — 40 · hot lead</div>
+          <div class="t-desc" style="color:#712B13;">No website or little online presence. Prime candidate for digital marketing services.</div>
+        </div>
+        <div class="tier" style="background:#FAEEDA;">
+          <div class="t-name" style="color:#633806;">41 — 70 · established</div>
+          <div class="t-desc" style="color:#412402;">Basic presence in place. Clear room for improvement and upsell.</div>
+        </div>
+        <div class="tier" style="background:var(--teal-l);">
+          <div class="t-name" style="color:var(--teal-d);">71 — 100 · benchmark</div>
+          <div class="t-desc" style="color:#085041;">Digitally strong. Useful as a reference point — or a competitor to monitor.</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════ ARCHITECTURE -->
+<!-- ══ DEMO ═══════════════════════════════════════════════════════════════ -->
+<section id="demo" class="demo-section">
+  <div class="container">
+    <div class="section-label">04 · try it live</div>
+    <h2>Run it on a real search — free</h2>
+    <div class="demo-wrap">
+      <div class="demo-intro">
+        <p>
+          Type any business type and city. The pipeline runs live, scrapes Google Maps,
+          and emails you the two spreadsheets described above — generated on demand, for real.
+        </p>
+        <ul>
+          <li>Any category + city (e.g. <em>dental clinics miami</em>)</li>
+          <li>Results in <strong>~5 minutes</strong> — it's a free-tier server, so be patient</li>
+          <li>Check <strong>spam</strong> if the email doesn't show up</li>
+          <li>No account needed, no strings attached</li>
+        </ul>
+      </div>
+
+      <form class="demo-form" id="scrapeForm">
+        <label for="query">What are you looking for?</label>
+        <input type="text" id="query" name="query" placeholder="dental clinics miami" required minlength="2" maxlength="200">
+
+        <label for="email">Where should we send the results?</label>
+        <input type="email" id="email" name="email" placeholder="you@youragency.com" required>
+
+        <div class="demo-scope">
+          <span>⚙</span>
+          <span>Fixed scope: <strong>5 businesses × 5 reviews</strong> — kept small so the free server stays responsive.</span>
+        </div>
+
+        <button type="submit" class="demo-btn" id="submitBtn">▶ &nbsp;Run MapLead</button>
+        <div class="form-msg" id="formMsg"></div>
+        <div class="form-hint">Results go only to the email you provide. Nothing is stored.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DIVIDER — technical content below ════════════════════════════════ -->
+<div class="container">
+  <hr class="section-divider" style="margin-top:0">
+  <p class="section-divider-label">↓ &nbsp; for the technical reader &nbsp; ↓</p>
+</div>
+
+<!-- ══ HOW IT WORKS ═══════════════════════════════════════════════════════ -->
 <section id="architecture">
   <div class="container">
-    <div class="section-label">03 · architecture</div>
+    <div class="section-label">05 · architecture</div>
     <h2>How it works</h2>
     <p>
-      The whole system is a single self-contained service. A form (or any HTTP client) posts a search
-      request to a FastAPI endpoint, which answers <span class="inline-code">202 Accepted</span>
-      immediately and runs the scrape in the background. Playwright drives a stealth Chromium through
-      Google Maps; the results are shaped with pandas into two CSVs and emailed via SendGrid.
+      A single FastAPI service handles everything. A POST request triggers a background task —
+      the API responds immediately with <span class="inline-code">202 Accepted</span> while
+      Playwright drives a stealth Chromium through Google Maps. Results are shaped with pandas
+      into two CSVs and delivered via Gmail SMTP.
     </p>
 
     <div class="pipeline">
@@ -392,257 +393,117 @@
       <div class="pipe-arrow">→</div>
       <div class="pipe-step"><span class="ps-icon">🐼</span><span class="ps-name">pandas</span><span class="ps-tech">→ CSV</span></div>
       <div class="pipe-arrow">→</div>
-      <div class="pipe-step"><span class="ps-icon">✉️</span><span class="ps-name">SendGrid</span><span class="ps-tech">email delivery</span></div>
+      <div class="pipe-step"><span class="ps-icon">✉️</span><span class="ps-name">Gmail SMTP</span><span class="ps-tech">email delivery</span></div>
     </div>
 
-    <h3 class="mt-lg">Deployment</h3>
-    <p>
-      One container, no external services. It ships as a single Docker image and deploys to
-      <strong>Render's free tier</strong> — HTTPS out of the box, automatic builds on every push,
-      and deliberately kept lean enough to fit the smallest free container that exists.
-    </p>
+    <h3 class="mt-lg">Stack</h3>
+    <p>Python 3.11 · FastAPI + uvicorn · Playwright (stealth Chromium) · pandas · Gmail SMTP · Docker · Render free tier</p>
 
-    <div class="container-card">
-      <div class="cc-head">
-        <div class="cc-dot"></div>
-        <span class="cc-name">maplead</span>
-        <span style="font-size:12px;color:var(--ink-3);">scraper · API · mailer</span>
-      </div>
-      <div class="cc-meta">
-        <span>python:3.11-slim</span><span>playwright chromium</span><span>fastapi + uvicorn</span>
-        <span>binds $PORT</span><span>--single-process</span>
-      </div>
-      <p style="font-size:13px;color:var(--ink-3);margin:0;">
-        Exposes <span class="text-mono" style="font-size:11px;">POST /scrape</span> and
-        <span class="text-mono" style="font-size:11px;">GET /health</span>. Rebuilt automatically on
-        every push, and tuned to run entirely within a free tier's memory budget.
-      </p>
-    </div>
-
-    <h3 class="mt-lg">Triggering a collection</h3>
-    <p>A single request kicks off everything. The API validates the input, returns instantly, and does the work in the background.</p>
-
+    <h3 class="mt-md">Triggering a run</h3>
     <div class="code-block">
       <div class="cb-bar">
         <div class="cb-dot r"></div><div class="cb-dot y"></div><div class="cb-dot g"></div>
-        <span class="cb-filename">example request · POST /scrape</span>
+        <span class="cb-filename">POST /scrape</span>
       </div>
-      <pre><span class="cm"># request body</span>
+      <pre><span class="cm"># request</span>
 {
   <span class="st">"query"</span>:          <span class="st">"barbershops campinas"</span>,
-  <span class="st">"max_businesses"</span>: <span class="nm">15</span>,   <span class="cm"># 1–15</span>
-  <span class="st">"max_reviews"</span>:    <span class="nm">5</span>,    <span class="cm"># 0–5 per business</span>
+  <span class="st">"max_businesses"</span>: <span class="nm">15</span>,
+  <span class="st">"max_reviews"</span>:    <span class="nm">5</span>,
   <span class="st">"email"</span>:          <span class="st">"you@example.com"</span>
 }
 
-<span class="cm"># immediate response — work continues in the background</span>
+<span class="cm"># immediate response — scraping runs in background</span>
 <span class="nm">202</span> <span class="kw">Accepted</span>
-{
-  <span class="st">"status"</span>:  <span class="st">"processing"</span>,
-  <span class="st">"message"</span>: <span class="st">"Search started! Results will be emailed in a few minutes."</span>
-}
+{ <span class="st">"status"</span>: <span class="st">"processing"</span> }
 
-<span class="cm"># ~minutes later → businesses.csv + reviews.csv arrive by email</span></pre>
+<span class="cm"># ~5 minutes later → businesses.csv + reviews.csv arrive by email</span></pre>
     </div>
+
+    <h3 class="mt-lg">Memory constraints on the free tier</h3>
+    <p>
+      The biggest engineering challenge was fitting a headless Chromium into Render's 512MB
+      free-tier container. A few deliberate choices made it work:
+    </p>
+    <ul style="color:var(--ink-2);padding-left:1.5rem;margin-top:.75rem;line-height:2;">
+      <li>Images, fonts and media aborted at the network layer via Playwright <span class="inline-code">route()</span> — not the engine flag, which breaks the Maps feed</li>
+      <li>Browser recycled every 3 businesses to release Chromium's accumulated memory</li>
+      <li><span class="inline-code">--single-process</span> flag on Linux only (crashes Chromium on Windows)</li>
+      <li>Pixel detection runs as concurrent HTTP GETs via <span class="inline-code">APIRequestContext</span> — no extra browser tab</li>
+    </ul>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════ OUTPUT -->
-<section id="output">
-  <div class="container">
-    <div class="section-label">04 · output</div>
-    <h2>What lands in your inbox</h2>
-    <p>
-      Two CSV files attached to a single email. <span class="inline-code">businesses.csv</span> holds
-      one row per establishment with the derived intelligence columns up front;
-      <span class="inline-code">reviews.csv</span> holds one row per review, each carrying its own
-      rating and a stable id. Below is the exact schema of each file.
-    </p>
-
-    <!-- businesses.csv schema -->
-    <div class="schema-list">
-      <div class="sl-head">
-        <div class="cb-dot" style="background:#28CA41;"></div>
-        <span class="sl-file">businesses.csv</span>
-        <span class="sl-count">one row per business</span>
-      </div>
-      <div class="sl-row"><span class="sl-col">name</span><span class="sl-desc">business name from the listing</span></div>
-      <div class="sl-row"><span class="sl-col">digital_score <span class="pill">derived</span></span><span class="sl-desc">0–100 digital-presence score, computed at collection time</span></div>
-      <div class="sl-row"><span class="sl-col">digital_tier <span class="pill">derived</span></span><span class="sl-desc">hot&nbsp;lead · established · benchmark, from the score</span></div>
-      <div class="sl-row"><span class="sl-col">has_pixel <span class="pill">derived</span></span><span class="sl-desc">whether the website loads any marketing tracking pixel</span></div>
-      <div class="sl-row"><span class="sl-col">pixels <span class="pill">derived</span></span><span class="sl-desc">which pixels were found (Meta, GA4, GTM, TikTok, Hotjar…)</span></div>
-      <div class="sl-row"><span class="sl-col">rating</span><span class="sl-desc">overall star rating of the business</span></div>
-      <div class="sl-row"><span class="sl-col">reviews_count</span><span class="sl-desc">total number of reviews on the listing</span></div>
-      <div class="sl-row"><span class="sl-col">category · phone · website</span><span class="sl-desc">contact and classification fields</span></div>
-      <div class="sl-row"><span class="sl-col">address · hours · price_range</span><span class="sl-desc">location, opening hours, price band</span></div>
-      <div class="sl-row"><span class="sl-col">google_maps_url</span><span class="sl-desc">direct link back to the listing</span></div>
-    </div>
-
-    <!-- reviews.csv schema -->
-    <div class="schema-list">
-      <div class="sl-head">
-        <div class="cb-dot" style="background:#28CA41;"></div>
-        <span class="sl-file">reviews.csv</span>
-        <span class="sl-count">one row per review</span>
-      </div>
-      <div class="sl-row"><span class="sl-col">business_name</span><span class="sl-desc">which business the review belongs to</span></div>
-      <div class="sl-row"><span class="sl-col">author</span><span class="sl-desc">name of the reviewer</span></div>
-      <div class="sl-row"><span class="sl-col">rating</span><span class="sl-desc">that review's own 1–5 star rating</span></div>
-      <div class="sl-row"><span class="sl-col">date_text</span><span class="sl-desc">when the review was posted (e.g. "2 months ago")</span></div>
-      <div class="sl-row"><span class="sl-col">text</span><span class="sl-desc">the full review text</span></div>
-      <div class="sl-row"><span class="sl-col">review_id</span><span class="sl-desc">Google's stable id — used to deduplicate reviews</span></div>
-    </div>
-
-    <!-- Digital Presence Score -->
-    <h3 class="mt-lg">The Digital Presence Score</h3>
-    <p>
-      The score is the project's core idea: a simple, transparent rule that turns four raw fields into
-      a single number, so a marketing team can instantly sort a list by who is digitally behind — and
-      therefore who is worth a call.
-    </p>
-
-    <div class="score-grid">
-      <div style="display:flex;flex-direction:column;gap:.5rem;">
-        <div class="score-rule"><span>has website</span><span class="pts">+30 pts</span></div>
-        <div class="score-rule"><span>has phone</span><span class="pts">+25 pts</span></div>
-        <div class="score-rule"><span>rating ≥ 4.0</span><span class="pts">+30 pts</span></div>
-        <div class="score-rule"><span>50+ reviews</span><span class="pts">+15 pts</span></div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:.5rem;">
-        <div class="tier" style="background:#FAECE7;">
-          <div class="t-name" style="color:#993C1D;">0 — 40 · hot lead</div>
-          <div class="t-desc" style="color:#712B13;">No website or phone. Prime opportunity for digital marketing services.</div>
-        </div>
-        <div class="tier" style="background:#FAEEDA;">
-          <div class="t-name" style="color:#633806;">41 — 70 · established</div>
-          <div class="t-desc" style="color:#412402;">Basic presence in place. Clear room for improvement.</div>
-        </div>
-        <div class="tier" style="background:var(--teal-l);">
-          <div class="t-name" style="color:var(--teal-d);">71 — 100 · benchmark</div>
-          <div class="t-desc" style="color:#085041;">Digitally dominant in the niche. A reference point for the segment.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════════════ DISCOVERIES -->
+<!-- ══ ENGINEERING CHALLENGES ════════════════════════════════════════════ -->
 <section id="discoveries">
   <div class="container">
-    <div class="section-label">05 · engineering journey</div>
-    <h2>Discoveries &amp; problems solved</h2>
-    <p>
-      The interesting part of this project wasn't the happy path — it was everything that fought back.
-      Each item below was a real bug or constraint hit during development, and the fix is what lets the
-      project actually run in production on the smallest free tier available.
-    </p>
+    <div class="section-label">06 · engineering challenges</div>
+    <h2>Problems solved along the way</h2>
+    <p>The interesting part wasn't the happy path. Each item below was a real constraint or bug hit during development.</p>
 
     <div class="discovery">
       <div class="disc-problem">
         <span class="disc-tag problem">problem</span>
-        <h4>Reviews came back duplicated</h4>
-        <p>Google Maps reuses the same <code>data-review-id</code> across several DOM nodes, and the
-        listing's overview tab only previews ~3 reviews — so naive scraping capped every business at
-        three duplicated rows.</p>
+        <h4>Duplicate reviews on every run</h4>
+        <p>Google Maps reuses the same <code>data-review-id</code> across nested DOM elements, and the overview tab only previews ~3 reviews — naive scraping capped every business at three duplicated rows.</p>
       </div>
       <div class="disc-solution">
         <span class="disc-tag solution">solution</span>
-        <h4>Dedup by stable id + open the real tab</h4>
-        <p>Always click into the full Reviews tab, then deduplicate on the stable review id while
-        scrolling until <code>max_reviews</code> <em>unique</em> reviews are loaded.</p>
+        <h4>Dedup by stable ID + full reviews tab</h4>
+        <p>Always navigate to the full Reviews tab, then deduplicate on the stable review ID while scrolling until <code>max_reviews</code> unique reviews load.</p>
       </div>
     </div>
 
     <div class="discovery">
       <div class="disc-problem">
         <span class="disc-tag problem">problem</span>
-        <h4>The server crashed only on Windows</h4>
-        <p>Under uvicorn on Windows, Playwright threw <code>NotImplementedError</code>: the
-        SelectorEventLoop can't spawn the Node driver subprocess it needs.</p>
+        <h4>Crashes only on Windows</h4>
+        <p>Under uvicorn on Windows, Playwright threw <code>NotImplementedError</code> — the SelectorEventLoop can't spawn the Node driver subprocess.</p>
       </div>
       <div class="disc-solution">
         <span class="disc-tag solution">solution</span>
-        <h4>A dedicated event loop in a thread</h4>
-        <p>Run the scraper in its own thread on a <code>ProactorEventLoop</code> (which supports
-        subprocesses), isolated from uvicorn's loop — Windows-only, transparent on Linux.</p>
+        <h4>Dedicated ProactorEventLoop per thread</h4>
+        <p>The scraper runs in its own thread with a <code>ProactorEventLoop</code> (supports subprocesses), isolated from uvicorn's loop — Windows-only, transparent on Linux.</p>
       </div>
     </div>
 
     <div class="discovery">
       <div class="disc-problem">
         <span class="disc-tag problem">problem</span>
-        <h4>Fitting Chromium into a tiny free container</h4>
-        <p>A headless Chromium plus the app overran the free tier's memory budget. Disabling images via
-        the engine flag was the obvious fix — but it silently broke the Maps results feed.</p>
+        <h4>One slow listing hangs the whole job</h4>
+        <p>A single broken Maps listing would stall the entire background task — and a hung background task means no email ever arrives.</p>
       </div>
       <div class="disc-solution">
         <span class="disc-tag solution">solution</span>
-        <h4>Block images at the network layer</h4>
-        <p>Abort image/font/media <em>requests</em> with a route handler (the engine still believes
-        images are on) plus <code>--single-process</code>. Measured real usage by USS, not summed RSS.</p>
+        <h4>Statistical per-business timeout</h4>
+        <p>Benchmarked per-business time (mean + 2σ) and wrapped each listing in <code>asyncio.wait_for()</code>. Slow listings are skipped, not fatal — the run always finishes.</p>
       </div>
     </div>
 
     <div class="discovery">
       <div class="disc-problem">
         <span class="disc-tag problem">problem</span>
-        <h4>One stuck listing could hang the whole job</h4>
-        <p>A single slow or broken Maps listing would stall the entire run — and for a background
-        email job, a hang means no email ever arrives.</p>
+        <h4>Business name came back blank intermittently</h4>
+        <p>Google Maps renders the <code>&lt;h1&gt;</code> element immediately but fills its text via JS shortly after — on the slow free-tier CPU, reading the element too early returned an empty string.</p>
       </div>
       <div class="disc-solution">
         <span class="disc-tag solution">solution</span>
-        <h4>A statistical per-business timeout</h4>
-        <p>Benchmarked per-business time and set a cap of <code>max + 2σ</code>. Anything slower is
-        skipped, not fatal — so the run always finishes and the email always sends.</p>
+        <h4>Wait for non-empty text content</h4>
+        <p>Added a <code>wait_for_function</code> that polls until <code>h1.textContent.trim().length > 0</code> before reading — tolerant of slow CPU without a fixed sleep.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════ DEMO -->
-<section id="demo" class="demo-section">
-  <div class="container">
-    <div class="section-label">06 · live demo</div>
-    <h2>Try it on a real search</h2>
-    <div class="demo-wrap">
-      <div class="demo-intro">
-        <p>
-          Run the actual pipeline against a query of your choice. Your request hits the live API
-          (hosted on a free tier, so the first call may take a few seconds to wake it up), which
-          scrapes Google Maps in the background and emails you the two CSVs — the same files
-          described above, generated on demand.
-        </p>
-        <ul>
-          <li>Pick any business type + city (e.g. <em>barbershops campinas</em>)</li>
-          <li>Each run collects <strong>5 businesses</strong> with up to <strong>5 reviews</strong> each</li>
-          <li>Be patient: it runs on a <strong>free-tier server</strong>, so the email can take
-              <strong>~5 minutes</strong> to arrive — that's normal, it <em>is</em> working</li>
-          <li>The email often lands in <strong>spam</strong> — check there too</li>
-        </ul>
-      </div>
-
-      <form class="demo-form" id="scrapeForm">
-        <label for="query">Search query</label>
-        <input type="text" id="query" name="query" placeholder="barbershops campinas" required minlength="2" maxlength="200">
-
-        <label for="email">Your email</label>
-        <input type="email" id="email" name="email" placeholder="you@example.com" required>
-
-        <div class="demo-scope">
-          <span class="ds-icon">⚙</span>
-          <span>Fixed scope: <strong>5 businesses × 5 reviews</strong> per run — kept small so the free tier stays responsive.</span>
-        </div>
-
-        <button type="submit" class="demo-btn" id="submitBtn">▶  Run the scrape</button>
-        <div class="form-msg" id="formMsg"></div>
-        <div class="form-hint">No data is stored — results go only to the email you provide.</div>
-      </form>
-    </div>
+<!-- ══ CTA BOTTOM ════════════════════════════════════════════════════════ -->
+<div class="container">
+  <div class="cta-bottom">
+    <p>Seen enough? The demo is live and free.</p>
+    <a href="#demo" class="cta-btn">▶ &nbsp;Try MapLead now</a>
   </div>
-</section>
+</div>
 
-<!-- ══════════════════════════════════════════════════════ FOOTER -->
+<!-- ══ FOOTER ════════════════════════════════════════════════════════════ -->
 <footer>
   <div class="container">
     <p>
@@ -650,21 +511,12 @@
       &nbsp;·&nbsp;
       <a href="https://github.com/rodrigo-carfon">github</a>
     </p>
-    <p style="margin-top:.5rem;">Rodrigo Carfon · Web Scraping · Automation · Market Intelligence</p>
+    <p style="margin-top:.5rem;">Rodrigo Carfon · Marketing Automation Specialist · Data & Intelligence</p>
   </div>
 </footer>
 
 <script>
-/* ════════════════════════════════════════════════════════════
-   DEMO FORM — posts to the live scraper API.
-
-   ⚙️  Set API_URL to the Render service URL + /scrape.
-   Render serves the API over HTTPS out of the box, so it pairs
-   cleanly with this HTTPS portfolio (no mixed-content issue).
-   e.g. https://gmaps-scraper-api.onrender.com/scrape
-   ════════════════════════════════════════════════════════════ */
 const API_URL = "https://gmaps-scraper-api-aw49.onrender.com/scrape";
-
 const form = document.getElementById('scrapeForm');
 const btn  = document.getElementById('submitBtn');
 const msg  = document.getElementById('formMsg');
@@ -678,20 +530,15 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   msg.className = 'form-msg';
 
-  // Fixed scope to protect the free tier — bump these if it scales later.
-  // No backend change needed: the API just processes what the form sends.
-  const MAX_BUSINESSES = 5;
-  const MAX_REVIEWS    = 5;
-
   const payload = {
     query:          document.getElementById('query').value.trim(),
-    max_businesses: MAX_BUSINESSES,
-    max_reviews:    MAX_REVIEWS,
+    max_businesses: 5,
+    max_reviews:    5,
     email:          document.getElementById('email').value.trim(),
   };
 
   btn.disabled = true;
-  btn.textContent = '⏳  Sending…';
+  btn.textContent = '⏳  Running…';
 
   try {
     const res = await fetch(API_URL, {
@@ -701,19 +548,18 @@ form.addEventListener('submit', async (e) => {
     });
 
     if (res.ok) {
-      showMsg('✓ Search started! Your results will arrive at ' + payload.email +
-              ' in about 5 minutes — it runs on a free-tier server, so please be patient ' +
-              '(it really is working). Be sure to check your spam folder too.', 'ok');
+      showMsg('✓ On it! Results will arrive at ' + payload.email +
+              ' in about 5 minutes. Check your spam folder if they don\'t show up.', 'ok');
       form.reset();
     } else {
       const detail = await res.text();
       showMsg('Something went wrong (HTTP ' + res.status + '). ' + detail.slice(0, 200), 'err');
     }
   } catch (err) {
-    showMsg('Could not reach the API. It may be waking up — please try again in a moment.', 'err');
+    showMsg('Could not reach the server — it may be waking up. Try again in a moment.', 'err');
   } finally {
     btn.disabled = false;
-    btn.textContent = '▶  Run the scrape';
+    btn.textContent = '▶  Run MapLead';
   }
 });
 </script>

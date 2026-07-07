@@ -197,29 +197,112 @@
 <nav>
   <a class="nav-logo" href="https://rodrigo-carfon.github.io"><span>~/</span>rodrigo-carfon</a>
   <ul class="nav-links">
-    <li><a href="#demo" class="nav-cta">try it free →</a></li>
+    <li><a href="#method">methodology</a></li>
+    <li><a href="#demo" class="nav-cta">run the demo →</a></li>
   </ul>
 </nav>
 
 <!-- ══ SECTION 1 — OVERVIEW ════════════════════════════════════════════════ -->
 <section class="hero">
   <div class="container">
-    <div class="hero-eyebrow">Market Intelligence Tool</div>
-    <h1>Your next 20 prospects,<br><em>researched and scored</em><br>in minutes.</h1>
+    <div class="hero-eyebrow">Portfolio Project · Marketing Automation</div>
+    <h1>MapLead — local market<br>research, <em>automated<br>end to end</em>.</h1>
     <p class="hero-sub">
-      Type a business category and city. MapLead searches Google Maps, scores each business's
-      digital presence, detects which marketing pixels they're running (Meta, Google, TikTok
-      and more), and collects their reviews — then emails you a clean spreadsheet, ready to
-      sort, filter, and act on.
+      A project I built to turn a plain search — a business category and a city — into a scored,
+      enriched prospect list. It queries Google Maps, scores each business's digital presence,
+      detects the marketing pixels they run (Meta, Google, TikTok and more) and collects their
+      reviews, then delivers a ready-to-use spreadsheet by email. The demo below runs the real
+      pipeline.
     </p>
     <div class="hero-meta">
-      <div class="hero-stat"><span class="num">20</span><span class="lbl">businesses per run</span></div>
-      <div class="hero-stat"><span class="num">0</span><span class="lbl">manual steps</span></div>
-      <div class="hero-stat"><span class="num">~5 min</span><span class="lbl">to your inbox</span></div>
-      <div class="hero-stat"><span class="num">free</span><span class="lbl">to try right now</span></div>
+      <div class="hero-stat"><span class="num">Python</span><span class="lbl">FastAPI + Playwright</span></div>
+      <div class="hero-stat"><span class="num">5</span><span class="lbl">stage pipeline</span></div>
+      <div class="hero-stat"><span class="num">0–100</span><span class="lbl">digital presence score</span></div>
+      <div class="hero-stat"><span class="num">~5 min</span><span class="lbl">run to inbox</span></div>
     </div>
 
-    <div class="score-grid mt-lg">
+  </div>
+</section>
+
+<!-- ══ SECTION 2 — METHODOLOGY ═════════════════════════════════════════════ -->
+<section id="method">
+  <div class="container">
+    <div class="section-label">methodology</div>
+    <h2>How the data is gathered</h2>
+    <p>
+      Every run is a small automated pipeline. There's no manual list-building and no paid data
+      API — the information is assembled the same way a human would, just faster and consistently
+      scored. Here are the five stages, end to end:
+    </p>
+
+    <div class="pipeline">
+      <div class="pipe-step highlight">
+        <span class="ps-icon">🔎</span>
+        <span class="ps-name">Search</span>
+        <span class="ps-tech">Google Maps query</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step">
+        <span class="ps-icon">🧭</span>
+        <span class="ps-name">Scrape</span>
+        <span class="ps-tech">Playwright headless</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step">
+        <span class="ps-icon">🧩</span>
+        <span class="ps-name">Enrich</span>
+        <span class="ps-tech">site + pixel probe</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step">
+        <span class="ps-icon">📊</span>
+        <span class="ps-name">Score</span>
+        <span class="ps-tech">0–100 heuristic</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step">
+        <span class="ps-icon">📬</span>
+        <span class="ps-name">Deliver</span>
+        <span class="ps-tech">spreadsheet by email</span>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature">
+        <div class="f-icon">🗺️</div>
+        <h3>Discovery from Google Maps</h3>
+        <p>The category + city query is run against Google Maps and each result is opened to pull its public profile.</p>
+        <div class="f-fields">
+          <span>name</span><span>address</span><span>phone</span><span>website</span><span>rating</span><span>reviews</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">🎯</div>
+        <h3>Marketing pixel detection</h3>
+        <p>Each business site is fetched and inspected for tracking tags, a quick read on how digitally mature they are.</p>
+        <div class="f-fields">
+          <span>Meta</span><span>Google</span><span>TikTok</span><span>GTM</span><span>LinkedIn</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">💬</div>
+        <h3>Review collection</h3>
+        <p>A sample of recent reviews is captured per business for qualitative context alongside the raw rating.</p>
+        <div class="f-fields">
+          <span>author</span><span>stars</span><span>text</span><span>date</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">📈</div>
+        <h3>Digital Presence Score</h3>
+        <p>A transparent 0–100 heuristic weighs website, contact completeness, rating and review volume.</p>
+        <div class="f-fields">
+          <span>website</span><span>contactability</span><span>rating</span><span>volume</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-grid">
       <div class="tier" style="background:#FAECE7;">
         <div class="t-name" style="color:#993C1D;">0 — 40 · hot lead</div>
         <div class="t-desc" style="color:#712B13;">Little online presence — prime candidate for digital marketing services.</div>
@@ -229,30 +312,30 @@
         <div class="t-desc" style="color:#085041;">Digitally strong — a useful reference point or a competitor to monitor.</div>
       </div>
     </div>
-    <p style="font-size:13px;color:var(--ink-3);margin-top:.75rem;">
-      Every business gets a <strong>Digital Presence Score (0–100)</strong> based on website,
-      contact info, rating and review volume — so your best prospects rise to the top.
-    </p>
+
+    <div class="callout">
+      <p>The lower the score, the bigger the opportunity — the scoring is what turns a raw scrape into a prioritized list.</p>
+    </div>
   </div>
 </section>
 
-<!-- ══ SECTION 2 — DEMO / FORM ═════════════════════════════════════════════ -->
+<!-- ══ SECTION 3 — DEMO / FORM ═════════════════════════════════════════════ -->
 <section id="demo" class="demo-section">
   <div class="container">
-    <div class="section-label">try it live</div>
-    <h2>Run it on a real search</h2>
+    <div class="section-label">live test</div>
+    <h2>Run the pipeline yourself</h2>
     <div class="demo-wrap">
       <div class="demo-intro">
         <p>
-          Type any business type and city. The pipeline runs live, scrapes Google Maps,
-          and emails you a spreadsheet with results, scores and pixel detection — generated
-          on demand, for real.
+          This is the actual pipeline described above, not a mockup. Enter a category and a city,
+          and it runs the five stages live against Google Maps and emails you the resulting
+          spreadsheet — scores, pixels and reviews included.
         </p>
         <ul>
           <li>Any category + city (e.g. <em>dental clinics miami</em>)</li>
-          <li>Results in <strong>~5 minutes</strong> — it's a free-tier server, so be patient</li>
+          <li>Runs in <strong>~5 minutes</strong> — hosted on a free-tier server, so give it a moment</li>
           <li>Check <strong>spam</strong> if the email doesn't show up</li>
-          <li>No account needed, no strings attached</li>
+          <li>Nothing is stored — results go only to the address you enter</li>
         </ul>
       </div>
 

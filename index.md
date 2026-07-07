@@ -7,6 +7,9 @@
 [Maplead - Local Business Scraper](/pdf/maplead_en.html)
 <img src="images/maplead.png?raw=true"/>
 
+[Portfolio Optimization Study - Coffe + Cotton Study](/pdf/index.html)
+<img src="images/COFFE.png?raw=true"/>
+
 ---
 
 <!-- ### Category Name 2 -->

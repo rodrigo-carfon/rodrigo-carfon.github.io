@@ -244,6 +244,52 @@ def frontier_chart(fr, w=1060, h=440, pad=60):
     return "".join(parts)
 
 
+def frontier_thumb(fr, w=520, h=260, pad=22):
+    """The frontier stripped to its shape, for the portfolio index card.
+
+    Generated rather than screenshotted so the thumbnail cannot drift from the
+    study it points at — neither its palette nor its numbers. No axes or labels:
+    at card size it has to read as a silhouette, and the curve bending left is
+    the whole story anyway.
+    """
+    pts, mv, a = fr["points"], fr["min_var"], fr["assets"]
+    xs_v = [p["risk"] for p in pts]
+    ys_v = [p["ret"] for p in pts]
+    xlo, xhi = min(xs_v), max(xs_v)
+    ylo, yhi = min(ys_v), max(ys_v)
+    xpad, ypad = (xhi - xlo) * 0.16 or 1, (yhi - ylo) * 0.16 or 1
+    xlo, xhi = xlo - xpad, xhi + xpad
+    ylo, yhi = ylo - ypad, yhi + ypad
+
+    def X(v): return _scale([v], xlo, xhi, pad, w - pad)[0]
+    def Y(v): return _scale([v], ylo, yhi, h - pad, pad)[0]
+
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" '
+             f'width="{w}" height="{h}" role="img" '
+             f'aria-label="The coffee and cotton risk-return frontier, bending left to a '
+             f'minimum-variance mix that is less risky than either asset alone">',
+             f'<rect width="{w}" height="{h}" fill="{BG_CARD}"/>']
+
+    d_all = " ".join(f"{'M' if i==0 else 'L'}{X(p['risk']):.1f} {Y(p['ret']):.1f}"
+                     for i, p in enumerate(pts))
+    parts.append(f'<path d="{d_all}" fill="none" stroke="{TEAL_LT}" stroke-width="2.5" '
+                 f'stroke-linejoin="round" stroke-linecap="round"/>')
+    eff = [mv] + [p for p in pts if p["ret"] > mv["ret"] + 1e-6]
+    d_eff = " ".join(f"{'M' if i==0 else 'L'}{X(p['risk']):.1f} {Y(p['ret']):.1f}"
+                     for i, p in enumerate(eff))
+    parts.append(f'<path d="{d_eff}" fill="none" stroke="{TEAL}" stroke-width="3.5" '
+                 f'stroke-linejoin="round" stroke-linecap="round"/>')
+
+    for tick, label in (("CT=F", "cotton"), ("KC=F", "coffee")):
+        parts.append(f'<circle cx="{X(a[tick]["risk"]):.1f}" cy="{Y(a[tick]["ret"]):.1f}" '
+                     f'r="7" fill="{COL[tick]}" stroke="{BG_CARD}" stroke-width="2.5"/>')
+    mx, my = X(mv["risk"]), Y(mv["ret"])
+    parts.append(f'<path d="M{mx:.1f} {my-8:.1f} L{mx+8:.1f} {my:.1f} L{mx:.1f} {my+8:.1f} '
+                 f'L{mx-8:.1f} {my:.1f} Z" fill="{INK}" stroke="{BG_CARD}" stroke-width="2.5"/>')
+    parts.append('</svg>')
+    return "".join(parts)
+
+
 def frontier_table(fr):
     """Collapsed table-view twin of the frontier chart (accessibility)."""
     rows = "".join(
@@ -646,6 +692,10 @@ def build():
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     print(f"  ✓ {out.relative_to(HERE.parent)} generated ({len(html):,} bytes)")
+
+    thumb = HERE.parent / "images" / "coffee-cotton-frontier.svg"
+    thumb.write_text(frontier_thumb(fr), encoding="utf-8")
+    print(f"  ✓ {thumb.relative_to(HERE.parent)} generated (index card)")
 
 
 if __name__ == "__main__":

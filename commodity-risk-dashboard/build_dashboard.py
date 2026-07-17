@@ -48,6 +48,183 @@ MONO_FF = "Geist Mono, ui-monospace, monospace"
 SOURCE_URL = ("https://github.com/rodrigo-carfon/rodrigo-carfon.github.io"
               "/tree/master/commodity-risk-dashboard")
 
+# Client-side interactivity, hand-written (no chart library). Reads the inline
+# JSON payload and progressively enhances the baked SVGs:
+#   • frontier explorer — a coffee-weight slider that snaps a marker along the
+#     baked curve and reads its risk/return live from the point's data-attrs;
+#   • price + correlation — a date-range filter (3M/6M/1Y/All) that re-renders
+#     the series, plus a hover crosshair with a synced readout.
+# Injected verbatim via {VIZ_JS}; kept out of the f-string so its own braces
+# need no escaping.
+VIZ_JS = r"""
+(function () {
+  var el = document.getElementById('viz-data');
+  if (!el) return;
+  var DATA = JSON.parse(el.textContent);
+  var C = { coffee:'#e0722e', cotton:'#2f6bed', teal:'#0f9d8f', ink:'#171b24',
+            mut:'#79818f', grid:'#dde1e8' };
+  var NS = 'http://www.w3.org/2000/svg';
+  var MONO = "'Geist Mono', ui-monospace, monospace";
+
+  function scale(v, lo, hi, a, b){ return hi===lo ? (a+b)/2 : a+(v-lo)/(hi-lo)*(b-a); }
+  function fmtDate(s){ var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var p=s.split('-'); return m[+p[1]-1]+'/'+p[0].slice(2); }
+
+  /* ---- 1) FRONTIER EXPLORER ---- */
+  (function () {
+    var wrap = document.getElementById('fx-frontier');
+    var mount = document.getElementById('fx-controls');
+    if (!wrap || !mount) return;
+    var svg = wrap.querySelector('svg');
+    var pts = svg ? [].slice.call(svg.querySelectorAll('.fx-pt')) : [];
+    if (!pts.length) return;
+
+    var ring = document.createElementNS(NS, 'circle');
+    ring.setAttribute('r','10'); ring.setAttribute('fill','none');
+    ring.setAttribute('stroke', C.ink); ring.setAttribute('stroke-width','2.5');
+    ring.setAttribute('pointer-events','none');
+    var dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('r','3.5'); dot.setAttribute('fill', C.ink); dot.setAttribute('pointer-events','none');
+    svg.appendChild(ring); svg.appendChild(dot);
+
+    var mvW = Math.round(DATA.frontier.min_var.w);
+    mount.innerHTML =
+      '<div class="fx-row"><label for="fx-slider">coffee weight</label>' +
+      '<input id="fx-slider" type="range" min="0" max="100" step="5" value="' + mvW + '">' +
+      '<span id="fx-w" class="fx-w"></span></div>' +
+      '<div class="fx-readout">' +
+        '<div><span class="k">mix</span><b id="fx-mix">–</b><small>coffee / cotton</small></div>' +
+        '<div><span class="k">risk</span><b id="fx-risk">–</b><small>annualized vol</small></div>' +
+        '<div><span class="k">return</span><b id="fx-ret">–</b><small>annualized</small></div>' +
+      '</div>';
+
+    var slider = document.getElementById('fx-slider');
+    var oMix = document.getElementById('fx-mix'), oRisk = document.getElementById('fx-risk'),
+        oRet = document.getElementById('fx-ret'), oW = document.getElementById('fx-w');
+
+    function set(w) {
+      var best = pts[0], bd = 1e9;
+      pts.forEach(function (p) { var d = Math.abs(+p.getAttribute('data-w') - w); if (d < bd){ bd=d; best=p; } });
+      var cx = +best.getAttribute('cx'), cy = +best.getAttribute('cy');
+      ring.setAttribute('cx', cx); ring.setAttribute('cy', cy);
+      dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+      var w2 = +best.getAttribute('data-w');
+      oMix.textContent = w2 + '% / ' + (100 - w2) + '%';
+      oRisk.textContent = (+best.getAttribute('data-risk')).toFixed(1) + '%';
+      oRet.textContent = (+best.getAttribute('data-ret')).toFixed(1) + '%';
+      oW.textContent = (w2 === mvW ? 'min-variance mix' : '');
+      mount.classList.toggle('at-min', w2 === mvW);
+    }
+    slider.addEventListener('input', function (e) { set(+e.target.value); });
+    set(mvW);
+  })();
+
+  /* ---- 2) LINE CHARTS (price + correlation) ---- */
+  function lineChart(kind, cfg) {
+    var mount = document.querySelector('[data-chart="' + kind + '"]');
+    if (!mount) return;
+    var host = mount.querySelector('.chart-svg');
+    if (!host) return;
+    var W = 560, H = 240, PAD = 38;
+    var dates = cfg.dates;
+
+    var bar = document.createElement('div');
+    bar.className = 'chart-filters';
+    [['3M',63],['6M',126],['1Y',252],['All',null]].forEach(function (r) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = r[0]; b.setAttribute('data-days', r[1] == null ? '' : r[1]);
+      if (r[1] == null) b.className = 'on';
+      bar.appendChild(b);
+    });
+    mount.insertBefore(bar, host);
+
+    var readout = document.createElement('div');
+    readout.className = 'chart-readout'; readout.style.display = 'none';
+    mount.appendChild(readout);
+
+    function draw(days) {
+      var n = dates.length, start = days ? Math.max(0, n - days) : 0;
+      var dsub = dates.slice(start);
+      var series = cfg.series.map(function (s) { return { name: s.name, color: s.color, vals: s.vals.slice(start) }; });
+      var allv = [];
+      series.forEach(function (s) { s.vals.forEach(function (v) { if (v != null) allv.push(v); }); });
+      if (cfg.threshold != null) allv.push(cfg.threshold);
+      var lo = Math.min.apply(null, allv), hi = Math.max.apply(null, allv);
+      var span = (hi - lo) || 1; lo -= span * 0.08; hi += span * 0.08;
+      var ydec = (hi - lo) >= 10 ? 0 : ((hi - lo) >= 1 ? 1 : 2);
+      function X(i){ return scale(i, 0, dsub.length - 1, PAD, W - PAD); }
+      function Y(v){ return scale(v, lo, hi, H - PAD, PAD); }
+
+      var p = ['<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet" font-family="Inter, sans-serif">'];
+      for (var i = 0; i < 5; i++) {
+        var gy = PAD + (H - 2*PAD) * i/4, val = hi - (hi - lo) * i/4;
+        p.push('<line x1="'+PAD+'" y1="'+gy.toFixed(1)+'" x2="'+(W-PAD)+'" y2="'+gy.toFixed(1)+'" stroke="'+C.grid+'"/>');
+        p.push('<text x="'+(PAD-6)+'" y="'+(gy+3).toFixed(1)+'" font-size="9" fill="'+C.mut+'" font-family='+JSON.stringify(MONO)+' text-anchor="end">'+val.toFixed(ydec)+'</text>');
+      }
+      if (cfg.threshold != null) {
+        var ty = Y(cfg.threshold);
+        p.push('<line x1="'+PAD+'" y1="'+ty.toFixed(1)+'" x2="'+(W-PAD)+'" y2="'+ty.toFixed(1)+'" stroke="'+C.mut+'" stroke-width="1.2" stroke-dasharray="5 3"/>');
+      }
+      series.forEach(function (s) {
+        var d = '', pen = false;
+        s.vals.forEach(function (v, i) { if (v == null) { pen = false; return; }
+          d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' '; pen = true; });
+        p.push('<path d="'+d+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>');
+      });
+      var ticks = Math.min(6, dsub.length);
+      for (var k = 0; k < ticks; k++) {
+        var idx = ticks > 1 ? Math.round(k * (dsub.length - 1) / (ticks - 1)) : 0;
+        var tx = X(idx), anc = k === 0 ? 'start' : (k === ticks - 1 ? 'end' : 'middle');
+        p.push('<text x="'+tx.toFixed(1)+'" y="'+(H-PAD+15).toFixed(1)+'" font-size="9" fill="'+C.mut+'" font-family='+JSON.stringify(MONO)+' text-anchor="'+anc+'">'+fmtDate(dsub[idx])+'</text>');
+      }
+      p.push('<line class="xh-line" x1="0" y1="'+PAD+'" x2="0" y2="'+(H-PAD)+'" stroke="'+C.ink+'" stroke-width="1" opacity="0"/>');
+      series.forEach(function (s, si) { p.push('<circle class="xh-dot" data-si="'+si+'" r="3.5" fill="'+s.color+'" stroke="#fff" stroke-width="1.5" opacity="0"/>'); });
+      p.push('<rect class="xh-catch" x="'+PAD+'" y="'+PAD+'" width="'+(W-2*PAD)+'" height="'+(H-2*PAD)+'" fill="transparent"/>');
+      p.push('</svg>');
+      host.innerHTML = p.join('');
+
+      var svg = host.querySelector('svg'), xh = svg.querySelector('.xh-line');
+      var dots = [].slice.call(svg.querySelectorAll('.xh-dot')), catcher = svg.querySelector('.xh-catch');
+      function locate(clientX) {
+        var r = svg.getBoundingClientRect();
+        var i = Math.round(scale((clientX - r.left) / r.width * W, PAD, W - PAD, 0, dsub.length - 1));
+        i = Math.max(0, Math.min(dsub.length - 1, i));
+        var gx = X(i);
+        xh.setAttribute('x1', gx); xh.setAttribute('x2', gx); xh.setAttribute('opacity', '1');
+        var rows = '';
+        series.forEach(function (s, si) {
+          var v = s.vals[i];
+          if (v == null) { dots[si].setAttribute('opacity', '0'); return; }
+          dots[si].setAttribute('cx', gx); dots[si].setAttribute('cy', Y(v)); dots[si].setAttribute('opacity', '1');
+          rows += '<span><i style="background:'+s.color+'"></i>'+s.name+' <b>'+v.toFixed(ydec)+'</b></span>';
+        });
+        readout.innerHTML = '<span class="d">'+fmtDate(dsub[i])+'</span>'+rows;
+        readout.style.display = 'flex';
+      }
+      function clear() { xh.setAttribute('opacity','0'); dots.forEach(function (d){ d.setAttribute('opacity','0'); }); readout.style.display = 'none'; }
+      catcher.addEventListener('mousemove', function (e) { locate(e.clientX); });
+      catcher.addEventListener('mouseleave', clear);
+      svg.addEventListener('touchmove', function (e) { if (e.touches[0]) locate(e.touches[0].clientX); }, { passive: true });
+    }
+
+    bar.addEventListener('click', function (e) {
+      if (e.target.tagName !== 'BUTTON') return;
+      [].forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.remove('on'); });
+      e.target.classList.add('on');
+      var d = e.target.getAttribute('data-days');
+      draw(d ? +d : null);
+    });
+    draw(null);
+  }
+
+  lineChart('price', { dates: DATA.price.dates,
+    series: [{ name:'Coffee', color:C.coffee, vals:DATA.price.kc },
+             { name:'Cotton', color:C.cotton, vals:DATA.price.ct }] });
+  lineChart('corr', { dates: DATA.corr.dates, threshold: 0,
+    series: [{ name:'Correlation 63d', color:C.teal, vals:DATA.corr.vals }] });
+})();
+"""
+
 
 def _scale(vals, lo, hi, a, b):
     """Map val in [lo,hi] -> pixel in [a,b]."""
@@ -192,11 +369,14 @@ def frontier_chart(fr, w=1060, h=440, pad=60):
     parts.append(f'<path d="{d_eff}" fill="none" stroke="{TEAL}" stroke-width="3" '
                  f'stroke-linejoin="round" stroke-linecap="round"/>')
 
-    # invisible wide hover targets along the curve → native tooltips, no JS
+    # invisible wide hover targets along the curve → native tooltips (no-JS),
+    # and data anchors the frontier-explorer slider snaps its marker to.
     for p in pts:
         tip = (f"{p['w_coffee']}% coffee / {100-p['w_coffee']}% cotton — "
                f"risk {p['risk']:.1f}% · return {p['ret']:.1f}%")
-        parts.append(f'<circle cx="{X(p["risk"]):.1f}" cy="{Y(p["ret"]):.1f}" r="11" '
+        parts.append(f'<circle class="fx-pt" data-w="{p["w_coffee"]}" '
+                     f'data-risk="{p["risk"]:.1f}" data-ret="{p["ret"]:.1f}" '
+                     f'cx="{X(p["risk"]):.1f}" cy="{Y(p["ret"]):.1f}" r="11" '
                      f'fill="#fff" fill-opacity="0"><title>{tip}</title></circle>')
 
     # annotation: "Efficient frontier" — ink text with a purple line-key beside it
@@ -368,10 +548,11 @@ def tools_section():
          "The pipeline loads prices, daily metrics and correlation into a relational store "
          "with an analytical view; <code>queries.sql</code> documents 10 production-style "
          "queries — joins, window functions, time aggregations, CASE logic."),
-        ("Pure-SVG dataviz", "no chart library",
-         "Every chart on this page is rendered directly as SVG by "
-         "<code>build_dashboard.py</code> from the pipeline's JSON payload — no chart "
-         "library, no runtime dependency, and the frontier ships a table twin for accessibility."),
+        ("Interactive SVG dataviz", "no chart library",
+         "Charts are rendered as SVG — server-side by <code>build_dashboard.py</code> for "
+         "the initial paint, then enhanced with hand-written JS: a frontier explorer, a "
+         "date-range filter and a hover crosshair. No chart library, no runtime dependency, "
+         "and the frontier ships a table twin for accessibility."),
         ("GitHub Actions", "scheduled automation",
          "A cron workflow runs the pipeline after every ICE close (weekdays), commits the "
          "refreshed data and redeploys this page via GitHub Pages — the study refreshes with "
@@ -417,6 +598,16 @@ def build():
     sessions = latest_sessions(10)
     d0, d1 = s["KC=F"]["dates"][0], s["KC=F"]["dates"][-1]
     leg_price = legend([("Coffee", COL["KC=F"]), ("Cotton", COL["CT=F"])])
+
+    # Payload the interactive layer reads. The frontier points themselves live in
+    # the baked SVG (the slider snaps to their data-attrs); here we only need the
+    # min-variance weight (default slider position) plus the full price/correlation
+    # series for the date filter and crosshair.
+    viz_json = json.dumps({
+        "frontier": {"min_var": {"w": round(mv["w_coffee"])}},
+        "price": {"dates": s["KC=F"]["dates"], "kc": s["KC=F"]["close"], "ct": s["CT=F"]["close"]},
+        "corr": {"dates": DATA["corr"]["dates"], "vals": DATA["corr"]["values"]},
+    }, separators=(",", ":"))
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -518,6 +709,35 @@ def build():
   .method {{ background: var(--tile-2); border: 1px dashed var(--line); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 1.6rem; font-size: 12px; color: var(--ink-2); line-height: 1.6; }}
   .method b {{ color: var(--ink); }}
 
+  /* ── Interactivity (hand-written, no library). On the light chart panels, so
+        controls use fixed light-appropriate colours in both themes. ── */
+  #fx-controls {{ margin-top: 1rem; }}
+  .fx-row {{ display: flex; align-items: center; gap: .8rem; }}
+  .fx-row label {{ font-family: var(--mono); font-size: 10.5px; color: #79818f; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }}
+  .fx-row input[type=range] {{ flex: 1; accent-color: #2f6bed; height: 4px; cursor: pointer; }}
+  .fx-w {{ font-family: var(--mono); font-size: 11px; color: #0f9d8f; min-width: 108px; }}
+  .fx-readout {{ display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }}
+  .fx-readout > div {{ display: flex; flex-direction: column; }}
+  .fx-readout .k {{ font-family: var(--mono); font-size: 10px; color: #79818f; text-transform: uppercase; letter-spacing: .05em; }}
+  .fx-readout b {{ font-family: var(--mono); font-size: 1.4rem; font-weight: 500; color: #171b24; font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 3px; }}
+  .fx-readout small {{ font-size: 10px; color: #79818f; }}
+  #fx-controls.at-min .fx-readout b {{ color: #0b7d72; }}
+
+  .chart-mount {{ position: relative; }}
+  .chart-legend {{ margin-bottom: 2px; }}
+  .chart-svg {{ position: relative; }}
+  .fx-pt {{ cursor: pointer; }}
+  .chart-filters {{ display: flex; gap: 4px; margin-bottom: .6rem; }}
+  .chart-filters button {{ font-family: var(--mono); font-size: 11px; color: #79818f; background: #f4f6f9; border: 1px solid #dde1e8; border-radius: 6px; padding: 2px 10px; cursor: pointer; transition: color .15s, background .15s, border-color .15s; }}
+  .chart-filters button:hover {{ color: #171b24; }}
+  .chart-filters button.on {{ background: #e7eefe; border-color: #2f6bed; color: #1f52c9; }}
+  .chart-readout {{ position: absolute; top: 26px; right: 0; display: flex; gap: .7rem; align-items: center; background: #fff; border: 1px solid #dde1e8; border-radius: 8px; padding: 4px 10px; font-family: var(--mono); font-size: 11px; color: #4b5462; pointer-events: none; box-shadow: 0 2px 10px rgba(23,27,36,.08); }}
+  .chart-readout .d {{ color: #171b24; font-weight: 500; }}
+  .chart-readout span {{ display: inline-flex; align-items: center; gap: 4px; }}
+  .chart-readout i {{ width: 8px; height: 8px; border-radius: 2px; display: inline-block; }}
+  .chart-readout b {{ color: #171b24; }}
+  .xh-catch {{ cursor: crosshair; }}
+
   @media (max-width: 820px) {{
     .tiles, .grid2, .toolgrid {{ grid-template-columns: 1fr; }}
     .flow {{ flex-direction: column; }}
@@ -548,7 +768,7 @@ def build():
       pipeline built end to end for the study, which reruns after every market close.</p>
     {flow}
     <div class="chips" style="margin-top:1.6rem">
-      <span class="chip">Python</span><span class="chip">pandas · numpy</span><span class="chip">SQL · SQLite</span><span class="chip">GitHub Actions</span><span class="chip">pure-SVG dataviz</span>
+      <span class="chip">Python</span><span class="chip">pandas · numpy</span><span class="chip">SQL · SQLite</span><span class="chip">GitHub Actions</span><span class="chip">interactive SVG</span>
     </div>
     <div class="meta-line">
       real data · ICE futures &nbsp;·&nbsp; coffee KC=F · cotton CT=F &nbsp;·&nbsp; {d0} → {d1}
@@ -580,7 +800,8 @@ def build():
         risk than either asset alone.</div>
     </div>
     <div class="panel hero-panel">
-      {frontier_svg}
+      <div id="fx-frontier">{frontier_svg}</div>
+      <div id="fx-controls"></div>
       {table}
     </div>
 
@@ -612,12 +833,17 @@ def build():
       <div class="panel">
         <h3 class="pt">Price paths — coffee vs cotton (shared US¢/lb scale)</h3>
         <div class="cap">Coffee's rally drives its high return and high risk; cotton stays flat and low-volatility.</div>
-        {leg_price}{price}
+        <div class="chart-mount" data-chart="price">
+          <div class="chart-legend">{leg_price}</div>
+          <div class="chart-svg">{price}</div>
+        </div>
       </div>
       <div class="panel">
         <h3 class="pt">Rolling 63-day correlation of daily returns</h3>
         <div class="cap">Hovers near zero throughout — the diversification assumption holds over time.</div>
-        {corr}
+        <div class="chart-mount" data-chart="corr">
+          <div class="chart-svg">{corr}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -652,6 +878,9 @@ def build():
     </p>
   </div>
 </footer>
+
+<script type="application/json" id="viz-data">{viz_json}</script>
+<script>{VIZ_JS}</script>
 
 </body>
 </html>"""

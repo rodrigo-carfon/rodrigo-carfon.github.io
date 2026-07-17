@@ -1,3 +1,0 @@
-relationship f0000000-0000-0000-0000-000000000001
-	fromColumn: Prices.date
-	toColumn: Calendar.Date

@@ -55,4 +55,4 @@ pure SVG from Python, no chart library.
 ---
 
 The home page started from [evanca/quick-portfolio](https://github.com/evanca/quick-portfolio)
-(Minimal theme, CC0). Nothing of it remains.
+(Minimal theme, CC0); none of its markup or styling remains.

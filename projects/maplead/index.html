@@ -144,17 +144,17 @@
     <div class="eyebrow">case study · ingestion pipeline</div>
     <h1>Turning an unstructured<br>public source into a<br><em>scored, schema'd dataset</em>.</h1>
     <p class="lead">
-      MapLead takes a plain search — a business category and a city — and returns a structured
-      dataset: 14 fields per business, a sample of reviews, the marketing pixels each one runs,
-      and a transparent 0–100 score. Playwright does the reading, a heuristic does the ranking,
-      and the whole thing runs async on a free-tier box that gives it 512 MB to work with.
+      MapLead takes a search — a business category and a city — and returns a structured
+      dataset: 14 fields per business, a sample of reviews, the marketing pixels each site runs,
+      and a transparent 0–100 score. Playwright handles extraction, an additive heuristic handles
+      ranking, and the pipeline runs asynchronously within a 512 MB free-tier instance.
     </p>
     <div class="stat-row">
       <div class="stat"><span class="n">5</span><span class="l">stage<br>pipeline</span></div>
       <div class="stat"><span class="n">14</span><span class="l">fields per<br>business</span></div>
       <div class="stat"><span class="n">9</span><span class="l">pixel<br>detectors</span></div>
       <div class="stat"><span class="n">202</span><span class="l">accepted — the work<br>runs in background</span></div>
-      <div class="stat"><span class="n">512 MB</span><span class="l">the box it<br>runs on</span></div>
+      <div class="stat"><span class="n">512 MB</span><span class="l">memory available<br>to a run</span></div>
     </div>
   </div>
 </section>
@@ -162,11 +162,11 @@
 <!-- ══ 2 — ARCHITECTURE ═══════════════════════════════════════════════════ -->
 <section id="architecture">
   <div class="container">
-    <h2>Five stages, end to end.</h2>
+    <h2>Pipeline architecture</h2>
     <p>
-      Every run is the same pipeline. A FastAPI endpoint validates the request, hands the job to a
-      background worker and returns immediately; the worker walks the five stages and mails the
-      result out when it is done.
+      Every run follows the same pipeline. A FastAPI endpoint validates the request, hands the job
+      to a background worker and returns immediately; the worker executes the five stages and emails
+      the result on completion.
     </p>
 
     <div class="pipeline">
@@ -198,7 +198,7 @@
 
     <h3 class="mt-lg">The contract</h3>
     <p class="note">
-      One endpoint. The 202 is the interesting part: the response is an acknowledgement, not a result.
+      One endpoint. The response is an acknowledgement rather than a result: no scraping has run when it returns.
     </p>
 
     <div class="code-block">
@@ -221,7 +221,7 @@
 
     <h3 class="mt-lg">Decisions &amp; constraints</h3>
     <p class="note">
-      Most of the design here was forced by the box it runs on. That turned out to be the useful part.
+      The hosting constraints drove most of the decisions below.
     </p>
 
     <div class="decisions">
@@ -230,11 +230,11 @@
         <div class="decision-key">async, not<br>request/response</div>
         <div>
           <p>
-            A run takes minutes, not milliseconds. The endpoint validates, queues the job on
-            FastAPI's <span class="inline-code">BackgroundTasks</span> and answers
-            <span class="inline-code">202</span> straight away — holding an HTTP request open for
-            five minutes would be timed out by every proxy between here and the client. The result
-            arrives by email because email is a queue someone already checks.
+            A run takes minutes. The endpoint validates the request, queues the job on FastAPI's
+            <span class="inline-code">BackgroundTasks</span> and returns
+            <span class="inline-code">202</span> immediately: holding an HTTP request open for five
+            minutes would exceed standard proxy and gateway timeouts. Results are delivered by email,
+            which avoids both a polling endpoint and any client-side session.
           </p>
         </div>
       </div>
@@ -244,7 +244,7 @@
         <div>
           <p>
             The free tier blocks outbound SMTP connections, so delivery goes through Brevo's HTTP
-            API instead. A hosting constraint quietly picked the transport.
+            API instead.
           </p>
         </div>
       </div>
@@ -253,10 +253,10 @@
         <div class="decision-key">recycle the browser<br>every 3 businesses</div>
         <div>
           <p>
-            Chromium's memory footprint grows across a run. On a 512 MB box that is the difference
-            between finishing and being OOM-killed halfway, so the browser is torn down and rebuilt
-            every third business. Low-resource Chromium flags are on in Docker and off on a desktop,
-            where <span class="inline-code">--single-process</span> crashes it.
+            Chromium's memory footprint grows over the course of a run. Within a 512 MB limit that
+            risks the process being OOM-killed before the job completes, so the browser is torn down
+            and rebuilt every third business. Low-resource Chromium flags are enabled in Docker and
+            disabled on desktop, where <span class="inline-code">--single-process</span> causes a crash.
           </p>
         </div>
       </div>
@@ -266,8 +266,8 @@
         <div>
           <p>
             A 90-second ceiling per business, set from a benchmark where the typical page took ~12 s
-            and the worst case landed near 15 s. Past the ceiling the business is skipped rather than
-            allowed to block the job — one unresponsive profile should cost you one row, not the run.
+            and the worst case near 15 s. Past the ceiling the business is skipped rather than allowed
+            to block the job, limiting the cost of an unresponsive profile to a single missing row.
           </p>
         </div>
       </div>
@@ -277,8 +277,7 @@
         <div>
           <p>
             The API's hard limits are 100 businesses and 100 reviews. The public demo below pins both
-            to five, so a stranger's run stays inside what the free tier can serve without pushing
-            everyone else into a cold start.
+            to five, keeping each run within what the free tier can serve concurrently.
           </p>
         </div>
       </div>
@@ -290,10 +289,10 @@
 <!-- ══ 3 — SCHEMA & SCORING ═══════════════════════════════════════════════ -->
 <section id="schema">
   <div class="container">
-    <h2>What a run actually returns.</h2>
+    <h2>Output schema</h2>
     <p>
-      Two CSVs. Everything is read from public profiles except the two computed columns, which are
-      where the raw scrape turns into something you can sort by.
+      Two CSVs. Every field is read from a public profile except the two computed columns, which are
+      derived at insertion time and make the result sortable by opportunity.
     </p>
 
     <p class="schema-cap">businesses.csv — 14 fields</p>
@@ -329,8 +328,9 @@
     <h3 class="mt-lg">Pixel detection</h3>
     <p class="note">
       Each business site is fetched and its HTML matched against nine detectors, each keyed on
-      specific inline-install signatures rather than a loose brand string — the point is to avoid
-      false positives, not to catch every exotic install.
+      specific inline-install signatures rather than a loose brand string. The signatures are
+      deliberately narrow: the trade-off accepts missing non-standard installations in order to
+      avoid false positives.
     </p>
     <div class="chips detectors">
       <span class="chip">Meta Pixel</span><span class="chip">Google Analytics</span><span class="chip">Google Tag Manager</span><span class="chip">Google Ads</span><span class="chip">TikTok Pixel</span><span class="chip">LinkedIn Insight</span><span class="chip">Hotjar</span><span class="chip">Pinterest Tag</span><span class="chip">Microsoft Clarity</span>
@@ -338,8 +338,8 @@
 
     <h3 class="mt-lg">The 0–100 heuristic</h3>
     <p class="note">
-      Four additive rules, evaluated as each business is inserted. Deliberately transparent — every
-      score can be read straight back off the row that produced it.
+      Four additive rules, evaluated as each business is inserted. The weighting is transparent:
+      every score can be reconstructed from the row that produced it.
     </p>
 
     <div class="score-rules">
@@ -352,22 +352,22 @@
     <div class="tiers">
       <div class="tier hot">
         <div class="t-name">0 — 40 · hot lead</div>
-        <div class="t-desc">Little to no online presence. The gap is the opportunity.</div>
+        <div class="t-desc">Little to no online presence — the highest-priority segment for outreach.</div>
       </div>
       <div class="tier mid">
         <div class="t-name">41 — 70 · established</div>
-        <div class="t-desc">Basic presence, with obvious room to improve.</div>
+        <div class="t-desc">Basic presence, with clear room to improve.</div>
       </div>
       <div class="tier bench">
         <div class="t-name">71 — 100 · benchmark</div>
-        <div class="t-desc">Digitally strong — a reference point, or a competitor to watch.</div>
+        <div class="t-desc">Digitally strong — a reference point, or a competitor to monitor.</div>
       </div>
     </div>
 
     <div class="callout">
       <p>
-        The score is what turns a raw scrape into something ordered. Sort ascending and you get a
-        worklist; sort descending and you get the segment's benchmarks. Same data, one column.
+        The score is what makes the scrape actionable: sorted ascending it gives a prioritized
+        worklist, sorted descending it gives the segment's benchmarks.
       </p>
     </div>
   </div>
@@ -376,17 +376,16 @@
 <!-- ══ 4 — LIVE DEMO ══════════════════════════════════════════════════════ -->
 <section id="demo" class="demo-section">
   <div class="container">
-    <h2>Run the pipeline yourself</h2>
+    <h2>Run the pipeline</h2>
     <div class="demo-wrap">
       <div class="demo-intro">
         <p>
-          This is the actual pipeline described above, not a mockup. Enter a category and a city and
-          it runs the five stages live, then emails you the two CSVs — scores, pixels and reviews
-          included.
+          This runs the pipeline described above against live data. Enter a category and a city, and
+          the five stages execute and email you the two CSVs — scores, pixels and reviews included.
         </p>
         <ul>
           <li>Any category + city (e.g. <em>dental clinics miami</em>)</li>
-          <li>Takes <strong>~5 minutes</strong> — the free-tier box may be cold-starting</li>
+          <li>Takes <strong>~5 minutes</strong>; the free-tier instance may need to cold-start</li>
           <li>Check <strong>spam</strong> if the email doesn't show up</li>
         </ul>
       </div>

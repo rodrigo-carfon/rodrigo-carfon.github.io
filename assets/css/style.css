@@ -50,7 +50,7 @@ a { color: var(--teal); }
 
 img { max-width: 100%; height: auto; display: block; }
 
-/* Every number on this site is compared against another number. */
+/* Metrics are read against each other down a column — keep the digits aligned. */
 .num, .stat .n, table, .tabular { font-variant-numeric: tabular-nums; }
 
 /* ── Layout ─────────────────────────────────────────────────────────────── */

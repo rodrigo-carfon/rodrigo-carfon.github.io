@@ -249,8 +249,8 @@ def frontier_thumb(fr, w=520, h=260, pad=22):
 
     Generated rather than screenshotted so the thumbnail cannot drift from the
     study it points at — neither its palette nor its numbers. No axes or labels:
-    at card size it has to read as a silhouette, and the curve bending left is
-    the whole story anyway.
+    at card size only the shape of the curve is legible, and the leftward bend is
+    what the study is about.
     """
     pts, mv, a = fr["points"], fr["min_var"], fr["assets"]
     xs_v = [p["risk"] for p in pts]
@@ -324,7 +324,7 @@ def asset_tiles(fr):
           <div><span>Return p.a.</span><b>{kc['ret']:.1f}%</b></div>
           <div><span>Risk (vol) p.a.</span><b>{kc['risk']:.1f}%</b></div>
         </div>
-        <p class="tile-note">The high-octane leg — a historic rally over the window, and the widest daily swings.</p>
+        <p class="tile-note">The higher-return, higher-risk asset — a sustained rally over the window, with the widest daily swings.</p>
       </div>
       <div class="tile">
         <div class="tile-h"><span class="dot" style="background:{COL['CT=F']}"></span>
@@ -333,20 +333,20 @@ def asset_tiles(fr):
           <div><span>Return p.a.</span><b>{ct['ret']:.1f}%</b></div>
           <div><span>Risk (vol) p.a.</span><b>{ct['risk']:.1f}%</b></div>
         </div>
-        <p class="tile-note">Traded sideways — little return to show, but the calmer of the two series.</p>
+        <p class="tile-note">Traded sideways: minimal return over the period, but the lower-volatility series.</p>
       </div>
       <div class="tile accent">
         <div class="tile-h"><span class="dot" style="background:{TEAL}"></span>
           <b>Correlation</b><small>daily returns</small></div>
         <div class="tile-big">{fr['corr']:.2f}</div>
         <p class="tile-note">Effectively zero — the two markets move independently. This is the
-          ingredient that lets diversification cancel risk out.</p>
+          condition under which diversification reduces portfolio risk.</p>
       </div>"""
 
 
 def flow_strip():
-    """The pipeline, compressed to one strip. Sits in the hero: for this portfolio
-    the pipeline is the point and the frontier is the payload it carries."""
+    """The pipeline, compressed to one strip. Sits in the hero: the pipeline is the
+    subject of this case study, and the frontier is what it produces."""
     return """
       <div class="flow">
         <span class="fbox">Yahoo Finance<small>ICE futures · KC=F / CT=F</small></span><span class="farr">→</span>
@@ -375,8 +375,8 @@ def tools_section():
          "DAX measures — the same study, delivered through a BI tool."),
         ("GitHub Actions", "scheduled automation",
          "A cron workflow runs the pipeline after every ICE close (weekdays), commits the "
-         "refreshed data and redeploys this page via GitHub Pages — the study updates "
-         "itself with zero servers."),
+         "refreshed data and redeploys this page via GitHub Pages — the study refreshes with "
+         "no server to maintain."),
     ]
     cards = "".join(
         f"""<div class="tool">
@@ -582,8 +582,8 @@ def build():
     <h1>The efficient frontier of<br><em>coffee &amp; cotton</em>.</h1>
     <p class="lead">Harry Markowitz's insight (1952): a portfolio's risk is not the average of its
       parts — when assets barely move together, blending them cancels risk out. This study applies
-      that lens to two real ICE commodities and locates the mix that minimizes risk. It rides on a
-      pipeline built end to end for it, which reruns itself after every close.</p>
+      that lens to two real ICE commodities and locates the mix that minimizes risk. It runs on a
+      pipeline built end to end for the study, which reruns after every market close.</p>
     {flow}
     <div class="chips" style="margin-top:1.75rem">
       <span class="chip">Python</span><span class="chip">pandas · numpy</span><span class="chip">SQL · SQLite</span><span class="chip">Power BI · DAX</span><span class="chip">GitHub Actions</span><span class="chip">pure-SVG dataviz</span>
@@ -643,7 +643,7 @@ def build():
     <div class="grid2">
       <div class="panel">
         <h3 class="pt">Price paths — coffee vs cotton (shared US¢/lb scale)</h3>
-        <div class="cap">Coffee's rally drives its high return &amp; high risk; cotton stays flat &amp; calm.</div>
+        <div class="cap">Coffee's rally drives its high return and high risk; cotton stays flat and low-volatility.</div>
         {leg_price}{price}
       </div>
       <div class="panel">
@@ -658,8 +658,8 @@ def build():
 <section id="build">
   <div class="container">
     <div class="step"><span class="n">4</span><h2>How this study was built</h2>
-      <div class="sub">A production-shaped data pipeline, not a notebook: automated capture, a relational
-        store, and two delivery front-ends from the same data.</div>
+      <div class="sub">A production-shaped data pipeline: automated capture, a relational store, and
+        two delivery front-ends from the same data.</div>
     </div>
     {tools}
 

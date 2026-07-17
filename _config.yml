@@ -1,11 +1,22 @@
 title: Rodrigo Carvalho
-description: >
-  Data Analyst · BI &amp; Marketing Analytics · Data Science<br>
-  Statistician (UNICAMP) building dashboards, automation pipelines, and ML-powered tools.<br><br>
-  Python · SQL · Power BI · n8n · Azure · Docker<br><br>
-  <a href="https://www.linkedin.com/in/rodrigo-fonseca-de-carvalho-0a50241b0/">LinkedIn</a> &nbsp;·&nbsp; <a href="https://github.com/rodrigo-carfon">GitHub</a>
-  
-remote_theme: pages-themes/minimal@v0.2.0
+author: Rodrigo Carvalho
+lang: en-US
+url: https://rodrigo-carfon.github.io
+
+# Plain text, ~140 chars: this is the <meta name="description"> and nothing else.
+# The hero lives in index.md.
+description: >-
+  Statistician (UNICAMP) building data pipelines — ingestion, orchestration,
+  modeling and delivery with Python, SQL, n8n, Docker and Power BI.
+
+# jekyll-seo-tag is NOT in the GitHub Pages default plugin set. It only resolved
+# before because the (now removed) remote theme pulled it in. {% seo %} in
+# _layouts/default.html fails the build without this line.
 plugins:
-- jekyll-remote-theme
-google_analytics: UA-000000-0 # your Google Analytics tracking ID here
+  - jekyll-seo-tag
+
+# The ETL project is browsable on GitHub; no need to serve its .py/.db/.pbip.
+exclude:
+  - commodity-risk-dashboard/
+  - README.md
+  - LICENSE

@@ -1,0 +1,225 @@
+---
+layout: default
+title: Rodrigo Carvalho
+---
+
+<section class="hero">
+<div class="container">
+<div class="eyebrow">campinas, brazil · data &amp; analytics engineering</div>
+<h1>I build the <em>pipelines</em><br>behind the dashboards.</h1>
+<p class="lead">
+Statistician (UNICAMP). Three years wiring up the layer most people never see —
+scrapers, RPA bots, API integrations and scheduled workflows that collect,
+validate and land data where the analysis can actually start.
+</p>
+<div class="stat-row">
+<div class="stat"><span class="n">3+</span><span class="l">years shipping<br>data systems</span></div>
+<div class="stat"><span class="n">80%</span><span class="l">less collection time<br>on pricing scrapers</span></div>
+<div class="stat"><span class="n">5</span><span class="l">organizations<br>built for</span></div>
+<div class="stat"><span class="n">B.Sc.</span><span class="l">Statistics<br>UNICAMP</span></div>
+</div>
+</div>
+</section>
+
+<section id="stack">
+<div class="container">
+<div class="section-label">stack, by layer</div>
+<h2>Grouped the way the data moves.</h2>
+<p class="lead">Not a logo wall — the tools I reach for at each stage of getting data from a source it was never meant to leave, to a place someone can ask questions of it.</p>
+
+<div class="rules">
+
+<div class="rule">
+<div class="rule-key">ingestion</div>
+<div class="rule-body">
+<div class="chips">
+<span class="chip">Python</span><span class="chip">requests</span><span class="chip">Selenium</span><span class="chip">Playwright</span><span class="chip">Automation 360</span><span class="chip">REST APIs</span><span class="chip">SAP extracts</span><span class="chip">yfinance</span>
+</div>
+<p class="rule-note">Most of the work starts here: getting data out of systems that were never built to hand it over — headless browsers, RPA bots, third-party APIs.</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key">storage</div>
+<div class="rule-body">
+<div class="chips">
+<span class="chip">SQL Server</span><span class="chip">PostgreSQL</span><span class="chip">MySQL</span><span class="chip">Oracle</span><span class="chip">SQLite</span>
+</div>
+<p class="rule-note">Relational, mostly. Schema design and modeling, plus the query-performance work that shows up once the tables stop being small.</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key">transformation</div>
+<div class="rule-body">
+<div class="chips">
+<span class="chip">pandas</span><span class="chip">numpy</span><span class="chip">SQL: window fns · CTEs</span><span class="chip">Power Query</span><span class="chip">DAX</span><span class="chip">dimensional modeling</span>
+</div>
+<p class="rule-note">Star schemas, incremental logic, and the statistics layer on top — regression, ANOVA, time series.</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key">orchestration<br>&amp; runtime</div>
+<div class="rule-body">
+<div class="chips">
+<span class="chip on">n8n</span><span class="chip on">Make</span><span class="chip on">Node-RED</span><span class="chip on">GitHub Actions</span><span class="chip on">Docker</span><span class="chip on">Azure</span>
+</div>
+<p class="rule-note">Scheduling, retries, and the glue between steps. This is where a script stops being a script.</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key">serving</div>
+<div class="rule-body">
+<div class="chips">
+<span class="chip">Power BI</span><span class="chip">semantic models</span><span class="chip">DAX</span><span class="chip">FastAPI</span><span class="chip">CSV / JSON exports</span><span class="chip">email delivery</span>
+</div>
+<p class="rule-note">A dashboard is one delivery target. An API, a scheduled file drop or an inbox is another.</p>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<section id="work">
+<div class="container">
+<div class="section-label">selected work</div>
+<h2>Two systems, running live.</h2>
+<p class="lead">Both are clickable — one refreshes itself on a schedule, the other runs its real pipeline on demand.</p>
+
+<div class="work">
+
+<div class="work-item">
+<a class="work-thumb" href="/projects/coffee-cotton-frontier/">
+<img src="{{ '/images/COFFE.png' | relative_url }}" alt="Risk-return efficient frontier chart of coffee and cotton portfolios">
+</a>
+<div>
+<div class="work-meta">python · sqlite · power bi · github actions · self-refreshing</div>
+<h3><a href="/projects/coffee-cotton-frontier/">Coffee &amp; Cotton — a market-risk pipeline that updates itself</a></h3>
+<p>
+Yahoo Finance → Python ETL → SQLite → two delivery front-ends from the same data: a
+versioned Power BI semantic model and a pure-SVG page. A cron workflow reruns the pipeline
+after each ICE close and commits the refreshed artifacts, so there is no server to maintain.
+The analysis riding on top is a Markowitz efficient frontier on real ICE futures.
+</p>
+<div class="chips">
+<span class="chip">Python</span><span class="chip">pandas</span><span class="chip">SQL</span><span class="chip">Power BI</span><span class="chip">GitHub Actions</span>
+</div>
+<a class="work-link" href="/projects/coffee-cotton-frontier/">read the case study →</a>
+</div>
+</div>
+
+<div class="work-item">
+<a class="work-thumb" href="/projects/maplead/">
+<img src="{{ '/images/maplead.png' | relative_url }}" alt="MapLead local business scraper dashboard">
+</a>
+<div>
+<div class="work-meta">python · fastapi · playwright · async jobs · live demo</div>
+<h3><a href="/projects/maplead/">MapLead — a five-stage ingestion pipeline behind an API</a></h3>
+<p>
+Turns an unstructured public source into a scored, schema'd dataset. Playwright scrapes
+Google Maps, an enrichment stage probes each business site for tracking pixels, a transparent
+0–100 heuristic scores it, and the run lands as a spreadsheet. Async by design: a run takes
+about five minutes on free-tier hardware, so the API accepts the job and delivers by email
+rather than holding the request open.
+</p>
+<div class="chips">
+<span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">Playwright</span><span class="chip">REST</span>
+</div>
+<a class="work-link" href="/projects/maplead/">run the live demo →</a>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<section id="experience">
+<div class="container">
+<div class="section-label">experience</div>
+<h2>What I built, where.</h2>
+
+<div class="rules">
+
+<div class="rule">
+<div class="rule-key"><span class="when">jul 2024 — now</span></div>
+<div class="rule-body">
+<div class="rule-title">Marketing Data Analyst <span class="org">· Pefaz</span></div>
+<p class="rule-desc">
+Built the lead-capture pipeline end to end: n8n and Make workflows that collect, validate and
+enrich prospect data from multiple channels, then create and assign CRM records in real time
+through the HubSpot and RD Station REST APIs. Predictive lead scoring and A/B analysis
+(regression, ANOVA) run on top of it; Power BI reports conversion, pipeline velocity, cost per
+lead and campaign ROI off the same data.
+</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key"><span class="when">sep 2023 — jul 2024</span></div>
+<div class="rule-body">
+<div class="rule-title">Data Analyst, Pricing <span class="org">· GrupoSC</span></div>
+<p class="rule-desc">
+Automated the price-collection layer with Python and Selenium, cutting collection time by 80%,
+and merged SAP transactional extracts into the elasticity model senior leadership priced from.
+Delivered the real-time price tracking and competitive intelligence dashboards on top.
+</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key"><span class="when">may 2022 — apr 2023</span></div>
+<div class="rule-body">
+<div class="rule-title">BI Data Analyst <span class="org">· Catho</span></div>
+<p class="rule-desc">
+Stood up the market-intelligence scrapers feeding weekly competitive benchmarks, and rewrote
+the SQL underneath the job-marketplace KPIs for performance and scalability on large datasets.
+</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key"><span class="when">jul 2021 — jul 2022</span></div>
+<div class="rule-body">
+<div class="rule-title">Associate Software Engineer <span class="org">· Accenture Brazil</span></div>
+<p class="rule-desc">
+Automated critical business processes in Automation Anywhere (Automation 360) and built the
+pipelines carrying RPA output into SQL databases. Deployed PostgreSQL and Node-RED in Docker
+containers on Azure, improving pipeline orchestration and reliability.
+</p>
+</div>
+</div>
+
+<div class="rule">
+<div class="rule-key"><span class="when">oct 2020 — jun 2021</span></div>
+<div class="rule-body">
+<div class="rule-title">Data Science Intern <span class="org">· PlanD Data Intelligence</span></div>
+<p class="rule-desc">
+Time-series forecasting for sales planning and inventory optimization, and data mining for
+consumption patterns — on the relational databases I built and maintained in SQL.
+</p>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<section id="contact">
+<div class="container">
+<div class="section-label">contact</div>
+<h2>Open to conversations.</h2>
+<p class="lead">Campinas, São Paulo, Brazil. Fluent in English.</p>
+<div class="contact-links">
+<a href="mailto:rodrigo.carfon@gmail.com">rodrigo.carfon@gmail.com</a>
+<a href="https://www.linkedin.com/in/rodrigo-fonseca-de-carvalho-0a50241b0/">linkedin</a>
+<a href="https://github.com/rodrigo-carfon">github</a>
+</div>
+<p class="note mt-lg">
+B.Sc. Statistics, UNICAMP · Azure Fundamentals (AZ-900) · Azure AI Fundamentals (AI-900) ·
+Automation Anywhere Advanced RPA Professional
+</p>
+</div>
+</section>

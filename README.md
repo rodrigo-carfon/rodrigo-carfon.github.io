@@ -1,55 +1,58 @@
-## Developer Portfolio Landing Page Template
+# rodrigo-carfon.github.io
 
-### ⚠️ Project Discontinued ⚠️
+Source for my portfolio — **[rodrigo-carfon.github.io](https://rodrigo-carfon.github.io)**.
 
-**Note:** This project is no longer maintained and has been discontinued. No further updates or support will be provided. Feel free to fork the repository and make any necessary changes on your own.
+A Jekyll home page plus two standalone case studies, all sharing one stylesheet.
+
+## Layout
+
+```
+_config.yml                       # Jekyll config (jekyll-seo-tag only)
+_layouts/default.html             # shell for the home: nav, fonts, footer
+index.html                        # the home page
+assets/css/style.css              # the design system — every page links this one file
+
+projects/
+├── maplead/index.html            # case study — hand-written
+└── coffee-cotton-frontier/       # case study — GENERATED, do not hand-edit
+    └── index.html                #   rendered by commodity-risk-dashboard/build_dashboard.py
+
+commodity-risk-dashboard/         # the ETL behind the coffee & cotton study
+.github/workflows/                # the cron that reruns it after each ICE close
+pdf/                              # redirect stubs for the old URLs
+```
+
+Two things worth knowing before editing:
+
+- **`projects/coffee-cotton-frontier/index.html` is generated.** Hand-edits are overwritten the
+  next time the pipeline runs. Change [`commodity-risk-dashboard/build_dashboard.py`](commodity-risk-dashboard/build_dashboard.py)
+  instead — including the chart colours, which are constants at the top of that file.
+- **The project pages carry no Jekyll front matter**, deliberately: they contain zero Liquid, so
+  a plain static server renders them byte-identically to production, and previewing needs no Ruby.
+
+## Running it locally
+
+The project pages and the stylesheet need nothing but a static server:
+
+```bash
+python -m http.server 8000      # from the repo root
+# → localhost:8000/projects/maplead/
+# → localhost:8000/projects/coffee-cotton-frontier/
+```
+
+The home page is the only file with Liquid in it, so it needs Jekyll to render. There is no
+Gemfile here — GitHub Pages builds it on push. To preview it locally, install Ruby 3.1 with
+DevKit and add a Gemfile with `github-pages` and `webrick`.
+
+To rebuild the coffee & cotton study, see
+[`commodity-risk-dashboard/README.md`](commodity-risk-dashboard/README.md).
+
+## The stack
+
+Jekyll on GitHub Pages · plain CSS, no framework · DM Sans / DM Mono · charts pre-rendered as
+pure SVG from Python, no chart library.
 
 ---
 
-### Introduction
-
-Use this template if you need a quick developer / data science portfolio! Based on a Minimal Jekyll theme for GitHub Pages.
-
-### Installation
-
-See full step by step tutorial [on Medium](https://medium.com/@evanca/set-up-your-portfolio-website-in-less-than-10-minutes-with-github-pages-d0efa8ff56fd).
-___
-
-You can use the editor on GitHub to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Roadmap
-
-This project has been discontinued and is no longer actively maintained. No new features or fixes will be added. If you're interested in contributing, feel free to fork the repository and customize it to your needs.
-___
-
-### References
-
-[1] Jekyll theme "Minimal" for GitHub Pages: https://github.com/pages-themes/minimal (CC0 1.0 Universal License)
-<br>[2] Dummy photo via: https://pixabay.com/photos/man-male-adult-person-caucasian-1209494/ (Pixabay License)
-<br>[3] Dummy thumbnail image created by rawpixel.com: https://www.freepik.com/free-vector/set-elements-infographic_2807573.htm (Standard Freepik License)
+The home page started from [evanca/quick-portfolio](https://github.com/evanca/quick-portfolio)
+(Minimal theme, CC0). Nothing of it remains.

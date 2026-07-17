@@ -1,0 +1,64 @@
+name: Refresh commodity risk data
+
+# Automated data capture for the Coffee & Cotton market-risk dashboard.
+# Runs the ETL pipeline on a schedule, regenerates the dashboard and the
+# Power BI CSVs, and commits the refreshed artifacts back to the repo — GitHub
+# Pages then redeploys the live demo automatically. This is the "automation of
+# data capture" piece of the data-engineering project: no server to maintain,
+# the schedule and every run are visible in the repo's Actions tab.
+
+on:
+  schedule:
+    # 22:00 UTC on weekdays — after the ICE New York session close.
+    # (cron in Actions is UTC; markets are closed on weekends.)
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch: {}   # allow manual runs from the Actions tab
+
+# Let the job push the refreshed data back to the repository.
+permissions:
+  contents: write
+
+# Avoid overlapping runs if a previous one is still in flight.
+concurrency:
+  group: refresh-commodities
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: commodity-risk-dashboard
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: commodity-risk-dashboard/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ETL pipeline (extract → transform → load)
+        run: python pipeline.py
+
+      - name: Rebuild the published case study
+        run: python build_dashboard.py
+
+      - name: Commit refreshed artifacts (only if changed)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # build_dashboard.py renders straight to the public URL, so the page it
+          # writes lives outside this job's working-directory.
+          git add data/ ../projects/coffee-cotton-frontier/index.html
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+          else
+            git commit -m "chore: daily commodity data refresh [skip ci]"
+            git push
+          fi

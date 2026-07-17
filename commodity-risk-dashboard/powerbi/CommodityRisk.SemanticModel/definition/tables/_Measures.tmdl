@@ -1,0 +1,81 @@
+/// Measures-only table (the single hidden column is just a placeholder so the
+/// table can exist). All the market-risk DAX lives here — the BI equivalent of
+/// the metrics pipeline.py computes in Python.
+table _Measures
+	lineageTag: a5000000-0000-0000-0000-0000000000f5
+
+	measure 'Last Price' = CALCULATE ( LASTNONBLANKVALUE ( Prices[date], MAX ( Prices[close] ) ) )
+		formatString: 0.00
+		lineageTag: a5000000-0000-0000-0000-000000000101
+
+	measure 'Day Change %' = ```
+			VAR today = [Last Price]
+			VAR yesterday =
+			    CALCULATE ( [Last Price], DATEADD ( 'Calendar'[Date], -1, DAY ) )
+			RETURN
+			    DIVIDE ( today - yesterday, yesterday )
+			```
+		formatString: 0.00%
+		lineageTag: a5000000-0000-0000-0000-000000000102
+
+	measure 'Annual Volatility' = CALCULATE ( LASTNONBLANKVALUE ( Prices[date], MAX ( Prices[vol_21d] ) ) )
+		formatString: 0.0%
+		lineageTag: a5000000-0000-0000-0000-000000000103
+
+	measure 'Current Drawdown' = CALCULATE ( LASTNONBLANKVALUE ( Prices[date], MAX ( Prices[drawdown] ) ) )
+		formatString: 0.0%
+		lineageTag: a5000000-0000-0000-0000-000000000104
+
+	measure 'Risk Flag' = ```
+			VAR v = [Annual Volatility]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        v >= 0.45, "🔴 BREACH",
+			        v >= 0.30, "🟠 WARN",
+			        "🟢 OK"
+			    )
+			```
+		lineageTag: a5000000-0000-0000-0000-000000000105
+
+	measure 'Risk Color' = ```
+			VAR v = [Annual Volatility]
+			RETURN
+			    SWITCH ( TRUE (), v >= 0.45, "#DC2626", v >= 0.30, "#D97706", "#16A34A" )
+			```
+		lineageTag: a5000000-0000-0000-0000-000000000106
+
+	measure 'Contract Notional US$' = ```
+			VAR lbs = IF ( SELECTEDVALUE ( Prices[ticker] ) = "KC=F", 37500, 50000 )
+			RETURN
+			    [Last Price] / 100 * lbs
+			```
+		formatString: \$#,0
+		lineageTag: a5000000-0000-0000-0000-000000000107
+
+	measure '52-Week High' = CALCULATE ( MAX ( Prices[close] ), DATESINPERIOD ( 'Calendar'[Date], MAX ( 'Calendar'[Date] ), -52, WEEK ) )
+		formatString: 0.00
+		lineageTag: a5000000-0000-0000-0000-000000000108
+
+	measure 'Distance From High %' = DIVIDE ( [Last Price] - [52-Week High], [52-Week High] )
+		formatString: 0.0%
+		lineageTag: a5000000-0000-0000-0000-000000000109
+
+	measure 'Days In Breach' = CALCULATE ( COUNTROWS ( Prices ), Prices[risk_flag] = "BREACH" )
+		formatString: #,0
+		lineageTag: a5000000-0000-0000-0000-00000000010a
+
+	column _
+		isHidden
+		dataType: string
+		lineageTag: a5000000-0000-0000-0000-000000000001
+		summarizeBy: none
+		sourceColumn: [_]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source = ```
+				DATATABLE ( "_", STRING, { { "-" } } )
+				```

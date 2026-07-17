@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "CommodityRisk"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "3f9a1d20-7c4e-4b1a-9e2f-0a1b2c3d4e01"
+  }
+}

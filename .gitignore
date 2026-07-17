@@ -1,0 +1,22 @@
+.env
+__pycache__/
+*.pyc
+
+# Jekyll build output
+_site/
+.jekyll-cache/
+.sass-cache/
+Gemfile.lock
+
+# Spreadsheets and extracts are ignored by default — this repo is public and
+# scraped lead data must never land in it by accident.
+*.xlsx
+*.csv
+
+# ...except the commodity pipeline's artifacts, which the scheduled workflow
+# refreshes and commits: they feed the Power BI model and the published page.
+!commodity-risk-dashboard/data/commodities_powerbi.xlsx
+!commodity-risk-dashboard/data/prices.csv
+!commodity-risk-dashboard/data/correlation.csv
+!commodity-risk-dashboard/data/kpi_snapshot.csv
+!commodity-risk-dashboard/powerbi/manual-import/*.csv

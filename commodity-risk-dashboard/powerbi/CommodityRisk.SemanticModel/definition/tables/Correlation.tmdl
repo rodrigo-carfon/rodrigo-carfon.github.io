@@ -1,0 +1,33 @@
+/// Rolling 63-day correlation between coffee and cotton daily returns, over time.
+/// Loaded from data/correlation.csv.
+table Correlation
+	lineageTag: a2000000-0000-0000-0000-0000000000f2
+
+	column date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: a2000000-0000-0000-0000-000000000001
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+	column corr_63d
+		dataType: double
+		formatString: 0.00
+		lineageTag: a2000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: corr_63d
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Correlation = m
+		mode: import
+		source = ```
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "correlation.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"date", type date}, {"corr_63d", type number}})
+				in
+				    Typed
+				```

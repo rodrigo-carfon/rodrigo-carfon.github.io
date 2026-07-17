@@ -1,0 +1,7 @@
+/// Folder that holds the CSVs produced by pipeline.py (prices.csv, correlation.csv,
+/// kpi_snapshot.csv). Change this parameter if you move the repository — it is the
+/// single place the whole model reads from. Keep the trailing backslash.
+expression DataFolder = "C:\Users\rodri\OneDrive\Área de Trabalho\rodrigo-carfon.github.io\commodity-risk-dashboard\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 6a0b1c2d-0001-4a00-9000-000000000001
+
+	annotation PBI_ResultType = Text

@@ -14,12 +14,11 @@ Gemfile.lock
 *.csv
 
 # ...except the commodity pipeline's artifacts, which the scheduled workflow
-# refreshes and commits: they feed the Power BI model and the published page.
+# refreshes and commits: they are the data behind the published page.
 !commodity-risk-dashboard/data/commodities_powerbi.xlsx
 !commodity-risk-dashboard/data/prices.csv
 !commodity-risk-dashboard/data/correlation.csv
 !commodity-risk-dashboard/data/kpi_snapshot.csv
-!commodity-risk-dashboard/powerbi/manual-import/*.csv
 
 # Local render of the Jekyll home for previewing without Ruby.
 _home-preview.html

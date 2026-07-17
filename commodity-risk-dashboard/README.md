@@ -1,7 +1,7 @@
-# Coffee & Cotton — Market-Risk Dashboard
+# Coffee & Cotton — Market-Risk Pipeline
 
-**An end-to-end data project: real ICE futures prices → Python ETL → SQL → an interactive
-market-risk dashboard** for the two soft commodities coffee (KC) and cotton (CT).
+**An end-to-end data project: real ICE futures prices → Python ETL → SQL → an interactive,
+self-refreshing case study** for the two soft commodities coffee (KC) and cotton (CT).
 Everything runs on **real data** from ICE futures (via Yahoo Finance) — nothing synthetic.
 
 🔗 **[Live demo](https://rodrigo-carfon.github.io/projects/coffee-cotton-frontier/)** · refreshed by the scheduled workflow, no server
@@ -13,7 +13,7 @@ Everything runs on **real data** from ICE futures (via Yahoo Finance) — nothin
 ## What it does
 
 A risk desk trading physical commodities needs to answer three questions every day. This
-project turns raw daily prices into a dashboard that answers them at a glance:
+project turns raw daily prices into a page that answers them at a glance:
 
 1. **Where are we now?** — latest price and day change per commodity.
 2. **How risky is it?** — annualized volatility against governance limit bands
@@ -24,7 +24,7 @@ project turns raw daily prices into a dashboard that answers them at a glance:
 ## Stack & architecture
 
 ```
-GitHub Actions (cron, weekdays)          ← automated data capture / orchestration
+GitHub Actions (cron)                    ← automated data capture / orchestration
         │  runs the pipeline daily, commits the refreshed data back
         ▼
 Yahoo Finance (ICE futures)
@@ -33,23 +33,22 @@ Yahoo Finance (ICE futures)
    pipeline.py  ──►  Extract → Transform (risk metrics) → Load
         │
         ├─►  data/commodities.db           (SQLite: prices, daily_metrics, correlation, kpi_snapshot, v_latest_risk)
-        ├─►  data/commodities_powerbi.xlsx (Power BI-ready workbook)
-        ├─►  data/{prices,correlation,kpi_snapshot}.csv  (flat files for the Power BI model)
-        └─►  data/dashboard_data.json       (dashboard payload)
-                       │                                   │
-                       ▼                                   ▼
-              build_dashboard.py                   powerbi/CommodityRisk.pbip
-                       │                            (PBIP: star schema + DAX + report)
+        ├─►  data/{prices,correlation,kpi_snapshot}.csv  (flat-file exports)
+        ├─►  data/commodities_powerbi.xlsx (Excel export of the same data)
+        └─►  data/dashboard_data.json       (page payload)
+                       │
+                       ▼
+              build_dashboard.py
+                       │
                        ▼
    ../projects/coffee-cotton-frontier/index.html
-              (pure-SVG case study, no JS/CDN — rendered straight to its
-               public URL, so there is no copy step to forget)
+              (interactive SVG case study, no chart library — rendered straight
+               to its public URL, so there is no copy step to forget)
 ```
 
 **GitHub Actions** schedules the daily capture (see *Automation* below) · **Python**
 (pandas / numpy / yfinance) for the ETL · **SQL/SQLite** for storage and analytical queries ·
-**Power BI** (a versioned **PBIP** project — see *Power BI* below) as the BI front-end · a
-**dependency-free HTML/SVG** dashboard for the live demo.
+a **dependency-free, interactive HTML/SVG** page for the live demo.
 
 ## Automation (daily data capture)
 
@@ -57,28 +56,12 @@ The capture is orchestrated by **GitHub Actions** — no server to maintain, and
 visible in the repo's *Actions* tab:
 [`.github/workflows/refresh-commodities.yml`](../.github/workflows/refresh-commodities.yml).
 
-- **Schedule:** `cron: 0 22 * * 1-5` — 22:00 UTC on weekdays, after the ICE New York close
-  (plus a manual *Run workflow* button via `workflow_dispatch`).
+- **Schedule:** `cron: 25 15 * * *` — 15:25 UTC daily (plus a manual *Run workflow* button
+  via `workflow_dispatch`). Scheduled runs can be delayed by GitHub; the button runs it now.
 - **What it does:** installs deps → runs `pipeline.py` (real download, with a light retry
   since Yahoo Finance is intermittent) → runs `build_dashboard.py` → **commits the refreshed
   `data/` and the rendered case study back to the repo** only if something changed. GitHub
   Pages then redeploys the live demo automatically.
-
-## Power BI
-
-A ready-to-open **PBIP project** (Power BI Desktop, text-based / git-versioned) lives in
-[`powerbi/`](powerbi/):
-
-- `powerbi/CommodityRisk.pbip` — open this in Power BI Desktop (enable *Preview features →
-  Power BI Project (.pbip) save format*).
-- **Semantic model** (TMDL): a **star schema** — `Prices` fact + `Calendar` dimension —
-  imported from the `data/*.csv` files via a single `DataFolder` parameter, with all the
-  **DAX measures** (`Last Price`, `Day Change %`, `Annual Volatility`, `Current Drawdown`,
-  `Risk Flag`, `Days In Breach`, …).
-- **Report + theme** mirroring the HTML dashboard.
-- See [docs/powerbi-guide.md](docs/powerbi-guide.md) for the model, the DAX and the talking
-  points. **Note:** point the `DataFolder` parameter at your local `…/commodity-risk-dashboard/data`
-  folder (it defaults to the author's path) and *Refresh*.
 
 ## The metrics
 
@@ -115,18 +98,12 @@ projects/coffee-cotton-frontier/
 
 commodity-risk-dashboard/
 ├── pipeline.py             # ETL: extract → transform (risk metrics) → load
-├── build_dashboard.py      # renders the case study from the JSON payload
+├── build_dashboard.py      # renders the interactive case study from the JSON payload
 ├── queries.sql             # 10 commented SQL queries over the SQLite DB
 ├── requirements.txt
-├── data/                   # generated artifacts (SQLite DB, Power BI xlsx, CSVs, JSON)
-├── powerbi/                # Power BI project (PBIP): semantic model (TMDL) + report + theme
-│   ├── CommodityRisk.pbip
-│   ├── CommodityRisk.SemanticModel/
-│   ├── CommodityRisk.Report/
-│   └── theme/
+├── data/                   # generated artifacts (SQLite DB, CSV/Excel exports, JSON payload)
 └── docs/
     ├── domain-primer.md    # the domain + metrics, in plain language
-    ├── powerbi-guide.md    # the Power BI model, DAX and talking points
     └── screenshot.png
 ```
 

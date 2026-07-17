@@ -334,7 +334,7 @@ def latest_sessions(n=10):
             f"<td>{ct_c[i]:,.2f}</td><td>{chg(ct_c[i], ct_c[i-1])}</td></tr>")
 
     return f"""
-    <div class="sessions">
+    <div>
       <div class="sessions-head">
         <h3>Latest {n} sessions</h3>
         <span class="sessions-note">closing prices in US¢/lb · regenerated on every pipeline run</span>

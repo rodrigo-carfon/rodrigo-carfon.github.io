@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MapLead — a five-stage ingestion pipeline behind an API</title>
+<title>Google Maps business scraper — automated collection by category and region</title>
 <meta name="author" content="Rodrigo Carvalho">
-<meta name="description" content="A case study on MapLead: a five-stage ingestion pipeline that turns an unstructured public source into a scored, schema'd dataset. Python, FastAPI, Playwright, async jobs on a 512MB box.">
+<meta name="description" content="A case study on scraping Google Maps for business data by category and region: a five-stage pipeline in Python, FastAPI and Playwright, running asynchronously within a 512 MB instance.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MapLead — a five-stage ingestion pipeline behind an API">
-<meta property="og:description" content="Playwright scrapes, an enrichment stage probes for tracking pixels, a transparent 0-100 heuristic scores it, and the run lands as a spreadsheet. Async by design.">
+<meta property="og:title" content="Google Maps business scraper — automated collection by category and region">
+<meta property="og:description" content="Playwright reads each Google Maps profile, an enrichment stage probes the business site for tracking pixels, and a derived 0-100 heuristic summarizes digital presence. Async by design.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -141,13 +141,14 @@
 <!-- ══ 1 — OVERVIEW ═══════════════════════════════════════════════════════ -->
 <section class="hero">
   <div class="container">
-    <div class="eyebrow">case study · ingestion pipeline</div>
-    <h1>Turning an unstructured<br>public source into a<br><em>scored, schema'd dataset</em>.</h1>
+    <div class="eyebrow">case study · web scraping pipeline</div>
+    <h1>Scraping Google Maps<br>business data by<br><em>category and region</em>.</h1>
     <p class="lead">
-      MapLead takes a search — a business category and a city — and returns a structured
-      dataset: 14 fields per business, a sample of reviews, the marketing pixels each site runs,
-      and a transparent 0–100 score. Playwright handles extraction, an additive heuristic handles
-      ranking, and the pipeline runs asynchronously within a 512 MB free-tier instance.
+      Given a business category and a city, the pipeline queries Google Maps, opens every result
+      and returns a structured dataset: 14 fields per business, a sample of reviews, and the
+      tracking pixels each business site runs. A derived 0–100 heuristic summarizes how much
+      digital presence each one has. Playwright handles the extraction; the run is asynchronous,
+      inside a 512 MB free-tier instance.
     </p>
     <div class="stat-row">
       <div class="stat"><span class="n">5</span><span class="l">stage<br>pipeline</span></div>
@@ -292,7 +293,7 @@
     <h2>Output schema</h2>
     <p>
       Two CSVs. Every field is read from a public profile except the two computed columns, which are
-      derived at insertion time and make the result sortable by opportunity.
+      derived at insertion time.
     </p>
 
     <p class="schema-cap">businesses.csv — 14 fields</p>
@@ -338,8 +339,9 @@
 
     <h3 class="mt-lg">The 0–100 heuristic</h3>
     <p class="note">
-      Four additive rules, evaluated as each business is inserted. The weighting is transparent:
-      every score can be reconstructed from the row that produced it.
+      Four additive rules, evaluated as each business is inserted. The tier names are the literal
+      values the <span class="inline-code">digital_tier</span> column takes. The weighting is
+      transparent: every score can be reconstructed from the row that produced it.
     </p>
 
     <div class="score-rules">
@@ -352,22 +354,22 @@
     <div class="tiers">
       <div class="tier hot">
         <div class="t-name">0 — 40 · hot lead</div>
-        <div class="t-desc">Little to no online presence — the highest-priority segment for outreach.</div>
+        <div class="t-desc">Few of the four signals present — little to no online presence.</div>
       </div>
       <div class="tier mid">
         <div class="t-name">41 — 70 · established</div>
-        <div class="t-desc">Basic presence, with clear room to improve.</div>
+        <div class="t-desc">A basic digital footprint, missing at least one major signal.</div>
       </div>
       <div class="tier bench">
         <div class="t-name">71 — 100 · benchmark</div>
-        <div class="t-desc">Digitally strong — a reference point, or a competitor to monitor.</div>
+        <div class="t-desc">Strong across most signals — website, contactability and reputation.</div>
       </div>
     </div>
 
     <div class="callout">
       <p>
-        The score is what makes the scrape actionable: sorted ascending it gives a prioritized
-        worklist, sorted descending it gives the segment's benchmarks.
+        The score is a derived column: it collapses four independent signals into one sortable
+        measure, which is what lets a flat scrape of a category be ranked and compared.
       </p>
     </div>
   </div>
@@ -376,12 +378,13 @@
 <!-- ══ 4 — LIVE DEMO ══════════════════════════════════════════════════════ -->
 <section id="demo" class="demo-section">
   <div class="container">
-    <h2>Run the pipeline</h2>
+    <h2>Run the scraper</h2>
     <div class="demo-wrap">
       <div class="demo-intro">
         <p>
-          This runs the pipeline described above against live data. Enter a category and a city, and
-          the five stages execute and email you the two CSVs — scores, pixels and reviews included.
+          This runs the pipeline described above against live data. Enter a business category and a
+          city, and the five stages execute and email you the two CSVs — fields, scores, pixels and
+          reviews included.
         </p>
         <ul>
           <li>Any category + city (e.g. <em>dental clinics miami</em>)</li>
@@ -391,10 +394,10 @@
       </div>
 
       <form class="demo-form" id="scrapeForm">
-        <label for="query">What are you looking for?</label>
+        <label for="query">Business category and city</label>
         <input type="text" id="query" name="query" placeholder="dental clinics miami" required minlength="2" maxlength="200">
 
-        <label for="email">Where should the results go?</label>
+        <label for="email">Email for the results</label>
         <input type="email" id="email" name="email" placeholder="you@example.com" required>
 
         <div class="demo-scope">
@@ -402,7 +405,7 @@
           <span>Fixed scope: <strong>5 businesses × 5 reviews</strong> — kept small so the free box stays responsive.</span>
         </div>
 
-        <button type="submit" class="demo-btn" id="submitBtn">▶ &nbsp;Run MapLead</button>
+        <button type="submit" class="demo-btn" id="submitBtn">▶ &nbsp;Run the scraper</button>
         <div class="form-msg" id="formMsg"></div>
         <div class="form-hint">Results go only to the email you provide. Nothing is stored.</div>
       </form>
@@ -464,7 +467,7 @@ form.addEventListener('submit', async (e) => {
     showMsg('Could not reach the server — it may be waking up. Try again in a moment.', 'err');
   } finally {
     btn.disabled = false;
-    btn.textContent = '▶  Run MapLead';
+    btn.textContent = '▶  Run the scraper';
   }
 });
 </script>

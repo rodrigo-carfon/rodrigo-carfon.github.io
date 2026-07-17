@@ -13,7 +13,8 @@ index.html                        # the home page
 assets/css/style.css              # the design system — every page links this one file
 
 projects/
-├── maplead/index.html            # case study — hand-written
+├── google-maps-scraper/          # case study — hand-written
+│   └── index.html
 └── coffee-cotton-frontier/       # case study — GENERATED, do not hand-edit
     └── index.html                #   rendered by commodity-risk-dashboard/build_dashboard.py
 
@@ -36,7 +37,7 @@ The project pages and the stylesheet need nothing but a static server:
 
 ```bash
 python -m http.server 8000      # from the repo root
-# → localhost:8000/projects/maplead/
+# → localhost:8000/projects/google-maps-scraper/
 # → localhost:8000/projects/coffee-cotton-frontier/
 ```
 

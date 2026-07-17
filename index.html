@@ -110,23 +110,22 @@ The analysis it delivers is a Markowitz efficient frontier on real ICE futures.
 </div>
 
 <div class="work-item">
-<a class="work-thumb" href="/projects/maplead/">
-<img src="{{ '/images/maplead.png' | relative_url }}" alt="MapLead local business scraper dashboard">
+<a class="work-thumb" href="/projects/google-maps-scraper/">
+<img src="{{ '/images/google-maps-scraper.svg' | relative_url }}" alt="The five-stage scraper pipeline: search, scrape, enrich, score, then deliver by email">
 </a>
 <div>
 <div class="work-meta">python · fastapi · playwright · async jobs · live demo</div>
-<h3><a href="/projects/maplead/">MapLead — a five-stage ingestion pipeline behind an API</a></h3>
+<h3><a href="/projects/google-maps-scraper/">Google Maps business scraper — collection by category and region</a></h3>
 <p>
-Turns an unstructured public source into a scored, schema'd dataset. Playwright scrapes
-Google Maps, an enrichment stage probes each business site for tracking pixels, a transparent
-0–100 heuristic scores it, and the run lands as a spreadsheet. Async by design: a run takes
-about five minutes on free-tier hardware, so the API accepts the job and delivers by email
-rather than holding the request open.
+Given a business category and a city, a five-stage pipeline queries Google Maps, opens every
+result and returns 14 structured fields per business, plus a sample of reviews and the tracking
+pixels each site runs. Async by design: a run takes about five minutes on free-tier hardware, so
+the API accepts the job and emails the CSVs rather than holding the request open.
 </p>
 <div class="chips">
 <span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">Playwright</span><span class="chip">REST</span>
 </div>
-<a class="work-link" href="/projects/maplead/">run the live demo →</a>
+<a class="work-link" href="/projects/google-maps-scraper/">run the live demo →</a>
 </div>
 </div>
 

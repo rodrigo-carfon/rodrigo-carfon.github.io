@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" width="520" height="260" role="img" aria-label="The five-stage scraper pipeline: search, scrape, enrich, score, then deliver by email">
+<rect width="520" height="260" fill="#ffffff"/>
+<style>
+  .lbl { font-family: 'DM Mono', ui-monospace, monospace; font-size: 12px; fill: #4a4946; }
+  .tech { font-family: 'DM Mono', ui-monospace, monospace; font-size: 9px; fill: #6f6d68; }
+  .box { fill: #ffffff; stroke: #e4e2dc; stroke-width: 1.5; }
+  .box-on { fill: #E1F5EE; stroke: #9FE1CB; stroke-width: 1.5; }
+  .arr { stroke: #6f6d68; stroke-width: 1.5; }
+</style>
+
+<!-- row 1: search → scrape → enrich → score -->
+<rect class="box-on" x="24"  y="52" width="104" height="52" rx="9"/>
+<text class="lbl"  x="76"  y="82" text-anchor="middle" fill="#0F6E56">search</text>
+<text class="tech" x="76"  y="96" text-anchor="middle">maps query</text>
+
+<line class="arr" x1="132" y1="78" x2="156" y2="78"/>
+<path d="M156 78 l-6 -3 v6 z" fill="#6f6d68"/>
+
+<rect class="box" x="160" y="52" width="104" height="52" rx="9"/>
+<text class="lbl"  x="212" y="82" text-anchor="middle" fill="#141412">scrape</text>
+<text class="tech" x="212" y="96" text-anchor="middle">Playwright</text>
+
+<line class="arr" x1="268" y1="78" x2="292" y2="78"/>
+<path d="M292 78 l-6 -3 v6 z" fill="#6f6d68"/>
+
+<rect class="box" x="296" y="52" width="104" height="52" rx="9"/>
+<text class="lbl"  x="348" y="82" text-anchor="middle" fill="#141412">enrich</text>
+<text class="tech" x="348" y="96" text-anchor="middle">pixel probe</text>
+
+<!-- elbow down from enrich into the score box on the second row -->
+<path d="M404 78 h40 v40" fill="none" class="arr"/>
+<path d="M444 122 l-3 -6 h6 z" fill="#6f6d68"/>
+
+<rect class="box" x="392" y="126" width="104" height="52" rx="9"/>
+<text class="lbl"  x="444" y="156" text-anchor="middle" fill="#141412">score</text>
+<text class="tech" x="444" y="170" text-anchor="middle">0–100</text>
+
+<line class="arr" x1="388" y1="152" x2="328" y2="152"/>
+<path d="M328 152 l6 -3 v6 z" fill="#6f6d68"/>
+
+<rect class="box" x="220" y="126" width="104" height="52" rx="9"/>
+<text class="lbl"  x="272" y="156" text-anchor="middle" fill="#141412">deliver</text>
+<text class="tech" x="272" y="170" text-anchor="middle">CSVs by email</text>
+</svg>

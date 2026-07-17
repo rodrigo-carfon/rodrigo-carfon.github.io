@@ -9,9 +9,10 @@ name: Refresh commodity risk data
 
 on:
   schedule:
-    # 22:00 UTC on weekdays — after the ICE New York session close.
-    # (cron in Actions is UTC; markets are closed on weekends.)
-    - cron: "0 22 * * 1-5"
+    # 15:25 UTC every day (= 12:25 in Campinas, UTC-3). cron in Actions is UTC.
+    # Scheduled runs can be delayed by GitHub during busy periods; use the
+    # "Run workflow" button (workflow_dispatch) for an immediate, exact run.
+    - cron: "25 15 * * *"
   workflow_dispatch: {}   # allow manual runs from the Actions tab
 
 # Let the job push the refreshed data back to the repository.

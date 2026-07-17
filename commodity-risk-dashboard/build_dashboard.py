@@ -306,6 +306,52 @@ def frontier_table(fr):
     </details>"""
 
 
+def latest_sessions(n=10):
+    """The last n trading sessions, straight from the series the pipeline just
+    wrote. This is the freshness signal on the page: it changes on every run
+    that picks up a new close, and it is read from the same source as every
+    other number here, so it cannot disagree with them.
+
+    Daily change is computed from consecutive closes (needs one extra prior
+    close, so we slice n+1 and drop the oldest after differencing)."""
+    kc, ct = DATA["series"]["KC=F"], DATA["series"]["CT=F"]
+    dates = kc["dates"][-(n + 1):]
+    kc_c = kc["close"][-(n + 1):]
+    ct_c = ct["close"][-(n + 1):]
+
+    def chg(cur, prev):
+        if prev in (None, 0) or cur is None:
+            return ""
+        pct = (cur - prev) / prev * 100
+        cls = "up" if pct >= 0 else "dn"
+        return f'<span class="chg {cls}">{pct:+.2f}%</span>'
+
+    rows = []
+    for i in range(len(dates) - 1, 0, -1):   # newest first, skip the padding row
+        rows.append(
+            f"<tr><td class='dt'>{dates[i]}</td>"
+            f"<td>{kc_c[i]:,.2f}</td><td>{chg(kc_c[i], kc_c[i-1])}</td>"
+            f"<td>{ct_c[i]:,.2f}</td><td>{chg(ct_c[i], ct_c[i-1])}</td></tr>")
+
+    return f"""
+    <div class="sessions">
+      <div class="sessions-head">
+        <h3>Latest {n} sessions</h3>
+        <span class="sessions-note">closing prices in US¢/lb · regenerated on every pipeline run</span>
+      </div>
+      <div class="table-wrap">
+        <table class="sessions-tbl">
+          <thead><tr>
+            <th class='dt'>date</th>
+            <th>coffee (KC)</th><th>Δ</th>
+            <th>cotton (CT)</th><th>Δ</th>
+          </tr></thead>
+          <tbody>{"".join(rows)}</tbody>
+        </table>
+      </div>
+    </div>"""
+
+
 def legend(items):
     sp = "".join(
         f'<span class="lg"><i style="background:{c}"></i>{n}</span>' for n, c in items)
@@ -415,6 +461,7 @@ def build():
     tools = tools_section()
     flow = flow_strip()
     table = frontier_table(fr)
+    sessions = latest_sessions(10)
     d0, d1 = s["KC=F"]["dates"][0], s["KC=F"]["dates"][-1]
     leg_price = legend([("Coffee", COL["KC=F"]), ("Cotton", COL["CT=F"])])
 
@@ -501,6 +548,27 @@ def build():
     font-size: 11px; color: var(--ink-3); font-family: var(--mono);
   }}
   .lg i {{ width: 12px; height: 3px; border-radius: 2px; display: inline-block; }}
+
+  /* ── Latest sessions — the freshness signal ── */
+  .sessions-head {{
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+  }}
+  .sessions-head h3 {{ font-size: 15px; margin: 0; }}
+  .sessions-note {{ font-family: var(--mono); font-size: 11px; color: var(--ink-3); }}
+  .sessions-tbl {{ width: 100%; }}
+  .sessions-tbl th {{
+    text-align: right; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .04em; color: var(--ink-3); background: var(--surface-2);
+  }}
+  .sessions-tbl th.dt, .sessions-tbl td.dt {{ text-align: left; }}
+  .sessions-tbl td {{
+    text-align: right; font-family: var(--mono); font-size: 12.5px;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+  }}
+  .sessions-tbl tbody tr:first-child td {{ font-weight: 500; background: var(--teal-l); }}
+  .sessions-tbl .chg {{ font-size: 11.5px; }}
+  .sessions-tbl .chg.up {{ color: var(--teal-d); }}
+  .sessions-tbl .chg.dn {{ color: var(--chart-coffee); }}
 
   /* ── The finding — teal, because teal is the answer everywhere on this page ── */
   .finding {{
@@ -592,6 +660,12 @@ def build():
       real data · ICE futures &nbsp;·&nbsp; coffee KC=F · cotton CT=F &nbsp;·&nbsp; {d0} → {d1}
       &nbsp;·&nbsp; last refresh {DATA['generated_at']}
     </div>
+  </div>
+</section>
+
+<section id="latest">
+  <div class="container">
+    {sessions}
   </div>
 </section>
 

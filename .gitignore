@@ -20,3 +20,6 @@ Gemfile.lock
 !commodity-risk-dashboard/data/correlation.csv
 !commodity-risk-dashboard/data/kpi_snapshot.csv
 !commodity-risk-dashboard/powerbi/manual-import/*.csv
+
+# Local render of the Jekyll home for previewing without Ruby.
+_home-preview.html

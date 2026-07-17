@@ -351,7 +351,7 @@ def flow_strip():
         <span class="fbox">Yahoo Finance<small>ICE futures · KC=F / CT=F</small></span><span class="farr">→</span>
         <span class="fbox">Python ETL<small>extract · transform · load</small></span><span class="farr">→</span>
         <span class="fbox">SQLite · CSV · JSON<small>analytical store + exports</small></span><span class="farr">→</span>
-        <span class="fbox">Power BI + this page<small>two delivery front-ends</small></span>
+        <span class="fbox">This page<small>self-contained front-end</small></span>
       </div>
       <div class="flow-note">Orchestrated by a scheduled GitHub Actions workflow — rerun after each ICE close, auto-commit, auto-deploy.</div>"""
 
@@ -368,10 +368,10 @@ def tools_section():
          "The pipeline loads prices, daily metrics and correlation into a relational store "
          "with an analytical view; <code>queries.sql</code> documents 10 production-style "
          "queries — joins, window functions, time aggregations, CASE logic."),
-        ("Power BI", "star schema · DAX",
-         "A versioned semantic model (PBIP/TMDL): <i>Prices</i> fact + <i>Calendar</i> "
-         "dimension, fed by pipeline-generated CSVs, with the risk KPIs re-expressed as "
-         "DAX measures — the same study, delivered through a BI tool."),
+        ("Pure-SVG dataviz", "no chart library",
+         "Every chart on this page is rendered directly as SVG by "
+         "<code>build_dashboard.py</code> from the pipeline's JSON payload — no chart "
+         "library, no runtime dependency, and the frontier ships a table twin for accessibility."),
         ("GitHub Actions", "scheduled automation",
          "A cron workflow runs the pipeline after every ICE close (weekdays), commits the "
          "refreshed data and redeploys this page via GitHub Pages — the study refreshes with "
@@ -425,7 +425,7 @@ def build():
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coffee &amp; Cotton — a market-risk pipeline that updates itself</title>
 <meta name="author" content="Rodrigo Carvalho">
-<meta name="description" content="A scheduled ETL pipeline — Yahoo Finance to Python to SQLite to Power BI — carrying a Markowitz efficient-frontier study on two real ICE commodities: Arabica coffee and cotton.">
+<meta name="description" content="A scheduled ETL pipeline — Yahoo Finance to Python to SQLite, published as a self-contained page — carrying a Markowitz efficient-frontier study on two real ICE commodities: Arabica coffee and cotton.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Coffee &amp; Cotton — a market-risk pipeline that updates itself">
 <meta property="og:description" content="Two barely-correlated commodities, and the minimum-variance mix that beats the safe asset on both risk and return — on a pipeline that reruns itself after every ICE close.">
@@ -548,7 +548,7 @@ def build():
       pipeline built end to end for the study, which reruns after every market close.</p>
     {flow}
     <div class="chips" style="margin-top:1.6rem">
-      <span class="chip">Python</span><span class="chip">pandas · numpy</span><span class="chip">SQL · SQLite</span><span class="chip">Power BI · DAX</span><span class="chip">GitHub Actions</span><span class="chip">pure-SVG dataviz</span>
+      <span class="chip">Python</span><span class="chip">pandas · numpy</span><span class="chip">SQL · SQLite</span><span class="chip">GitHub Actions</span><span class="chip">pure-SVG dataviz</span>
     </div>
     <div class="meta-line">
       real data · ICE futures &nbsp;·&nbsp; coffee KC=F · cotton CT=F &nbsp;·&nbsp; {d0} → {d1}
@@ -626,8 +626,8 @@ def build():
 <section id="build">
   <div class="container">
     <div class="step"><span class="n">4</span><h2>How this study was built</h2>
-      <div class="sub">A production-shaped data pipeline: automated capture, a relational store, and
-        two delivery front-ends from the same data.</div>
+      <div class="sub">A production-shaped data pipeline: automated capture, a relational store, and a
+        self-contained web page rendered from the same data.</div>
     </div>
     {tools}
 

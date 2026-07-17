@@ -1,4 +1,8 @@
 title: Rodrigo Carvalho
+# jekyll-seo-tag builds the home's <title> as "title | tagline". Without a
+# tagline it falls back to the whole description, which overflows the tab and
+# the search result.
+tagline: Data &amp; Analytics Engineering
 author: Rodrigo Carvalho
 lang: en-US
 url: https://rodrigo-carfon.github.io

@@ -11,118 +11,70 @@
 <meta property="og:description" content="Playwright reads each Google Maps profile, an enrichment stage probes the business site for tracking pixels, and a derived 0-100 heuristic summarizes digital presence. Async by design.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
-  /* Page-local only — everything structural comes from the shared system. */
+  /* Page-local only — structure comes from the shared system. */
+  .hero-wrap { padding: 2.6rem 0 1.8rem; }
+  .stat-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); margin-top: 1.8rem; }
+  @media (max-width: 720px){ .stat-row { grid-template-columns: repeat(2,1fr); } }
 
-  /* ── Decisions & constraints ── */
-  .decisions { border-top: 1px solid var(--border); margin-top: 2rem; }
-  .decision {
-    display: grid; grid-template-columns: 190px 1fr; gap: 2rem;
-    padding: 1.4rem 0; border-bottom: 1px solid var(--border);
-  }
-  .decision-key {
-    font-family: var(--mono); font-size: 12px; color: var(--teal);
-    letter-spacing: .04em; padding-top: 3px;
-  }
-  .decision p { font-size: 14px; margin: 0; line-height: 1.65; }
+  .decisions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: 1.4rem; }
+  @media (max-width: 720px){ .decisions { grid-template-columns: 1fr; } }
+  .decision-key { font-family: var(--mono); font-size: 12px; color: var(--blue); margin-bottom: .5rem; }
+  .decision p { font-size: 13.5px; margin: 0; line-height: 1.6; }
 
-  /* ── Schema table ── */
-  .schema { width: 100%; margin-top: 1.25rem; }
-  .schema th, .schema td { text-align: left; padding: 5px 12px; }
-  .schema td.t { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
-  .schema td.f { font-family: var(--mono); font-size: 12px; color: var(--ink); white-space: nowrap; }
-  .schema td.src { font-size: 12.5px; color: var(--ink-3); }
-  .schema tr.computed td.f { color: var(--teal-d); }
-  .schema-cap {
-    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
-    letter-spacing: .06em; margin: 1.75rem 0 0;
-  }
+  .schema-cap { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: .04em; margin: 1.6rem 0 .5rem; text-transform: uppercase; }
+  table.schema th, table.schema td { text-align: left; }
+  table.schema td.f { font-family: var(--mono); font-size: 12px; color: var(--ink); white-space: nowrap; }
+  table.schema td.t { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+  table.schema td.src { font-size: 12.5px; color: var(--ink-3); }
+  table.schema tr.computed td.f { color: var(--teal); }
 
-  /* ── Scoring ── */
-  .score-rules { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: 1.25rem 0; }
-  .score-rule {
-    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-    padding: .6rem 1rem; background: #fff; border: 1px solid var(--border);
-    border-radius: 8px; font-size: 13px;
-  }
+  .score-rules { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: 1.1rem 0; }
+  @media (max-width: 560px){ .score-rules { grid-template-columns: 1fr; } }
+  .score-rule { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .55rem .9rem; background: var(--tile-2); border: 1px solid var(--line); border-radius: 8px; }
   .score-rule .cond { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
-  .score-rule .pts {
-    font-family: var(--mono); color: var(--teal); font-weight: 500;
-    font-variant-numeric: tabular-nums;
-  }
-  .tiers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; margin-top: 1.25rem; }
-  .tier { padding: .9rem 1rem; border-radius: 8px; }
+  .score-rule .pts { font-family: var(--mono); color: var(--teal); font-weight: 500; }
+
+  .tiers { display: grid; grid-template-columns: repeat(3,1fr); gap: .7rem; margin-top: 1rem; }
+  @media (max-width: 640px){ .tiers { grid-template-columns: 1fr; } }
+  .tier { padding: .85rem 1rem; border-radius: 10px; border: 1px solid var(--line); }
   .tier .t-name { font-family: var(--mono); font-size: 12px; font-weight: 500; }
-  .tier .t-desc { font-size: 12px; margin-top: 4px; line-height: 1.5; }
-  .tier.hot { background: #FAECE7; }
-  .tier.hot .t-name { color: #993C1D; } .tier.hot .t-desc { color: #712B13; }
-  .tier.mid { background: var(--surface-2); }
-  .tier.mid .t-name { color: var(--ink); } .tier.mid .t-desc { color: var(--ink-2); }
-  .tier.bench { background: var(--teal-l); }
-  .tier.bench .t-name { color: var(--teal-d); } .tier.bench .t-desc { color: #085041; }
+  .tier .t-desc { font-size: 12px; margin-top: 4px; line-height: 1.5; color: var(--ink-2); }
+  .tier.hot { background: color-mix(in srgb, var(--amber) 12%, var(--tile)); border-color: color-mix(in srgb, var(--amber) 30%, var(--line)); }
+  .tier.hot .t-name { color: var(--amber); }
+  .tier.mid { background: var(--tile-2); }
+  .tier.mid .t-name { color: var(--ink); }
+  .tier.bench { background: var(--teal-l); border-color: color-mix(in srgb, var(--teal) 30%, var(--line)); }
+  .tier.bench .t-name { color: var(--teal); }
 
-  /* ── Pixel detectors ── */
-  .detectors { margin-top: 1.25rem; }
-
-  /* ── Demo (inverted) ── */
-  .demo-section { background: var(--ink); color: #e8e6e0; }
-  .demo-section h2 { color: #fafaf8; }
-  .demo-section p { color: #b4b2a9; }
-  .demo-wrap {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
-    margin-top: 2.5rem; align-items: start;
-  }
-  .demo-intro ul { list-style: none; margin: 1.25rem 0 0; padding: 0; }
-  .demo-intro li {
-    font-size: 14px; color: #b4b2a9; padding: .4rem 0 .4rem 1.5rem; position: relative;
-  }
-  .demo-intro li::before { content: '→'; position: absolute; left: 0; color: var(--teal); }
-  .demo-form {
-    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12);
-    border-radius: 14px; padding: 1.75rem;
-  }
-  .demo-form label {
-    display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
-    text-transform: uppercase; color: #9a9892; margin: 1.1rem 0 .4rem;
-  }
+  /* demo — committed dark panel, both themes */
+  .demo { background: #12151c; border-radius: var(--radius); padding: 2rem; margin-top: 1.4rem; }
+  .demo h2 { color: #f2f5fa; }
+  .demo .eyebrow { color: #57e39a; }
+  .demo p { color: #aeb7c6; }
+  .demo-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.6rem; align-items: start; }
+  @media (max-width: 720px){ .demo-wrap { grid-template-columns: 1fr; } }
+  .demo-intro ul { list-style: none; margin: 1rem 0 0; padding: 0; }
+  .demo-intro li { font-size: 13.5px; color: #aeb7c6; padding: .35rem 0 .35rem 1.4rem; position: relative; }
+  .demo-intro li::before { content: '→'; position: absolute; left: 0; color: var(--blue); }
+  .demo-form { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 1.5rem; }
+  .demo-form label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #98a2b3; margin: 1rem 0 .4rem; }
   .demo-form label:first-of-type { margin-top: 0; }
-  .demo-form input {
-    width: 100%; background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.14);
-    border-radius: 8px; padding: .7rem .9rem; color: #fafaf8;
-    font-family: var(--sans); font-size: 14px; transition: border-color .2s;
-  }
-  .demo-form input:focus { outline: none; border-color: var(--teal); }
-  .demo-form input::placeholder { color: #7a7873; }
-  .demo-btn {
-    width: 100%; margin-top: 1.5rem; background: var(--teal); color: #fff; border: none;
-    border-radius: 8px; padding: .85rem; font-family: var(--mono); font-size: 13px;
-    font-weight: 500; letter-spacing: .03em; cursor: pointer; transition: background .2s;
-  }
-  .demo-btn:hover:not(:disabled) { background: #25b485; }
-  .demo-btn:disabled { background: #3a4a44; color: #8a988f; cursor: not-allowed; }
-  .form-msg {
-    margin-top: 1.1rem; font-size: 13px; line-height: 1.6;
-    border-radius: 8px; padding: .9rem 1rem; display: none;
-  }
+  .demo-form input { width: 100%; background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: .65rem .85rem; color: #f2f5fa; font-family: var(--sans); font-size: 14px; }
+  .demo-form input:focus { outline: none; border-color: var(--blue); }
+  .demo-form input::placeholder { color: #71798a; }
+  .demo-btn { width: 100%; margin-top: 1.4rem; background: var(--blue); color: #fff; border: none; border-radius: 8px; padding: .8rem; font-family: var(--mono); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .18s; }
+  .demo-btn:hover:not(:disabled) { background: #4d82ff; }
+  .demo-btn:disabled { background: #33405e; color: #8792a6; cursor: not-allowed; }
+  .form-msg { margin-top: 1rem; font-size: 13px; line-height: 1.6; border-radius: 8px; padding: .8rem 1rem; display: none; }
   .form-msg.show { display: block; }
-  .form-msg.ok { background: rgba(29,158,117,.15); border: 1px solid rgba(29,158,117,.4); color: #7fe3bf; }
-  .form-msg.err { background: rgba(216,90,48,.15); border: 1px solid rgba(216,90,48,.4); color: #f0a98e; }
-  .form-hint { font-size: 11px; color: #85837d; margin-top: .6rem; font-family: var(--mono); }
-  .demo-scope {
-    display: flex; align-items: flex-start; gap: .6rem; margin-top: 1.4rem;
-    padding: .75rem .9rem; background: rgba(29,158,117,.08);
-    border: 1px solid rgba(29,158,117,.25); border-radius: 8px;
-    font-size: 12.5px; color: #b4b2a9; line-height: 1.5;
-  }
-  .demo-scope strong { color: #7fe3bf; }
-
-  @media (max-width: 720px) {
-    .decision { grid-template-columns: 1fr; gap: .5rem; }
-    .score-rules, .demo-wrap { grid-template-columns: 1fr; }
-    .tiers { grid-template-columns: 1fr; }
-  }
+  .form-msg.ok { background: rgba(87,227,154,.12); border: 1px solid rgba(87,227,154,.4); color: #7fe3bf; }
+  .form-msg.err { background: rgba(240,120,90,.14); border: 1px solid rgba(240,120,90,.4); color: #f0a98e; }
+  .form-hint { font-size: 11px; color: #71798a; margin-top: .55rem; font-family: var(--mono); }
+  .demo-scope { display: flex; gap: .55rem; margin-top: 1.2rem; padding: .7rem .85rem; background: rgba(47,107,237,.1); border: 1px solid rgba(47,107,237,.3); border-radius: 8px; font-size: 12.5px; color: #aeb7c6; line-height: 1.5; }
+  .demo-scope strong { color: #9cc0ff; }
 </style>
 </head>
 <body>
@@ -138,75 +90,53 @@
   </div>
 </nav>
 
-<!-- ══ 1 — OVERVIEW ═══════════════════════════════════════════════════════ -->
-<section class="hero">
-  <div class="container">
-    <div class="eyebrow">case study · web scraping pipeline</div>
-    <h1>Scraping Google Maps<br>business data by<br><em>category and region</em>.</h1>
-    <p class="lead">
-      Given a business category and a city, the pipeline queries Google Maps, opens every result
-      and returns a structured dataset: 14 fields per business, a sample of reviews, and the
-      tracking pixels each business site runs. A derived 0–100 heuristic summarizes how much
-      digital presence each one has. Playwright handles the extraction; the run is asynchronous,
-      inside a 512 MB free-tier instance.
-    </p>
-    <div class="stat-row">
-      <div class="stat"><span class="n">5</span><span class="l">stage<br>pipeline</span></div>
-      <div class="stat"><span class="n">14</span><span class="l">fields per<br>business</span></div>
-      <div class="stat"><span class="n">9</span><span class="l">pixel<br>detectors</span></div>
-      <div class="stat"><span class="n">202</span><span class="l">accepted — the work<br>runs in background</span></div>
-      <div class="stat"><span class="n">512 MB</span><span class="l">memory available<br>to a run</span></div>
-    </div>
+<main class="container">
+
+<!-- ── OVERVIEW ─────────────────────────────────────────────────────────── -->
+<section class="hero-wrap">
+  <div class="eyebrow">case study · web scraping pipeline</div>
+  <h1 class="mt-sm">Scraping Google Maps business data by <span class="h-accent">category and region</span>.</h1>
+  <p class="lead mt-md" style="max-width:64ch">
+    Given a business category and a city, the pipeline queries Google Maps, opens every result and
+    returns a structured dataset: 14 fields per business, a sample of reviews, and the tracking
+    pixels each business site runs. A derived 0–100 heuristic summarizes how much digital presence
+    each one has. Playwright handles the extraction; the run is asynchronous, inside a 512 MB
+    free-tier instance.
+  </p>
+  <div class="stat-row">
+    <div class="tile stat"><div class="n blue">5</div><div class="l">stage pipeline</div></div>
+    <div class="tile stat"><div class="n">14</div><div class="l">fields per business</div></div>
+    <div class="tile stat"><div class="n">9</div><div class="l">pixel detectors</div></div>
+    <div class="tile stat"><div class="n">202</div><div class="l">accepted — work runs in background</div></div>
+    <div class="tile stat"><div class="n">512 MB</div><div class="l">memory available to a run</div></div>
   </div>
 </section>
 
-<!-- ══ 2 — ARCHITECTURE ═══════════════════════════════════════════════════ -->
-<section id="architecture">
-  <div class="container">
-    <h2>Pipeline architecture</h2>
-    <p>
-      Every run follows the same pipeline. A FastAPI endpoint validates the request, hands the job
-      to a background worker and returns immediately; the worker executes the five stages and emails
-      the result on completion.
-    </p>
+<!-- ── ARCHITECTURE ─────────────────────────────────────────────────────── -->
+<section id="architecture" class="section">
+  <h2>Pipeline architecture</h2>
+  <p class="lead mt-sm" style="max-width:64ch">
+    Every run follows the same pipeline. A FastAPI endpoint validates the request, hands the job to
+    a background worker and returns immediately; the worker executes the five stages and emails the
+    result on completion.
+  </p>
 
-    <div class="pipeline">
-      <div class="pipe-step on">
-        <span class="ps-name">Search</span>
-        <span class="ps-tech">Maps query</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step">
-        <span class="ps-name">Scrape</span>
-        <span class="ps-tech">Playwright</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step">
-        <span class="ps-name">Enrich</span>
-        <span class="ps-tech">site + pixel probe</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step">
-        <span class="ps-name">Score</span>
-        <span class="ps-tech">0–100 heuristic</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step">
-        <span class="ps-name">Deliver</span>
-        <span class="ps-tech">CSVs by email</span>
-      </div>
-    </div>
+  <div class="pipeline">
+    <div class="pipe-step on"><span class="ps-name">Search</span><span class="ps-tech">Maps query</span></div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step"><span class="ps-name">Scrape</span><span class="ps-tech">Playwright</span></div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step"><span class="ps-name">Enrich</span><span class="ps-tech">site + pixel probe</span></div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step"><span class="ps-name">Score</span><span class="ps-tech">0–100 heuristic</span></div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step"><span class="ps-name">Deliver</span><span class="ps-tech">CSVs by email</span></div>
+  </div>
 
-    <h3 class="mt-lg">The contract</h3>
-    <p class="note">
-      One endpoint. The response is an acknowledgement rather than a result: no scraping has run when it returns.
-    </p>
-
-    <div class="code-block">
-      <div class="cb-bar">
-        <span class="cb-dot r"></span><span class="cb-dot y"></span><span class="cb-dot g"></span>
-        <span class="cb-filename">POST /scrape</span>
-      </div>
+  <h3 class="mt-lg">The contract</h3>
+  <p class="note mt-sm">One endpoint. The response is an acknowledgement rather than a result: no scraping has run when it returns.</p>
+  <div class="code-block">
+    <div class="cb-bar"><span class="cb-dot r"></span><span class="cb-dot y"></span><span class="cb-dot g"></span><span class="cb-filename">POST /scrape</span></div>
 <pre><span class="cm"># request</span>
 {
   <span class="nm">"query"</span><span class="op">:</span>          <span class="st">"dental clinics miami"</span><span class="op">,</span>   <span class="cm"># 2–200 chars</span>
@@ -218,90 +148,44 @@
 <span class="cm"># response — immediately, before any scraping happens</span>
 <span class="kw">202 Accepted</span>
 { <span class="nm">"status"</span><span class="op">:</span> <span class="st">"processing"</span><span class="op">,</span> <span class="nm">"query"</span><span class="op">:</span> <span class="st">"dental clinics miami"</span><span class="op">,</span> … }</pre>
+  </div>
+
+  <h3 class="mt-lg">Decisions &amp; constraints</h3>
+  <p class="note mt-sm">The hosting constraints drove most of the decisions below.</p>
+  <div class="decisions">
+    <div class="tile">
+      <div class="decision-key">async, not request/response</div>
+      <p>A run takes minutes. The endpoint validates the request, queues the job on FastAPI's <span class="inline-code">BackgroundTasks</span> and returns <span class="inline-code">202</span> immediately: holding an HTTP request open for five minutes would exceed standard proxy and gateway timeouts. Results are delivered by email, which avoids both a polling endpoint and any client-side session.</p>
     </div>
-
-    <h3 class="mt-lg">Decisions &amp; constraints</h3>
-    <p class="note">
-      The hosting constraints drove most of the decisions below.
-    </p>
-
-    <div class="decisions">
-
-      <div class="decision">
-        <div class="decision-key">async, not<br>request/response</div>
-        <div>
-          <p>
-            A run takes minutes. The endpoint validates the request, queues the job on FastAPI's
-            <span class="inline-code">BackgroundTasks</span> and returns
-            <span class="inline-code">202</span> immediately: holding an HTTP request open for five
-            minutes would exceed standard proxy and gateway timeouts. Results are delivered by email,
-            which avoids both a polling endpoint and any client-side session.
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <div class="decision-key">email over HTTP,<br>not SMTP</div>
-        <div>
-          <p>
-            The free tier blocks outbound SMTP connections, so delivery goes through Brevo's HTTP
-            API instead.
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <div class="decision-key">recycle the browser<br>every 3 businesses</div>
-        <div>
-          <p>
-            Chromium's memory footprint grows over the course of a run. Within a 512 MB limit that
-            risks the process being OOM-killed before the job completes, so the browser is torn down
-            and rebuilt every third business. Low-resource Chromium flags are enabled in Docker and
-            disabled on desktop, where <span class="inline-code">--single-process</span> causes a crash.
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <div class="decision-key">skip, don't hang</div>
-        <div>
-          <p>
-            A 90-second ceiling per business, set from a benchmark where the typical page took ~12 s
-            and the worst case near 15 s. Past the ceiling the business is skipped rather than allowed
-            to block the job, limiting the cost of an unresponsive profile to a single missing row.
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <div class="decision-key">demo capped<br>at 5 × 5</div>
-        <div>
-          <p>
-            The API's hard limits are 100 businesses and 100 reviews. The public demo below pins both
-            to five, keeping each run within what the free tier can serve concurrently.
-          </p>
-        </div>
-      </div>
-
+    <div class="tile">
+      <div class="decision-key">email over HTTP, not SMTP</div>
+      <p>The free tier blocks outbound SMTP connections, so delivery goes through Brevo's HTTP API instead.</p>
+    </div>
+    <div class="tile">
+      <div class="decision-key">recycle the browser every 3 businesses</div>
+      <p>Chromium's memory footprint grows over the course of a run. Within a 512 MB limit that risks the process being OOM-killed before the job completes, so the browser is torn down and rebuilt every third business. Low-resource Chromium flags are enabled in Docker and disabled on desktop, where <span class="inline-code">--single-process</span> causes a crash.</p>
+    </div>
+    <div class="tile">
+      <div class="decision-key">skip, don't hang</div>
+      <p>A 90-second ceiling per business, set from a benchmark where the typical page took ~12 s and the worst case near 15 s. Past the ceiling the business is skipped rather than allowed to block the job, limiting the cost of an unresponsive profile to a single missing row.</p>
+    </div>
+    <div class="tile">
+      <div class="decision-key">demo capped at 5 × 5</div>
+      <p>The API's hard limits are 100 businesses and 100 reviews. The public demo below pins both to five, keeping each run within what the free tier can serve concurrently.</p>
     </div>
   </div>
 </section>
 
-<!-- ══ 3 — SCHEMA & SCORING ═══════════════════════════════════════════════ -->
-<section id="schema">
-  <div class="container">
-    <h2>Output schema</h2>
-    <p>
-      Two CSVs. Every field is read from a public profile except the two computed columns, which are
-      derived at insertion time.
-    </p>
+<!-- ── SCHEMA & SCORING ─────────────────────────────────────────────────── -->
+<section id="schema" class="section">
+  <h2>Output schema</h2>
+  <p class="lead mt-sm" style="max-width:64ch">Two CSVs. Every field is read from a public profile except the two computed columns, which are derived at insertion time and make the result sortable by opportunity.</p>
 
+  <div class="tile mt-md">
     <p class="schema-cap">businesses.csv — 14 fields</p>
     <div class="table-wrap">
       <table class="schema">
-        <thead>
-          <tr><th>field</th><th>type</th><th>source</th></tr>
-        </thead>
+        <thead><tr><th>field</th><th>type</th><th>source</th></tr></thead>
         <tbody>
           <tr><td class="f">name</td><td class="t">str</td><td class="src">Maps profile</td></tr>
           <tr class="computed"><td class="f">digital_score</td><td class="t">int</td><td class="src">computed — 0–100 heuristic</td></tr>
@@ -320,91 +204,52 @@
         </tbody>
       </table>
     </div>
-
     <p class="schema-cap">reviews.csv — 7 fields</p>
-    <div class="chips mt-sm">
-      <span class="chip">business_name</span><span class="chip">business_url</span><span class="chip">author</span><span class="chip">rating</span><span class="chip">date_text</span><span class="chip">text</span><span class="chip">review_id</span>
-    </div>
+    <div class="chips"><span class="chip">business_name</span><span class="chip">business_url</span><span class="chip">author</span><span class="chip">rating</span><span class="chip">date_text</span><span class="chip">text</span><span class="chip">review_id</span></div>
+  </div>
 
-    <h3 class="mt-lg">Pixel detection</h3>
-    <p class="note">
-      Each business site is fetched and its HTML matched against nine detectors, each keyed on
-      specific inline-install signatures rather than a loose brand string. The signatures are
-      deliberately narrow: the trade-off accepts missing non-standard installations in order to
-      avoid false positives.
-    </p>
-    <div class="chips detectors">
-      <span class="chip">Meta Pixel</span><span class="chip">Google Analytics</span><span class="chip">Google Tag Manager</span><span class="chip">Google Ads</span><span class="chip">TikTok Pixel</span><span class="chip">LinkedIn Insight</span><span class="chip">Hotjar</span><span class="chip">Pinterest Tag</span><span class="chip">Microsoft Clarity</span>
-    </div>
+  <h3 class="mt-lg">Pixel detection</h3>
+  <p class="note mt-sm" style="max-width:64ch">Each business site is fetched and its HTML matched against nine detectors, each keyed on specific inline-install signatures rather than a loose brand string. The signatures are deliberately narrow: the trade-off accepts missing non-standard installations in order to avoid false positives.</p>
+  <div class="chips mt-sm"><span class="chip">Meta Pixel</span><span class="chip">Google Analytics</span><span class="chip">Google Tag Manager</span><span class="chip">Google Ads</span><span class="chip">TikTok Pixel</span><span class="chip">LinkedIn Insight</span><span class="chip">Hotjar</span><span class="chip">Pinterest Tag</span><span class="chip">Microsoft Clarity</span></div>
 
-    <h3 class="mt-lg">The 0–100 heuristic</h3>
-    <p class="note">
-      Four additive rules, evaluated as each business is inserted. The tier names are the literal
-      values the <span class="inline-code">digital_tier</span> column takes. The weighting is
-      transparent: every score can be reconstructed from the row that produced it.
-    </p>
-
-    <div class="score-rules">
-      <div class="score-rule"><span class="cond">has website</span><span class="pts">+30</span></div>
-      <div class="score-rule"><span class="cond">has phone</span><span class="pts">+25</span></div>
-      <div class="score-rule"><span class="cond">rating ≥ 4.0</span><span class="pts">+30</span></div>
-      <div class="score-rule"><span class="cond">reviews ≥ 50</span><span class="pts">+15</span></div>
-    </div>
-
-    <div class="tiers">
-      <div class="tier hot">
-        <div class="t-name">0 — 40 · hot lead</div>
-        <div class="t-desc">Few of the four signals present — little to no online presence.</div>
-      </div>
-      <div class="tier mid">
-        <div class="t-name">41 — 70 · established</div>
-        <div class="t-desc">A basic digital footprint, missing at least one major signal.</div>
-      </div>
-      <div class="tier bench">
-        <div class="t-name">71 — 100 · benchmark</div>
-        <div class="t-desc">Strong across most signals — website, contactability and reputation.</div>
-      </div>
-    </div>
-
-    <div class="callout">
-      <p>
-        The score is a derived column: it collapses four independent signals into one sortable
-        measure, which is what lets a flat scrape of a category be ranked and compared.
-      </p>
-    </div>
+  <h3 class="mt-lg">The 0–100 heuristic</h3>
+  <p class="note mt-sm" style="max-width:64ch">Four additive rules, evaluated as each business is inserted. The tier names are the literal values the <span class="inline-code">digital_tier</span> column takes. The weighting is transparent: every score can be reconstructed from the row that produced it.</p>
+  <div class="score-rules">
+    <div class="score-rule"><span class="cond">has website</span><span class="pts">+30</span></div>
+    <div class="score-rule"><span class="cond">has phone</span><span class="pts">+25</span></div>
+    <div class="score-rule"><span class="cond">rating ≥ 4.0</span><span class="pts">+30</span></div>
+    <div class="score-rule"><span class="cond">reviews ≥ 50</span><span class="pts">+15</span></div>
+  </div>
+  <div class="tiers">
+    <div class="tier hot"><div class="t-name">0 — 40 · hot lead</div><div class="t-desc">Few of the four signals present — little to no online presence.</div></div>
+    <div class="tier mid"><div class="t-name">41 — 70 · established</div><div class="t-desc">A basic digital footprint, missing at least one major signal.</div></div>
+    <div class="tier bench"><div class="t-name">71 — 100 · benchmark</div><div class="t-desc">Strong across most signals — website, contactability and reputation.</div></div>
+  </div>
+  <div class="callout">
+    <p>The score is a derived column: it collapses four independent signals into one sortable measure, which is what lets a flat scrape of a category be ranked and compared.</p>
   </div>
 </section>
 
-<!-- ══ 4 — LIVE DEMO ══════════════════════════════════════════════════════ -->
-<section id="demo" class="demo-section">
-  <div class="container">
-    <h2>Run the scraper</h2>
+<!-- ── DEMO ─────────────────────────────────────────────────────────────── -->
+<section id="demo" class="section">
+  <div class="demo">
+    <div class="eyebrow">live test</div>
+    <h2 class="mt-sm">Run the scraper</h2>
     <div class="demo-wrap">
       <div class="demo-intro">
-        <p>
-          This runs the pipeline described above against live data. Enter a business category and a
-          city, and the five stages execute and email you the two CSVs — fields, scores, pixels and
-          reviews included.
-        </p>
+        <p>This runs the pipeline described above against live data. Enter a business category and a city, and the five stages execute and email you the two CSVs — fields, scores, pixels and reviews included.</p>
         <ul>
           <li>Any category + city (e.g. <em>dental clinics miami</em>)</li>
           <li>Takes <strong>~5 minutes</strong>; the free-tier instance may need to cold-start</li>
           <li>Check <strong>spam</strong> if the email doesn't show up</li>
         </ul>
       </div>
-
       <form class="demo-form" id="scrapeForm">
         <label for="query">Business category and city</label>
         <input type="text" id="query" name="query" placeholder="dental clinics miami" required minlength="2" maxlength="200">
-
         <label for="email">Email for the results</label>
         <input type="email" id="email" name="email" placeholder="you@example.com" required>
-
-        <div class="demo-scope">
-          <span>⚙</span>
-          <span>Fixed scope: <strong>5 businesses × 5 reviews</strong> — kept small so the free box stays responsive.</span>
-        </div>
-
+        <div class="demo-scope"><span>⚙</span><span>Fixed scope: <strong>5 businesses × 5 reviews</strong> — kept small so the free instance stays responsive.</span></div>
         <button type="submit" class="demo-btn" id="submitBtn">▶ &nbsp;Run the scraper</button>
         <div class="form-msg" id="formMsg"></div>
         <div class="form-hint">Results go only to the email you provide. Nothing is stored.</div>
@@ -413,13 +258,12 @@
   </div>
 </section>
 
+</main>
+
 <footer class="footer">
   <div class="footer-inner">
     <p>Rodrigo Carvalho · Data &amp; Analytics Engineering</p>
-    <p>
-      <a href="/">← back to portfolio</a> ·
-      <a href="https://github.com/rodrigo-carfon">github</a>
-    </p>
+    <p><a href="/">← back to portfolio</a> · <a href="https://github.com/rodrigo-carfon">github</a></p>
   </div>
 </footer>
 
@@ -454,7 +298,6 @@ form.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-
     if (res.ok) {
       showMsg('✓ On it! Results will arrive at ' + payload.email +
               ' in about 5 minutes. Check your spam folder if they don\'t show up.', 'ok');

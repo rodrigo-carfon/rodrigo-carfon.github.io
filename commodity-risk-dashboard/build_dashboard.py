@@ -29,22 +29,21 @@ sys.stdout.reconfigure(encoding="utf-8")
 HERE = Path(__file__).parent
 DATA = json.loads((HERE / "data" / "dashboard_data.json").read_text(encoding="utf-8"))
 
-# Palette — mirrors /assets/css/style.css. One colour, one meaning:
-#   teal  = the answer      (the efficient branch, the finding)
-#   ink   = the one point being argued for (the min-variance marker, so it
-#           still reads against the teal curve it sits on)
-#   each commodity keeps a hue of its own.
-# Contrast-checked on the paper background: coffee 3.70:1, cotton 4.95:1,
-# teal 3.24:1; worst colour-blind pair separation ΔE 9.4.
-COL = {"KC=F": "#D85A30", "CT=F": "#2F6FB5"}   # coffee, cotton
-TEAL, TEAL_LT = "#1D9E75", "#9FE1CB"           # efficient branch / dominated branch
-TEAL_L, TEAL_D = "#E1F5EE", "#0F6E56"          # tints for the finding box
-INK, INK_2 = "#141412", "#4a4946"
-MUTED, GRID, BG_CARD = "#6f6d68", "#e4e2dc", "#ffffff"
-SURFACE, SURFACE_2 = "#fafaf8", "#f2f1ee"
+# Palette — mirrors /assets/css/style.css (the "instrument panel" system).
+# One colour, one meaning:
+#   teal  = the answer     (the efficient branch, the finding)
+#   ink   = the one point being argued for (the min-variance marker)
+#   each commodity keeps a hue of its own: coffee warm, cotton blue.
+# Charts render on a light card (--chart-card) in both themes for legibility.
+COL = {"KC=F": "#e0722e", "CT=F": "#2f6bed"}   # coffee, cotton
+TEAL, TEAL_LT = "#0f9d8f", "#9ad9d0"           # efficient branch / dominated branch
+TEAL_L, TEAL_D = "#dcf3f0", "#0b7d72"          # tints for the finding box
+INK, INK_2 = "#171b24", "#4b5462"
+MUTED, GRID, BG_CARD = "#79818f", "#dde1e8", "#ffffff"
+SURFACE, SURFACE_2 = "#e7eaef", "#f4f6f9"
 
-SANS_FF = "DM Sans, sans-serif"
-MONO_FF = "DM Mono, ui-monospace, monospace"
+SANS_FF = "Inter, system-ui, sans-serif"
+MONO_FF = "Geist Mono, ui-monospace, monospace"
 
 SOURCE_URL = ("https://github.com/rodrigo-carfon/rodrigo-carfon.github.io"
               "/tree/master/commodity-risk-dashboard")
@@ -244,52 +243,6 @@ def frontier_chart(fr, w=1060, h=440, pad=60):
     return "".join(parts)
 
 
-def frontier_thumb(fr, w=520, h=260, pad=22):
-    """The frontier stripped to its shape, for the portfolio index card.
-
-    Generated rather than screenshotted so the thumbnail cannot drift from the
-    study it points at — neither its palette nor its numbers. No axes or labels:
-    at card size only the shape of the curve is legible, and the leftward bend is
-    what the study is about.
-    """
-    pts, mv, a = fr["points"], fr["min_var"], fr["assets"]
-    xs_v = [p["risk"] for p in pts]
-    ys_v = [p["ret"] for p in pts]
-    xlo, xhi = min(xs_v), max(xs_v)
-    ylo, yhi = min(ys_v), max(ys_v)
-    xpad, ypad = (xhi - xlo) * 0.16 or 1, (yhi - ylo) * 0.16 or 1
-    xlo, xhi = xlo - xpad, xhi + xpad
-    ylo, yhi = ylo - ypad, yhi + ypad
-
-    def X(v): return _scale([v], xlo, xhi, pad, w - pad)[0]
-    def Y(v): return _scale([v], ylo, yhi, h - pad, pad)[0]
-
-    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" '
-             f'width="{w}" height="{h}" role="img" '
-             f'aria-label="The coffee and cotton risk-return frontier, bending left to a '
-             f'minimum-variance mix that is less risky than either asset alone">',
-             f'<rect width="{w}" height="{h}" fill="{BG_CARD}"/>']
-
-    d_all = " ".join(f"{'M' if i==0 else 'L'}{X(p['risk']):.1f} {Y(p['ret']):.1f}"
-                     for i, p in enumerate(pts))
-    parts.append(f'<path d="{d_all}" fill="none" stroke="{TEAL_LT}" stroke-width="2.5" '
-                 f'stroke-linejoin="round" stroke-linecap="round"/>')
-    eff = [mv] + [p for p in pts if p["ret"] > mv["ret"] + 1e-6]
-    d_eff = " ".join(f"{'M' if i==0 else 'L'}{X(p['risk']):.1f} {Y(p['ret']):.1f}"
-                     for i, p in enumerate(eff))
-    parts.append(f'<path d="{d_eff}" fill="none" stroke="{TEAL}" stroke-width="3.5" '
-                 f'stroke-linejoin="round" stroke-linecap="round"/>')
-
-    for tick, label in (("CT=F", "cotton"), ("KC=F", "coffee")):
-        parts.append(f'<circle cx="{X(a[tick]["risk"]):.1f}" cy="{Y(a[tick]["ret"]):.1f}" '
-                     f'r="7" fill="{COL[tick]}" stroke="{BG_CARD}" stroke-width="2.5"/>')
-    mx, my = X(mv["risk"]), Y(mv["ret"])
-    parts.append(f'<path d="M{mx:.1f} {my-8:.1f} L{mx+8:.1f} {my:.1f} L{mx:.1f} {my+8:.1f} '
-                 f'L{mx-8:.1f} {my:.1f} Z" fill="{INK}" stroke="{BG_CARD}" stroke-width="2.5"/>')
-    parts.append('</svg>')
-    return "".join(parts)
-
-
 def frontier_table(fr):
     """Collapsed table-view twin of the frontier chart (accessibility)."""
     rows = "".join(
@@ -363,29 +316,29 @@ def asset_tiles(fr):
     a = fr["assets"]
     kc, ct = a["KC=F"], a["CT=F"]
     return f"""
-      <div class="tile">
-        <div class="tile-h"><span class="dot" style="background:{COL['KC=F']}"></span>
+      <div class="atile">
+        <div class="atile-h"><span class="dot" style="background:{COL['KC=F']}"></span>
           <b>Coffee (Arabica)</b><small>KC · ICE</small></div>
-        <div class="tile-nums">
+        <div class="atile-nums">
           <div><span>Return p.a.</span><b>{kc['ret']:.1f}%</b></div>
           <div><span>Risk (vol) p.a.</span><b>{kc['risk']:.1f}%</b></div>
         </div>
-        <p class="tile-note">The higher-return, higher-risk asset — a sustained rally over the window, with the widest daily swings.</p>
+        <p class="atile-note">The higher-return, higher-risk asset — a sustained rally over the window, with the widest daily swings.</p>
       </div>
-      <div class="tile">
-        <div class="tile-h"><span class="dot" style="background:{COL['CT=F']}"></span>
+      <div class="atile">
+        <div class="atile-h"><span class="dot" style="background:{COL['CT=F']}"></span>
           <b>Cotton (No.2)</b><small>CT · ICE</small></div>
-        <div class="tile-nums">
+        <div class="atile-nums">
           <div><span>Return p.a.</span><b>{ct['ret']:.1f}%</b></div>
           <div><span>Risk (vol) p.a.</span><b>{ct['risk']:.1f}%</b></div>
         </div>
-        <p class="tile-note">Traded sideways: minimal return over the period, but the lower-volatility series.</p>
+        <p class="atile-note">Traded sideways: minimal return over the period, but the lower-volatility series.</p>
       </div>
-      <div class="tile accent">
-        <div class="tile-h"><span class="dot" style="background:{TEAL}"></span>
+      <div class="atile accent">
+        <div class="atile-h"><span class="dot" style="background:{TEAL}"></span>
           <b>Correlation</b><small>daily returns</small></div>
-        <div class="tile-big">{fr['corr']:.2f}</div>
-        <p class="tile-note">Effectively zero — the two markets move independently. This is the
+        <div class="atile-big">{fr['corr']:.2f}</div>
+        <p class="atile-note">Effectively zero — the two markets move independently. This is the
           condition under which diversification reduces portfolio risk.</p>
       </div>"""
 
@@ -478,150 +431,91 @@ def build():
 <meta property="og:description" content="Two barely-correlated commodities, and the minimum-variance mix that beats the safe asset on both risk and return — on a pipeline that reruns itself after every ICE close.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
-  /* Page-local only. Tokens, nav, footer, type and tables come from the shared
-     sheet; what follows is this study's own furniture. */
-
-  /* The frontier is the centrepiece — let it breathe past the prose measure. */
+  /* Page-local only. Tokens, nav, footer, chips and type come from the shared sheet. */
+  section {{ padding: 1.7rem 0; }}
+  .hero {{ padding: 2.6rem 0 1.3rem; }}
   .container.wide {{ max-width: 1080px; }}
+  h1 em {{ font-style: normal; color: var(--blue); }}
+  .meta-line {{ font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: .02em; margin-top: 1.4rem; line-height: 1.7; }}
 
-  .meta-line {{
-    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
-    letter-spacing: .03em; margin-top: 1.5rem; line-height: 1.7;
-  }}
+  /* numbered steps */
+  .step {{ margin-bottom: 1.1rem; }}
+  .step .n {{ display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 500; width: 21px; height: 21px; border-radius: 6px; margin-right: 10px; vertical-align: 2px; }}
+  .step h2 {{ display: inline; }}
+  .step .sub {{ color: var(--ink-3); font-size: 13.5px; line-height: 1.6; margin: .6rem 0 0 31px; max-width: 660px; }}
 
-  /* ── Numbered steps ── */
-  .step {{ margin-bottom: 1.25rem; }}
-  .step .n {{
-    display: inline-flex; align-items: center; justify-content: center;
-    background: var(--teal); color: #fff; font-family: var(--mono);
-    font-size: 11px; font-weight: 500; width: 21px; height: 21px;
-    border-radius: 50%; margin-right: 10px; vertical-align: 2px;
-  }}
-  .step h2 {{ display: inline; font-size: clamp(1.25rem, 2.2vw, 1.5rem); }}
-  .step .sub {{
-    color: var(--ink-3); font-size: 13.5px; line-height: 1.6;
-    margin: .6rem 0 0 31px; max-width: 660px;
-  }}
-
-  /* ── Asset tiles ── */
-  .tiles {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }}
-  .tile {{
-    background: #fff; border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 15px 16px;
-  }}
-  .tile.accent {{ border-color: #9FE1CB; background: var(--teal-l); }}
-  .tile-h {{ display: flex; align-items: center; gap: 8px; font-size: 14px; }}
-  .tile-h small {{
-    color: var(--ink-3); font-size: 11px; font-weight: 400;
-    margin-left: auto; font-family: var(--mono);
-  }}
+  /* asset tiles */
+  .tiles {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); margin-top: 1rem; }}
+  .atile {{ background: var(--tile); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); }}
+  .atile.accent {{ background: var(--teal-l); border-color: color-mix(in srgb, var(--teal) 30%, var(--line)); }}
+  .atile-h {{ display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }}
+  .atile-h small {{ color: var(--ink-3); font-size: 11px; font-weight: 400; margin-left: auto; font-family: var(--mono); }}
   .dot {{ width: 11px; height: 11px; border-radius: 50%; flex: none; }}
-  .tile-nums {{ display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 12px 0 8px; }}
-  .tile-nums div {{ display: flex; flex-direction: column; }}
-  .tile-nums span {{ color: var(--ink-3); font-size: 11px; }}
-  .tile-nums b {{
-    font-family: var(--mono); font-size: 20px; font-weight: 500;
-    font-variant-numeric: tabular-nums;
-  }}
-  .tile-big {{
-    font-family: var(--mono); font-size: 38px; font-weight: 500; color: var(--teal-d);
-    margin: 8px 0 4px; font-variant-numeric: tabular-nums; line-height: 1.1;
-  }}
-  .tile-note {{ color: var(--ink-3); font-size: 11.5px; line-height: 1.45; }}
+  .atile-nums {{ display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 12px 0 8px; }}
+  .atile-nums div {{ display: flex; flex-direction: column; }}
+  .atile-nums span {{ color: var(--ink-3); font-size: 11px; }}
+  .atile-nums b {{ font-family: var(--mono); font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; }}
+  .atile-big {{ font-family: var(--mono); font-size: 2.1rem; font-weight: 500; color: var(--teal); margin: 8px 0 4px; font-variant-numeric: tabular-nums; }}
+  .atile-note {{ color: var(--ink-3); font-size: 11.5px; line-height: 1.45; }}
 
-  /* ── Panels ── */
-  .panel {{
-    background: #fff; border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 18px;
-  }}
-  .panel.hero-panel {{ border-color: #9FE1CB; }}
-  .panel h3.pt {{ font-size: 13.5px; margin-bottom: 2px; }}
-  .panel .cap {{ color: var(--ink-3); font-size: 11.5px; margin-bottom: 8px; }}
-  .grid2 {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }}
-
+  /* chart panels — always a light card so the fixed-colour SVGs stay legible in dark mode */
+  .panel {{ background: var(--chart-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); }}
+  .panel.hero-panel {{ border-color: color-mix(in srgb, var(--teal) 28%, var(--line)); }}
+  .panel h3.pt {{ font-size: 13.5px; margin-bottom: 2px; color: #171b24; }}
+  .panel .cap {{ color: #79818f; font-size: 11.5px; margin-bottom: 8px; }}
+  .panel table {{ color: #171b24; }}
+  .panel th {{ background: #f4f6f9; color: #79818f; }}
+  .panel th, .panel td {{ border-bottom-color: #eaedf1; }}
+  .grid2 {{ display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }}
   .legend {{ display: flex; gap: 14px; margin: 2px 0 4px; flex-wrap: wrap; }}
-  .lg {{
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; color: var(--ink-3); font-family: var(--mono);
-  }}
+  .lg {{ display: flex; align-items: center; gap: 5px; font-size: 11px; color: #79818f; font-family: var(--mono); }}
   .lg i {{ width: 12px; height: 3px; border-radius: 2px; display: inline-block; }}
 
-  /* ── Latest sessions — the freshness signal ── */
-  .sessions-head {{
-    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
-  }}
-  .sessions-head h3 {{ font-size: 15px; margin: 0; }}
-  .sessions-note {{ font-family: var(--mono); font-size: 11px; color: var(--ink-3); }}
-  .sessions-tbl {{ width: 100%; }}
-  .sessions-tbl th {{
-    text-align: right; font-family: var(--mono); font-size: 10.5px;
-    letter-spacing: .04em; color: var(--ink-3); background: var(--surface-2);
-  }}
-  .sessions-tbl th.dt, .sessions-tbl td.dt {{ text-align: left; }}
-  .sessions-tbl td {{
-    text-align: right; font-family: var(--mono); font-size: 12.5px;
-    color: var(--ink); font-variant-numeric: tabular-nums;
-  }}
-  .sessions-tbl tbody tr:first-child td {{ font-weight: 500; background: var(--teal-l); }}
-  .sessions-tbl .chg {{ font-size: 11.5px; }}
-  .sessions-tbl .chg.up {{ color: var(--teal-d); }}
-  .sessions-tbl .chg.dn {{ color: var(--chart-coffee); }}
-
-  /* ── The finding — teal, because teal is the answer everywhere on this page ── */
-  .finding {{
-    background: var(--teal-l); border: 1px solid #9FE1CB;
-    border-left: 5px solid var(--teal); border-radius: 12px;
-    padding: 16px 20px; margin-top: 16px;
-  }}
+  /* finding */
+  .finding {{ background: var(--teal-l); border: 1px solid color-mix(in srgb, var(--teal) 30%, var(--line)); border-left: 4px solid var(--teal); border-radius: var(--radius); padding: 1.1rem 1.3rem; margin-top: var(--gap); }}
   .finding h3 {{ font-size: 15px; color: var(--teal-d); margin-bottom: 6px; }}
   .finding p {{ font-size: 13.5px; color: var(--ink-2); }}
   .finding .kpis {{ display: flex; gap: 22px; margin: 12px 0 2px; flex-wrap: wrap; }}
   .finding .kpis div {{ display: flex; flex-direction: column; }}
-  .finding .kpis b {{
-    font-family: var(--mono); font-size: 22px; font-weight: 500;
-    color: var(--teal-d); font-variant-numeric: tabular-nums;
-  }}
+  .finding .kpis b {{ font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--teal-d); font-variant-numeric: tabular-nums; }}
   .finding .kpis span {{ font-size: 11px; color: var(--ink-3); }}
 
-  /* ── Frontier table (the chart's accessible twin) ── */
+  /* frontier table */
   .tbl {{ margin-top: 10px; }}
-  .tbl summary {{ cursor: pointer; color: var(--teal); font-family: var(--mono); font-size: 12px; }}
+  .tbl summary {{ cursor: pointer; color: var(--blue); font-family: var(--mono); font-size: 12px; }}
   .tbl table {{ margin-top: 8px; }}
 
-  /* ── Architecture strip ── */
-  .flow {{ display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin: 2rem 0 0; }}
-  .fbox {{
-    background: #fff; border: 1px solid var(--border); border-radius: 10px;
-    padding: 10px 14px; font-size: 12.5px; font-weight: 500;
-    display: flex; flex-direction: column; justify-content: center;
-  }}
-  .fbox small {{
-    color: var(--ink-3); font-weight: 400; font-size: 10.5px;
-    margin-top: 2px; font-family: var(--mono);
-  }}
+  /* latest sessions */
+  .sessions-head {{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }}
+  .sessions-head h3 {{ font-size: 15px; margin: 0; }}
+  .sessions-note {{ font-family: var(--mono); font-size: 11px; color: var(--ink-3); }}
+  .sessions-tbl td {{ font-family: var(--mono); }}
+  .sessions-tbl th.dt, .sessions-tbl td.dt {{ text-align: left; }}
+  .sessions-tbl tbody tr:first-child td {{ font-weight: 500; background: var(--blue-l); }}
+  .sessions-tbl .chg {{ font-size: 11.5px; }}
+  .sessions-tbl .chg.up {{ color: var(--teal); }}
+  .sessions-tbl .chg.dn {{ color: var(--chart-coffee); }}
+
+  /* architecture strip */
+  .flow {{ display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin: 1.6rem 0 0; }}
+  .fbox {{ background: var(--tile); border: 1px solid var(--line); border-radius: 10px; padding: 9px 13px; font-size: 12.5px; font-weight: 600; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow); }}
+  .fbox small {{ color: var(--ink-3); font-weight: 400; font-size: 10.5px; margin-top: 2px; font-family: var(--mono); }}
   .farr {{ align-self: center; color: var(--ink-3); font-size: 15px; }}
   .flow-note {{ color: var(--ink-3); font-size: 11.5px; margin-top: 10px; font-family: var(--mono); }}
 
-  /* ── Toolchain ── */
-  .toolgrid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 2rem; }}
-  .tool {{ background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }}
+  /* toolchain */
+  .toolgrid {{ display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: 1.4rem; }}
+  .tool {{ background: var(--tile); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow); }}
   .tool-h {{ display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }}
-  .tool-h b {{ font-size: 14px; font-weight: 500; color: var(--ink); }}
+  .tool-h b {{ font-size: 14px; font-weight: 600; color: var(--ink); }}
   .tool-h small {{ color: var(--ink-3); font-size: 11px; font-family: var(--mono); }}
   .tool p {{ font-size: 12.5px; color: var(--ink-2); line-height: 1.55; margin: 0; }}
-  .tool code {{
-    font-family: var(--mono); background: var(--surface-2);
-    border-radius: 4px; padding: 1px 5px; font-size: 11.5px;
-  }}
+  .tool code {{ font-family: var(--mono); background: var(--tile-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 11.5px; }}
 
-  .method {{
-    background: var(--surface-2); border: 1px dashed var(--border);
-    border-radius: 10px; padding: 14px 16px; margin-top: 2rem;
-    font-size: 12px; color: var(--ink-2); line-height: 1.6;
-  }}
+  .method {{ background: var(--tile-2); border: 1px dashed var(--line); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 1.6rem; font-size: 12px; color: var(--ink-2); line-height: 1.6; }}
   .method b {{ color: var(--ink); }}
 
   @media (max-width: 820px) {{
@@ -647,13 +541,13 @@ def build():
 <section class="hero">
   <div class="container">
     <div class="eyebrow">case study · scheduled etl pipeline</div>
-    <h1>The efficient frontier of<br><em>coffee &amp; cotton</em>.</h1>
-    <p class="lead">Harry Markowitz's insight (1952): a portfolio's risk is not the average of its
+    <h1>The efficient frontier of <em>coffee &amp; cotton</em>.</h1>
+    <p class="lead" style="max-width:64ch">Harry Markowitz's insight (1952): a portfolio's risk is not the average of its
       parts — when assets barely move together, blending them cancels risk out. This study applies
       that lens to two real ICE commodities and locates the mix that minimizes risk. It runs on a
       pipeline built end to end for the study, which reruns after every market close.</p>
     {flow}
-    <div class="chips" style="margin-top:1.75rem">
+    <div class="chips" style="margin-top:1.6rem">
       <span class="chip">Python</span><span class="chip">pandas · numpy</span><span class="chip">SQL · SQLite</span><span class="chip">Power BI · DAX</span><span class="chip">GitHub Actions</span><span class="chip">pure-SVG dataviz</span>
     </div>
     <div class="meta-line">
@@ -665,7 +559,7 @@ def build():
 
 <section id="latest">
   <div class="container">
-    {sessions}
+    <div class="tile">{sessions}</div>
   </div>
 </section>
 
@@ -766,10 +660,6 @@ def build():
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     print(f"  ✓ {out.relative_to(HERE.parent)} generated ({len(html):,} bytes)")
-
-    thumb = HERE.parent / "images" / "coffee-cotton-frontier.svg"
-    thumb.write_text(frontier_thumb(fr), encoding="utf-8")
-    print(f"  ✓ {thumb.relative_to(HERE.parent)} generated (index card)")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" width="520" height="260" role="img" aria-label="The coffee study pipeline: Yahoo Finance to Python ETL to SQLite to Power BI and page">
+<rect width="520" height="260" fill="#f4f6f9"/>
+<style>
+  .lbl { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; fill: #171b24; }
+  .cap { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; fill: #79818f; }
+  .box { fill: #ffffff; stroke: #dde1e8; stroke-width: 1.5; }
+  .box-on { fill: #e7eefe; stroke: #2f6bed; stroke-width: 1.5; }
+  .arr { stroke: #79818f; stroke-width: 1.5; }
+</style>
+<rect class="box-on" x="44"  y="106" width="84" height="48" rx="8"/>
+<text class="lbl" x="86"  y="130" text-anchor="middle" fill="#1f52c9">yahoo</text>
+<text class="cap" x="86"  y="144" text-anchor="middle">prices</text>
+<line class="arr" x1="132" y1="130" x2="156" y2="130"/><path d="M156 130 l-6 -3 v6 z" fill="#79818f"/>
+<rect class="box" x="160" y="106" width="84" height="48" rx="8"/>
+<text class="lbl" x="202" y="130" text-anchor="middle">etl</text>
+<text class="cap" x="202" y="144" text-anchor="middle">python</text>
+<line class="arr" x1="248" y1="130" x2="272" y2="130"/><path d="M272 130 l-6 -3 v6 z" fill="#79818f"/>
+<rect class="box" x="276" y="106" width="84" height="48" rx="8"/>
+<text class="lbl" x="318" y="130" text-anchor="middle">sqlite</text>
+<text class="cap" x="318" y="144" text-anchor="middle">store</text>
+<line class="arr" x1="364" y1="130" x2="388" y2="130"/><path d="M388 130 l-6 -3 v6 z" fill="#79818f"/>
+<rect class="box" x="392" y="106" width="84" height="48" rx="8"/>
+<text class="lbl" x="434" y="130" text-anchor="middle">serve</text>
+<text class="cap" x="434" y="144" text-anchor="middle">bi + page</text>
+</svg>

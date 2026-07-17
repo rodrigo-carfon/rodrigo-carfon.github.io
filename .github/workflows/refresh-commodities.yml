@@ -56,7 +56,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # build_dashboard.py renders straight to the public URL, so the page it
           # writes lives outside this job's working-directory.
-          git add data/ ../projects/coffee-cotton-frontier/index.html ../images/coffee-cotton-frontier.svg
+          git add data/ ../projects/coffee-cotton-frontier/index.html
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
           else

@@ -63,19 +63,33 @@ TRADING_DAYS = 252
 # ----------------------------------------------------------------------------
 # 1. EXTRACT
 # ----------------------------------------------------------------------------
-def _download(tickers: list[str], period: str, retries: int = 3) -> pd.DataFrame:
+def _download(tickers: list[str], period: str, retries: int = 4) -> pd.DataFrame:
     """yf.download with a light retry — Yahoo Finance is intermittent in CI.
 
-    Retries on transient failures (empty frame / network error) with a short
-    backoff; re-raises the last error if every attempt fails (fail visibly).
+    Serialised with ``threads=False``: yfinance keeps an on-disk cache and,
+    when tickers download concurrently on the runner, one of them hits
+    ``OperationalError('database is locked')`` and comes back empty. Downloading
+    one ticker at a time sidesteps that contention.
+
+    A frame is only accepted once EVERY ticker has at least one real close — a
+    non-empty frame that is missing a ticker (all-NaN column) is a *partial*
+    download, which we retry and, if it never heals, raise on. That guarantees
+    the pipeline never emits a half-populated payload.
     """
     last_err: Exception | None = None
     for attempt in range(1, retries + 1):
         try:
-            raw = yf.download(tickers, period=period, progress=False, auto_adjust=False)
-            if raw is not None and not raw.empty:
-                return raw
-            last_err = RuntimeError("empty frame returned by yfinance")
+            raw = yf.download(tickers, period=period, progress=False,
+                              auto_adjust=False, threads=False)
+            if raw is None or raw.empty:
+                last_err = RuntimeError("empty frame returned by yfinance")
+            else:
+                missing = [t for t in tickers
+                           if ("Close", t) not in raw.columns
+                           or raw[("Close", t)].dropna().empty]
+                if not missing:
+                    return raw
+                last_err = RuntimeError(f"partial download — no data for {missing}")
         except Exception as err:  # noqa: BLE001 — retry any transient download error
             last_err = err
         wait = 3 * attempt
@@ -106,6 +120,15 @@ def extract(period: str = "3y") -> pd.DataFrame:
     df = pd.concat(frames, ignore_index=True)
     df = df.dropna(subset=["close"]).sort_values(["ticker", "date"]).reset_index(drop=True)
     df["date"] = pd.to_datetime(df["date"]).dt.date
+
+    # Both commodities are required — the study is a two-asset frontier. Refuse to
+    # continue on a one-sided dataset rather than write a payload the dashboard
+    # can't build (belt-and-suspenders behind _download's own check).
+    counts = df.groupby("ticker").size()
+    empty = [t for t in COMMODITIES if int(counts.get(t, 0)) == 0]
+    if empty:
+        raise RuntimeError(f"no price rows for {empty} — refusing to build a partial payload")
+
     print(f"          {len(df)} real price rows "
           f"({df['date'].min()} → {df['date'].max()})")
     return df

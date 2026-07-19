@@ -1,18 +1,20 @@
 name: Refresh commodity risk data
 
-# Automated data capture for the Coffee & Cotton market-risk dashboard.
-# Runs the ETL pipeline on a schedule, regenerates the dashboard and the
-# Power BI CSVs, and commits the refreshed artifacts back to the repo — GitHub
-# Pages then redeploys the live demo automatically. This is the "automation of
-# data capture" piece of the data-engineering project: no server to maintain,
+# Automated data capture for the Coffee & Cotton market-risk study.
+# Runs the ETL pipeline on a schedule, regenerates the case-study page and the
+# CSV/JSON data exports, and commits the refreshed artifacts back to the repo —
+# GitHub Pages then redeploys the live page automatically. This is the "automation
+# of data capture" piece of the data-engineering project: no server to maintain,
 # the schedule and every run are visible in the repo's Actions tab.
 
 on:
   schedule:
-    # 15:25 UTC every day (= 12:25 in Campinas, UTC-3). cron in Actions is UTC.
-    # Scheduled runs can be delayed by GitHub during busy periods; use the
-    # "Run workflow" button (workflow_dispatch) for an immediate, exact run.
-    - cron: "25 15 * * *"
+    # 15:25 UTC on weekdays (= 12:25 in Campinas, UTC-3). cron in Actions is UTC.
+    # Weekends are skipped: the ICE market is closed, so a Sat/Sun run would only
+    # re-commit the same close with a new timestamp. Friday's close is picked up
+    # by Monday's run. Scheduled runs can be delayed by GitHub during busy periods;
+    # use the "Run workflow" button (workflow_dispatch) for an immediate, exact run.
+    - cron: "25 15 * * 1-5"
   workflow_dispatch: {}   # allow manual runs from the Actions tab
 
 # Let the job push the refreshed data back to the repository.

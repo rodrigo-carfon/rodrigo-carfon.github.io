@@ -9,12 +9,16 @@ name: Refresh commodity risk data
 
 on:
   schedule:
-    # 15:25 UTC on weekdays (= 12:25 in Campinas, UTC-3). cron in Actions is UTC.
-    # Weekends are skipped: the ICE market is closed, so a Sat/Sun run would only
-    # re-commit the same close with a new timestamp. Friday's close is picked up
-    # by Monday's run. Scheduled runs can be delayed by GitHub during busy periods;
-    # use the "Run workflow" button (workflow_dispatch) for an immediate, exact run.
-    - cron: "25 15 * * 1-5"
+    # 22:30 UTC on weekdays (= 19:30 in Campinas, UTC-3). cron in Actions is UTC.
+    # Chosen to run AFTER the ICE New York settlement so each run captures that
+    # day's close: coffee/cotton settle ~13:30–14:20 ET (≈17:30–18:20 UTC in
+    # summer, an hour later in winter), and this leaves a wide margin for Yahoo
+    # Finance to publish the end-of-day bar. The :30 minute avoids the top-of-hour
+    # congestion that makes GitHub's scheduler run late.
+    # Weekends are skipped: the ICE market is closed on Sat/Sun. Scheduled runs can
+    # still be delayed by GitHub — use the "Run workflow" button (workflow_dispatch)
+    # for an immediate, exact run.
+    - cron: "30 22 * * 1-5"
   workflow_dispatch: {}   # allow manual runs from the Actions tab
 
 # Let the job push the refreshed data back to the repository.

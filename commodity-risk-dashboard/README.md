@@ -56,9 +56,10 @@ The capture is orchestrated by **GitHub Actions** — no server to maintain, and
 visible in the repo's *Actions* tab:
 [`.github/workflows/refresh-commodities.yml`](../.github/workflows/refresh-commodities.yml).
 
-- **Schedule:** `cron: 25 15 * * 1-5` — 15:25 UTC on weekdays (weekends are skipped, since the
-  ICE market is closed). Plus a manual *Run workflow* button via `workflow_dispatch`. Scheduled
-  runs can be delayed by GitHub; the button runs it immediately.
+- **Schedule:** `cron: 30 22 * * 1-5` — 22:30 UTC on weekdays, after the ICE New York settlement
+  so each run captures that day's close (weekends are skipped, since the market is closed). Plus a
+  manual *Run workflow* button via `workflow_dispatch`. Scheduled runs can be delayed by GitHub;
+  the button runs it immediately.
 - **What it does:** installs deps → runs `pipeline.py` (real download, with a light retry
   since Yahoo Finance is intermittent) → runs `build_dashboard.py` → **commits the refreshed
   `data/` and the rendered case study back to the repo** only if something changed. GitHub

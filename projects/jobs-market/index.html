@@ -133,6 +133,21 @@
       <div class="tile kpi"><div class="n" id="k-areas">–</div><div class="l">áreas</div></div>
     </section>
 
+    <!-- Charts -->
+    <section id="charts" style="margin-bottom:var(--section-gap)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:0 .25rem .9rem">
+        <h2>Panorama</h2>
+        <span class="note">reage aos filtros ativos</span>
+      </div>
+      <div class="charts">
+        <div class="tile chart-tile"><h3>Por área</h3><div class="cap">áreas com mais vagas</div><div class="bars" id="c-area"></div></div>
+        <div class="tile chart-tile"><h3>Por senioridade</h3><div class="cap">distribuição de nível</div><div class="bars" id="c-seniority"></div></div>
+        <div class="tile chart-tile"><h3>Por portal</h3><div class="cap">de onde vêm as vagas</div><div class="bars" id="c-source"></div></div>
+        <div class="tile chart-tile"><h3>Empresas que mais publicam</h3><div class="cap">top 15</div><div class="bars" id="c-company"></div></div>
+        <div class="tile chart-tile chart-wide"><h3>Vagas publicadas por dia</h3><div class="cap">por data de publicação (janela de 90 dias)</div><div id="c-timeline"></div></div>
+      </div>
+    </section>
+
     <!-- Filters -->
     <section id="filters" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
       <div class="filters">
@@ -152,28 +167,13 @@
       </div>
     </section>
 
-    <!-- Charts -->
-    <section id="charts" style="margin-bottom:var(--section-gap)">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:0 .25rem .9rem">
-        <h2>Panorama</h2>
-        <span class="note">reage aos filtros ativos</span>
-      </div>
-      <div class="charts">
-        <div class="tile chart-tile"><h3>Por área</h3><div class="cap">áreas com mais vagas</div><div class="bars" id="c-area"></div></div>
-        <div class="tile chart-tile"><h3>Por senioridade</h3><div class="cap">distribuição de nível</div><div class="bars" id="c-seniority"></div></div>
-        <div class="tile chart-tile"><h3>Por portal</h3><div class="cap">de onde vêm as vagas</div><div class="bars" id="c-source"></div></div>
-        <div class="tile chart-tile"><h3>Empresas que mais publicam</h3><div class="cap">top 15</div><div class="bars" id="c-company"></div></div>
-        <div class="tile chart-tile chart-wide"><h3>Vagas publicadas por dia</h3><div class="cap">por data de publicação (janela de 90 dias)</div><div id="c-timeline"></div></div>
-      </div>
-    </section>
-
     <!-- Results -->
     <section id="results" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
       <div class="results-head">
         <h2>Vagas</h2>
         <select class="sortsel" id="sort">
           <option value="recent">mais recentes</option>
-          <option value="salary">maior salário</option>
+          <option value="oldest">mais antigas</option>
           <option value="portals">em mais portais</option>
           <option value="company">empresa (A–Z)</option>
         </select>
@@ -408,12 +408,17 @@
   }
 
   // ── results list ──────────────────────────────────────────────────────
+  function pubOf(i) { return J.pub[i] || J.seen[i] || ""; }
   function sortIdx(arr) {
     var a = arr.slice();
-    if (sortKey === "salary") a.sort(function (x, y) { return (J.smax[y] || J.smin[y] || 0) - (J.smax[x] || J.smin[x] || 0); });
-    else if (sortKey === "portals") a.sort(function (x, y) { return J.np[y] - J.np[x]; });
-    else if (sortKey === "company") a.sort(function (x, y) { return (D.company[J.cmp[x]] || "").localeCompare(D.company[J.cmp[y]] || ""); });
-    // "recent" keeps the data's first_seen-desc order
+    if (sortKey === "oldest")
+      a.sort(function (x, y) { return pubOf(x) < pubOf(y) ? -1 : pubOf(x) > pubOf(y) ? 1 : 0; });
+    else if (sortKey === "portals")
+      a.sort(function (x, y) { return (J.np[y] - J.np[x]) || (pubOf(x) < pubOf(y) ? 1 : -1); });
+    else if (sortKey === "company")
+      a.sort(function (x, y) { return (D.company[J.cmp[x]] || "").localeCompare(D.company[J.cmp[y]] || "") || (pubOf(x) < pubOf(y) ? 1 : -1); });
+    else  // "mais recentes" — by publication date, newest first
+      a.sort(function (x, y) { return pubOf(x) < pubOf(y) ? 1 : pubOf(x) > pubOf(y) ? -1 : 0; });
     return a;
   }
   function render() {

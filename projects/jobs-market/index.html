@@ -126,8 +126,8 @@
     <!-- KPIs -->
     <section class="kpis" style="margin-bottom:var(--section-gap)">
       <div class="tile kpi"><div class="n blue" id="k-total">–</div><div class="l">vagas na janela (90d)</div></div>
-      <div class="tile kpi"><div class="n teal" id="k-new1">–</div><div class="l">novas hoje</div></div>
-      <div class="tile kpi"><div class="n" id="k-new7">–</div><div class="l">novas em 7 dias</div></div>
+      <div class="tile kpi"><div class="n teal" id="k-new1">–</div><div class="l">publicadas hoje</div></div>
+      <div class="tile kpi"><div class="n" id="k-new7">–</div><div class="l">publicadas em 7 dias</div></div>
       <div class="tile kpi"><div class="n" id="k-portals">–</div><div class="l">portais</div></div>
       <div class="tile kpi"><div class="n" id="k-companies">–</div><div class="l">empresas</div></div>
       <div class="tile kpi"><div class="n" id="k-areas">–</div><div class="l">áreas</div></div>
@@ -230,6 +230,7 @@
     buildFacetChips();
     buildRecencyChips();
     wire();
+    renderKpis();   // dataset-level totals — computed once, immune to filters
     var base = data.total_base || N, win = data.total_window || N;
     var shown = (N < win)
       ? N.toLocaleString("pt-BR") + " mais recentes de " + win.toLocaleString("pt-BR") + " na janela de " + data.window_days + " dias"
@@ -319,19 +320,20 @@
       filtered.push(i);
     }
     $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
-    renderKpis(); renderCharts(); render();
+    renderCharts(); render();
   }
 
   // ── KPIs ──────────────────────────────────────────────────────────────
+  // Fixed, dataset-level facts — computed once over the WHOLE base, never over
+  // the filtered subset (the "X correspondem aos filtros" line covers that).
   function renderKpis() {
     var d7 = daysAgo(7), comp = new Set(), area = new Set(), src = new Set(), n1 = 0, n7 = 0;
-    for (var k = 0; k < filtered.length; k++) {
-      var i = filtered[k];
+    for (var i = 0; i < N; i++) {
       comp.add(J.cmp[i]); area.add(J.area[i]); src.add(J.src[i]);
-      if (J.seen[i] === GEN) n1++;
-      if (J.seen[i] >= d7) n7++;
+      if (J.pub[i] === GEN) n1++;          // publicadas hoje
+      if (J.pub[i] && J.pub[i] >= d7) n7++; // publicadas nos últimos 7 dias
     }
-    $("k-total").textContent = filtered.length.toLocaleString("pt-BR");
+    $("k-total").textContent = N.toLocaleString("pt-BR");
     $("k-new1").textContent = n1.toLocaleString("pt-BR");
     $("k-new7").textContent = n7.toLocaleString("pt-BR");
     $("k-portals").textContent = src.size;

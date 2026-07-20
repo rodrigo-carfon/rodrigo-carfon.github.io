@@ -92,8 +92,9 @@ def main():
     conn = storage.connect(str(DB_PATH))
     before = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
     storage.upsert(conn, rows)
+    pruned = storage.prune(conn, keep_days=120)
     total = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
-    print(f"  stored: {total - before} new · {total} total in jobs.db")
+    print(f"  stored: {total - before + pruned} new · {pruned} pruned (>120d) · {total} total in jobs.db")
 
     # ── export served snapshot (90-day window) ──
     n, mb = storage.export_snapshot(conn, str(JSON_PATH), window_days=90)

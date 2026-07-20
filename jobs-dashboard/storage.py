@@ -98,6 +98,17 @@ def upsert(conn, jobs, today=None):
     return inserted
 
 
+def prune(conn, keep_days=120, today=None):
+    """Drop jobs not seen in the last `keep_days` days. The DB is committed daily,
+    so bounding it to a rolling window (a bit wider than the 90-day served window)
+    keeps git history from growing without limit. Returns rows deleted."""
+    today = today or date.today().isoformat()
+    cutoff = (date.fromisoformat(today) - timedelta(days=keep_days)).isoformat()
+    cur = conn.execute("DELETE FROM jobs WHERE last_seen_date < ?", (cutoff,))
+    conn.commit()
+    return cur.rowcount
+
+
 def export_snapshot(conn, out_path, window_days=90, today=None, max_jobs=15000, max_raw_mb=9):
     """Write the dictionary-encoded JSON the dashboard reads.
 

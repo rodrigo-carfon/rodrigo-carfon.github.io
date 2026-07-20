@@ -209,6 +209,9 @@ p  { color: var(--ink-2); }
 
 /* ── Work tiles ─────────────────────────────────────────────────────────── */
 
+.work-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+@media (max-width: 900px) { .work-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) { .work-grid { grid-template-columns: 1fr; } }
 .work-thumb {
   border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line);
   background: var(--tile-2); margin-bottom: 1rem; aspect-ratio: 2 / 1;

@@ -1,0 +1,52 @@
+name: Refresh job-market data
+
+# Daily ingestion for the Job-Market Explorer. Fetches job postings from every
+# public portal API, normalizes + classifies them, updates the SQLite history and
+# writes the trimmed 90-day snapshot the dashboard reads — then commits both back
+# to the repo. GitHub Pages redeploys the page automatically. All endpoints are
+# key-free, so there are no secrets to configure.
+
+on:
+  schedule:
+    # 06:20 UTC every day (= 03:20 in Campinas, UTC-3). Job boards publish 7 days
+    # a week, so unlike the weekday-only commodity job this runs daily. Kept far
+    # from the 22:30 commodity slot so the two never contend for the runner or
+    # race on a push. The :20 minute avoids top-of-hour scheduler congestion.
+    - cron: "20 6 * * *"
+  workflow_dispatch: {}   # allow manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-jobs
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jobs-dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: jobs-dashboard/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Run ETL (fetch → normalize → classify → SQLite → snapshot)
+        run: python pipeline.py
+      - name: Commit refreshed artifacts (only if changed)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # jobs.db is the durable history; data.json is the served snapshot.
+          git add data/jobs.db ../projects/jobs-market/data.json
+          if git diff --cached --quiet; then
+            echo "No changes — nothing to commit."
+          else
+            git commit -m "chore: daily jobs snapshot [skip ci]"
+            git push
+          fi

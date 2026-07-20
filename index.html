@@ -88,20 +88,29 @@ title: Rodrigo Carvalho
 <section id="work" style="margin-top:var(--section-gap)">
   <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:0 .25rem 1.1rem">
     <h2>Selected work</h2>
-    <span class="note">two systems running in production</span>
+    <span class="note">three systems running in production</span>
   </div>
-  <div class="bento">
+  <div class="work-grid">
 
-    <a class="tile link span-2" href="/projects/coffee-cotton-frontier/">
+    <a class="tile link" href="/projects/coffee-cotton-frontier/">
       <div class="work-thumb"><img src="{{ '/images/coffee-pipeline.svg' | relative_url }}" alt="Pipeline diagram: Yahoo Finance to Python ETL to SQLite to serving"></div>
-      <div class="work-meta">python · sqlite · pure-svg · github actions</div>
+      <div class="work-meta">python · sqlite · interactive svg · github actions</div>
       <div class="work-title">Coffee &amp; Cotton — a market-risk pipeline that updates itself</div>
-      <p class="work-desc">Yahoo Finance → Python ETL → SQLite → a self-contained page rendered from the data. A cron workflow reruns the pipeline after each close and commits the refreshed data, so there is no server to maintain.</p>
-      <div class="chips"><span class="chip">Python</span><span class="chip">SQL</span><span class="chip">pure-SVG</span><span class="chip">GitHub Actions</span></div>
+      <p class="work-desc">Yahoo Finance → Python ETL → SQLite → a self-contained interactive page. A cron workflow reruns it after each close and commits the refreshed data, so there is no server to maintain.</p>
+      <div class="chips"><span class="chip">Python</span><span class="chip">SQL</span><span class="chip">GitHub Actions</span></div>
       <span class="work-go">read the case study →</span>
     </a>
 
-    <a class="tile link span-2" href="/projects/google-maps-scraper/">
+    <a class="tile link" href="/projects/jobs-market/">
+      <div class="work-thumb"><img src="{{ '/images/jobs-pipeline.svg' | relative_url }}" alt="Pipeline diagram: eight portal APIs to normalize and classify, to SQLite, to the dashboard"></div>
+      <div class="work-meta">python · sqlite · 8 apis · github actions · dashboard</div>
+      <div class="work-title">Job-Market Explorer — daily multi-portal jobs pipeline</div>
+      <p class="work-desc">Eight public job-portal APIs collected daily into one normalized, classified base in SQLite, exposed through an interactive dashboard — filter thousands of jobs by area, seniority, company, portal and market.</p>
+      <div class="chips"><span class="chip">Python</span><span class="chip">SQL</span><span class="chip">REST APIs</span><span class="chip">GitHub Actions</span></div>
+      <span class="work-go">explore the dashboard →</span>
+    </a>
+
+    <a class="tile link" href="/projects/google-maps-scraper/">
       <div class="work-thumb"><img src="{{ '/images/google-maps-scraper.svg' | relative_url }}" alt="Pipeline diagram: search, scrape, enrich, score, deliver"></div>
       <div class="work-meta">python · fastapi · playwright · async jobs · live demo</div>
       <div class="work-title">Google Maps business scraper — collection by category and region</div>

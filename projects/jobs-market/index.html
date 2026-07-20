@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job-Market Explorer — vagas de múltiplos portais, atualizadas diariamente</title>
+<meta name="author" content="Rodrigo Carvalho">
+<meta name="description" content="Um explorador do mercado de vagas: um pipeline diário coleta vagas de múltiplos portais (Gupy, The Muse, boards remotos) por API, e este dashboard deixa filtrar por área, senioridade, empresa, portal, modelo e mercado.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Job-Market Explorer — vagas de múltiplos portais">
+<meta property="og:description" content="Pipeline diário multi-portal + dashboard interativo. Filtre milhares de vagas por área, senioridade, empresa, portal e modelo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  /* Page-local only — structure comes from the shared design system. */
+  .hero-wrap { padding: 2.4rem 0 1.4rem; }
+
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap); }
+  @media (max-width: 880px){ .kpis { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi .n { font-family: var(--mono); font-size: 1.55rem; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .kpi .n.blue { color: var(--blue); } .kpi .n.teal { color: var(--teal); }
+  .kpi .l { font-size: 11.5px; color: var(--ink-3); margin-top: .5rem; line-height: 1.35; }
+
+  /* filters */
+  .filters { display: flex; flex-direction: column; gap: 1rem; }
+  .filter-search { display: flex; gap: .6rem; align-items: center; }
+  .filter-search input {
+    flex: 1; background: var(--tile-2); border: 1px solid var(--line); border-radius: 9px;
+    padding: .6rem .85rem; color: var(--ink); font-family: var(--sans); font-size: 14px;
+  }
+  .filter-search input:focus { outline: none; border-color: var(--blue); }
+  .fgroup { display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: baseline; }
+  .fgroup > .flabel { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ink-3); min-width: 74px; }
+  .fchips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .fchip {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+    background: var(--tile-2); border: 1px solid var(--line);
+    padding: 3px 9px; border-radius: 999px; cursor: pointer; user-select: none;
+    transition: all .12s; white-space: nowrap;
+  }
+  .fchip:hover { border-color: var(--blue); }
+  .fchip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .fchip .c { opacity: .6; margin-left: 4px; }
+  .filter-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .filter-foot .count { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
+  .filter-foot .count b { color: var(--blue); }
+  .btn-clear { font-family: var(--mono); font-size: 12px; color: var(--ink-3); background: none;
+    border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer; }
+  .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  /* charts */
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+  @media (max-width: 760px){ .charts { grid-template-columns: 1fr; } }
+  .chart-tile h3 { font-size: 13px; font-weight: 600; margin-bottom: .1rem; }
+  .chart-tile .cap { font-size: 11px; color: var(--ink-3); font-family: var(--mono); margin-bottom: .8rem; }
+  .bars { display: flex; flex-direction: column; gap: 6px; }
+  .bar-row { display: grid; grid-template-columns: 130px 1fr 42px; gap: 8px; align-items: center; font-size: 12px; }
+  .bar-row .lab { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { background: var(--tile-2); border-radius: 4px; height: 16px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--blue); border-radius: 4px; min-width: 2px; transition: width .25s; }
+  .bar-fill.teal { background: var(--teal); }
+  .bar-row .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+  .chart-empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1rem 0; }
+
+  /* results list */
+  .results-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .9rem; flex-wrap: wrap; }
+  .sortsel { font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--tile-2);
+    border: 1px solid var(--line); border-radius: 7px; padding: 4px 8px; }
+  .job { display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; padding: .95rem 0; border-top: 1px solid var(--line-2); }
+  .job:first-child { border-top: none; }
+  .job-main .t { font-size: 14.5px; font-weight: 600; line-height: 1.35; }
+  .job-main .t a { color: var(--ink); text-decoration: none; }
+  .job-main .t a:hover { color: var(--blue); }
+  .job-main .co { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .job-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: .5rem; }
+  .job-side { text-align: right; font-family: var(--mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+  .job-side .sal { color: var(--teal); }
+  .badge { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 5px;
+    background: var(--tile-2); border: 1px solid var(--line); color: var(--ink-2); }
+  .badge.src { background: var(--blue-l); border-color: color-mix(in srgb, var(--blue) 30%, var(--line)); color: var(--blue-d); }
+  .badge.np { background: var(--teal-l); border-color: color-mix(in srgb, var(--teal) 30%, var(--line)); color: var(--teal-d); }
+  .pager { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.3rem; }
+  .pager button { font-family: var(--mono); font-size: 12px; padding: 5px 12px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--tile-2); color: var(--ink-2); cursor: pointer; }
+  .pager button:disabled { opacity: .4; cursor: default; }
+  .pager .pinfo { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+  .loading { text-align: center; padding: 4rem 0; color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
+  .meta-line { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-top: 1.2rem; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="/"><span>~/</span>rodrigo-carfon</a>
+    <ul class="nav-links">
+      <li><a href="#filters">filtros</a></li>
+      <li><a href="#charts">panorama</a></li>
+      <li><a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/jobs-dashboard" class="nav-cta">source ↗</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container">
+
+  <section class="hero-wrap">
+    <div class="eyebrow">case study · pipeline diário multi-portal</div>
+    <h1 class="mt-sm">O mercado de vagas, <span class="h-accent">entre portais</span>.</h1>
+    <p class="lead mt-md" style="max-width:64ch">
+      Um pipeline coleta vagas de múltiplos portais por API todos os dias — Gupy, The Muse e
+      seis boards de vagas remotas — normaliza tudo num schema único, classifica área e
+      senioridade, e guarda o histórico. Este dashboard lê o recorte dos últimos 90 dias e deixa
+      explorar por área, senioridade, empresa, portal, modelo e mercado.
+    </p>
+    <div class="meta-line" id="meta">carregando…</div>
+  </section>
+
+  <div id="app" style="display:none">
+
+    <!-- KPIs -->
+    <section class="kpis" style="margin-bottom:var(--section-gap)">
+      <div class="tile kpi"><div class="n blue" id="k-total">–</div><div class="l">vagas na janela (90d)</div></div>
+      <div class="tile kpi"><div class="n teal" id="k-new1">–</div><div class="l">novas hoje</div></div>
+      <div class="tile kpi"><div class="n" id="k-new7">–</div><div class="l">novas em 7 dias</div></div>
+      <div class="tile kpi"><div class="n" id="k-portals">–</div><div class="l">portais</div></div>
+      <div class="tile kpi"><div class="n" id="k-companies">–</div><div class="l">empresas</div></div>
+      <div class="tile kpi"><div class="n" id="k-areas">–</div><div class="l">áreas</div></div>
+    </section>
+
+    <!-- Filters -->
+    <section id="filters" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
+      <div class="filters">
+        <div class="filter-search">
+          <input id="q" type="search" placeholder="Buscar por título ou empresa…" autocomplete="off">
+        </div>
+        <div class="fgroup"><span class="flabel">Portal</span><div class="fchips" id="f-source"></div></div>
+        <div class="fgroup"><span class="flabel">Área</span><div class="fchips" id="f-area"></div></div>
+        <div class="fgroup"><span class="flabel">Senioridade</span><div class="fchips" id="f-seniority"></div></div>
+        <div class="fgroup"><span class="flabel">Modelo</span><div class="fchips" id="f-work_model"></div></div>
+        <div class="fgroup"><span class="flabel">Mercado</span><div class="fchips" id="f-market"></div></div>
+        <div class="fgroup"><span class="flabel">Publicada</span><div class="fchips" id="f-recency"></div></div>
+        <div class="filter-foot">
+          <div class="count"><b id="fcount">0</b> vagas correspondem aos filtros</div>
+          <button class="btn-clear" id="clear">limpar filtros</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section id="charts" style="margin-bottom:var(--section-gap)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:0 .25rem .9rem">
+        <h2>Panorama</h2>
+        <span class="note">reage aos filtros ativos</span>
+      </div>
+      <div class="charts">
+        <div class="tile chart-tile"><h3>Por área</h3><div class="cap">áreas com mais vagas</div><div class="bars" id="c-area"></div></div>
+        <div class="tile chart-tile"><h3>Por senioridade</h3><div class="cap">distribuição de nível</div><div class="bars" id="c-seniority"></div></div>
+        <div class="tile chart-tile"><h3>Por portal</h3><div class="cap">de onde vêm as vagas</div><div class="bars" id="c-source"></div></div>
+        <div class="tile chart-tile"><h3>Novas por dia</h3><div class="cap">primeira vez vistas (janela)</div><div id="c-timeline"></div></div>
+        <div class="tile chart-tile"><h3>Empresas que mais publicam</h3><div class="cap">top 15</div><div class="bars" id="c-company"></div></div>
+        <div class="tile chart-tile"><h3>Faixa salarial</h3><div class="cap">onde há salário informado</div><div id="c-salary"></div></div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
+      <div class="results-head">
+        <h2>Vagas</h2>
+        <select class="sortsel" id="sort">
+          <option value="recent">mais recentes</option>
+          <option value="salary">maior salário</option>
+          <option value="portals">em mais portais</option>
+          <option value="company">empresa (A–Z)</option>
+        </select>
+      </div>
+      <div id="list"></div>
+      <div class="pager">
+        <button id="prev">← anterior</button>
+        <span class="pinfo" id="pinfo">–</span>
+        <button id="next">próxima →</button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="loading" id="loading">carregando a base de vagas…</div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <p>Rodrigo Carvalho · Data &amp; Analytics Engineering</p>
+    <p><a href="/">← voltar ao portfólio</a> · <a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/jobs-dashboard">código-fonte</a></p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

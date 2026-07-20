@@ -19,8 +19,9 @@ description: >-
 plugins:
   - jekyll-seo-tag
 
-# The ETL project is browsable on GitHub; no need to serve its .py/.db/.pbip.
+# The ETL projects are browsable on GitHub; no need to serve their .py/.db.
 exclude:
   - commodity-risk-dashboard/
+  - jobs-dashboard/
   - README.md
   - LICENSE

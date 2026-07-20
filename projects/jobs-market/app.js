@@ -150,7 +150,6 @@
     bars($("c-source"), tally("src", "source"), 9);
     companyBars();
     timeline();
-    salary();
   }
   function bars(host, entries, topN, teal) {
     entries = entries.slice(0, topN);
@@ -174,37 +173,36 @@
   }
 
   function timeline() {
-    var host = $("c-timeline"), m = {};
-    for (var k = 0; k < filtered.length; k++) { var d = J.seen[filtered[k]]; if (d) m[d] = (m[d] || 0) + 1; }
+    var host = $("c-timeline"), m = {}, c90 = daysAgo(90);
+    // by the job's own publication date (spans weeks), within the 90-day window
+    for (var k = 0; k < filtered.length; k++) {
+      var d = J.pub[filtered[k]];
+      if (d && d >= c90 && d <= GEN) m[d] = (m[d] || 0) + 1;
+    }
     var days = Object.keys(m).sort();
     if (days.length < 2) { host.innerHTML = '<div class="chart-empty">poucos dias para uma série</div>'; return; }
-    var W = 300, H = 120, P = 22, max = Math.max.apply(null, days.map(function (d) { return m[d]; }));
+    var W = 900, H = 170, P = 30, max = Math.max.apply(null, days.map(function (d) { return m[d]; }));
     var X = function (i) { return P + i / (days.length - 1) * (W - 2 * P); };
     var Y = function (v) { return H - P - v / max * (H - 2 * P); };
     var pts = days.map(function (d, i) { return X(i).toFixed(1) + "," + Y(m[d]).toFixed(1); });
     var area = "M" + X(0).toFixed(1) + "," + (H - P) + " L" + pts.join(" L") + " L" + X(days.length - 1).toFixed(1) + "," + (H - P) + " Z";
-    host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" font-family="Geist Mono, monospace">' +
-      '<path d="' + area + '" fill="var(--blue)" fill-opacity="0.10"/>' +
-      '<polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>' +
-      '<text x="' + P + '" y="' + (H - 4) + '" font-size="9" fill="var(--ink-3)">' + days[0].slice(5) + '</text>' +
-      '<text x="' + (W - P) + '" y="' + (H - 4) + '" font-size="9" fill="var(--ink-3)" text-anchor="end">' + days[days.length - 1].slice(5) + '</text>' +
-      '<text x="' + P + '" y="14" font-size="9" fill="var(--ink-3)">pico ' + max + '/dia</text></svg>';
-  }
-
-  function salary() {
-    var host = $("c-salary"), vals = [];
-    for (var k = 0; k < filtered.length; k++) {
-      var i = filtered[k], v = J.smax[i] || J.smin[i];
-      if (v && v > 0) vals.push(v);
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="none" font-family="Geist Mono, monospace">'];
+    // horizontal gridlines + y ticks
+    for (var g = 0; g <= 2; g++) {
+      var gy = P + g * (H - 2 * P) / 2, gv = Math.round(max * (1 - g / 2));
+      svg.push('<line x1="' + P + '" y1="' + gy.toFixed(1) + '" x2="' + (W - P) + '" y2="' + gy.toFixed(1) + '" stroke="var(--chart-grid)"/>');
+      svg.push('<text x="' + (P - 6) + '" y="' + (gy + 3).toFixed(1) + '" font-size="9" fill="var(--ink-3)" text-anchor="end">' + gv + '</text>');
     }
-    if (vals.length < 8) { host.innerHTML = '<div class="chart-empty">salário informado em ' + vals.length + ' vaga(s) do recorte — poucos para um histograma</div>'; return; }
-    vals.sort(function (a, b) { return a - b; });
-    var lo = vals[0], hi = vals[Math.floor(vals.length * 0.95)], nb = 8, step = (hi - lo) / nb || 1;
-    var buckets = new Array(nb).fill(0);
-    vals.forEach(function (v) { var b = Math.min(nb - 1, Math.floor((v - lo) / step)); buckets[b]++; });
-    var fmt = function (n) { return n >= 1000 ? (n / 1000).toFixed(0) + "k" : n.toFixed(0); };
-    var entries = buckets.map(function (c, b) { return [fmt(lo + b * step) + "–" + fmt(lo + (b + 1) * step), c]; });
-    bars(host, entries, nb, true);
+    svg.push('<path d="' + area + '" fill="var(--blue)" fill-opacity="0.10"/>');
+    svg.push('<polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>');
+    // ~6 date labels along the axis
+    var ticks = Math.min(6, days.length);
+    for (var t = 0; t < ticks; t++) {
+      var di = Math.round(t * (days.length - 1) / (ticks - 1));
+      var anc = t === 0 ? "start" : (t === ticks - 1 ? "end" : "middle");
+      svg.push('<text x="' + X(di).toFixed(1) + '" y="' + (H - 8) + '" font-size="9" fill="var(--ink-3)" text-anchor="' + anc + '">' + days[di].slice(5) + '</text>');
+    }
+    host.innerHTML = svg.join("");
   }
 
   // ── results list ──────────────────────────────────────────────────────

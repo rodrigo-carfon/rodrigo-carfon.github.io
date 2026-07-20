@@ -55,6 +55,7 @@
   /* charts */
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
   @media (max-width: 760px){ .charts { grid-template-columns: 1fr; } }
+  .chart-wide { grid-column: 1 / -1; }
   .chart-tile h3 { font-size: 13px; font-weight: 600; margin-bottom: .1rem; }
   .chart-tile .cap { font-size: 11px; color: var(--ink-3); font-family: var(--mono); margin-bottom: .8rem; }
   .bars { display: flex; flex-direction: column; gap: 6px; }
@@ -161,9 +162,8 @@
         <div class="tile chart-tile"><h3>Por área</h3><div class="cap">áreas com mais vagas</div><div class="bars" id="c-area"></div></div>
         <div class="tile chart-tile"><h3>Por senioridade</h3><div class="cap">distribuição de nível</div><div class="bars" id="c-seniority"></div></div>
         <div class="tile chart-tile"><h3>Por portal</h3><div class="cap">de onde vêm as vagas</div><div class="bars" id="c-source"></div></div>
-        <div class="tile chart-tile"><h3>Novas por dia</h3><div class="cap">primeira vez vistas (janela)</div><div id="c-timeline"></div></div>
         <div class="tile chart-tile"><h3>Empresas que mais publicam</h3><div class="cap">top 15</div><div class="bars" id="c-company"></div></div>
-        <div class="tile chart-tile"><h3>Faixa salarial</h3><div class="cap">onde há salário informado</div><div id="c-salary"></div></div>
+        <div class="tile chart-tile chart-wide"><h3>Vagas publicadas por dia</h3><div class="cap">por data de publicação (janela de 90 dias)</div><div id="c-timeline"></div></div>
       </div>
     </section>
 

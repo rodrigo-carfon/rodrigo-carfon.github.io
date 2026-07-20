@@ -26,8 +26,8 @@ TERMS = [
     "estágio", "jovem aprendiz", "analista", "coordenador", "gerente",
 ]
 
-PAGE = 40
-MAX_OFFSET = 120  # up to 4 pages per term
+PAGE = 100                       # the endpoint accepts up to 100/page
+MAX_OFFSET = 400                 # offset genuinely advances → 5 pages of 100 per term
 
 
 def fetch():

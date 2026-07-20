@@ -98,8 +98,13 @@ def upsert(conn, jobs, today=None):
     return inserted
 
 
-def export_snapshot(conn, out_path, window_days=90, today=None, max_raw_mb=6):
-    """Write the dictionary-encoded 90-day JSON the dashboard reads."""
+def export_snapshot(conn, out_path, window_days=90, today=None, max_jobs=15000, max_raw_mb=9):
+    """Write the dictionary-encoded JSON the dashboard reads.
+
+    The durable base (jobs.db) keeps every job; the served snapshot is bounded to
+    the `max_jobs` freshest jobs inside the `window_days` window, so the file the
+    browser downloads and filters stays small and fast even as the base grows.
+    """
     today = today or date.today().isoformat()
     cutoff = (date.fromisoformat(today) - timedelta(days=window_days)).isoformat()
     rows = conn.execute("""
@@ -108,8 +113,9 @@ def export_snapshot(conn, out_path, window_days=90, today=None, max_raw_mb=6):
                first_seen_date, url, skills, dedupe_key
         FROM jobs
         WHERE MAX(COALESCE(published_date,''), first_seen_date) >= ?
-        ORDER BY first_seen_date DESC, published_date DESC
-    """, (cutoff,)).fetchall()
+        ORDER BY MAX(COALESCE(published_date,''), first_seen_date) DESC
+        LIMIT ?
+    """, (cutoff, max_jobs)).fetchall()
 
     # seen_on_n_portals: distinct sources per dedupe_key across the window
     portals = {}
@@ -152,8 +158,15 @@ def export_snapshot(conn, out_path, window_days=90, today=None, max_raw_mb=6):
         cols["smin"].append(round(smin) if smin else None)
         cols["smax"].append(round(smax) if smax else None)
 
+    total_window = conn.execute("""
+        SELECT COUNT(*) FROM jobs
+        WHERE MAX(COALESCE(published_date,''), first_seen_date) >= ?
+    """, (cutoff,)).fetchone()[0]
+    total_base = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
+
     payload = {"generated": today, "window_days": window_days,
-               "count": len(rows), "dict": dicts, "jobs": cols}
+               "count": len(rows), "total_window": total_window,
+               "total_base": total_base, "dict": dicts, "jobs": cols}
     text = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
     raw_mb = len(text.encode("utf-8")) / 1_048_576

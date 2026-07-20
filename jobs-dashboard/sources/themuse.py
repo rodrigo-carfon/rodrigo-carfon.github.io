@@ -8,7 +8,7 @@ from ._http import get_json
 from ._common import strip_html, iso_date, work_model_pt, job
 
 BASE = "https://www.themuse.com/api/public/jobs"
-MAX_PAGES = 8
+MAX_PAGES = 45   # the feed exposes ~20k pages; 45 × 20 ≈ 900 recent jobs
 
 
 def fetch():

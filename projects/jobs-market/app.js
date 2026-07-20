@@ -28,8 +28,12 @@
     buildFacetChips();
     buildRecencyChips();
     wire();
-    $("meta").textContent = "atualizado em " + GEN + " · " + N.toLocaleString("pt-BR") +
-      " vagas na janela de " + data.window_days + " dias · fonte: pipeline diário (GitHub Actions)";
+    var base = data.total_base || N, win = data.total_window || N;
+    var shown = (N < win)
+      ? N.toLocaleString("pt-BR") + " mais recentes de " + win.toLocaleString("pt-BR") + " na janela de " + data.window_days + " dias"
+      : N.toLocaleString("pt-BR") + " vagas na janela de " + data.window_days + " dias";
+    $("meta").textContent = "atualizado em " + GEN + " · " + shown +
+      " · base de " + base.toLocaleString("pt-BR") + " vagas · pipeline diário (GitHub Actions)";
     $("loading").style.display = "none";
     $("app").style.display = "block";
     apply();

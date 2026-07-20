@@ -12,11 +12,22 @@ MARKET = "Global remote"
 
 def fetch_remotive():
     out = []
-    for cat in ("data", "marketing", "all-others"):
-        d = get_json(f"https://remotive.com/api/remote-jobs?category={cat}")
+    # Remotive currently rate-limits and returns the same ~42 latest jobs for any
+    # category from a given IP, so a few calls are enough (dedup collapses them).
+    cats = ("software-development", "data", "marketing", "all-others")
+    seen = set()
+    for cat in cats:
+        try:
+            d = get_json(f"https://remotive.com/api/remote-jobs?category={cat}")
+        except Exception as e:
+            print(f"    [remotive:{cat}] {str(e)[:40]}"); continue
         for j in d.get("jobs", []):
+            jid = j.get("id") or j.get("url")
+            if jid in seen:
+                continue
+            seen.add(jid)
             out.append(job(
-                "remotive", j.get("id") or j.get("url"),
+                "remotive", jid,
                 title=j.get("title", ""), company=j.get("company_name", ""),
                 url=j.get("url", ""), work_model="remoto",
                 country=j.get("candidate_required_location", "") or "", market=MARKET,
@@ -30,20 +41,36 @@ def fetch_remotive():
 
 
 def fetch_jobicy():
-    d = get_json("https://jobicy.com/api/v2/remote-jobs?count=200")
-    out = []
-    for j in d.get("jobs", []):
-        ind = j.get("jobIndustry")
-        cats = ind if isinstance(ind, list) else ([ind] if ind else [])
-        out.append(job(
-            "jobicy", j.get("id") or j.get("url"),
-            title=j.get("jobTitle", ""), company=j.get("companyName", ""),
-            url=j.get("url", ""), work_model="remoto",
-            country=j.get("jobGeo", "") or "", market=MARKET,
-            published_date=iso_date(j.get("pubDate")),
-            description=strip_html((j.get("jobExcerpt", "") or "")),
-            categories=[str(c) for c in cats if c],
-        ))
+    # Jobicy caps at 100 jobs/call, but different industry filters return
+    # different subsets — so sweep several industries and dedup.
+    out, seen = [], set()
+    industries = [None, "dev", "data-science", "marketing", "business",
+                  "hr", "supporting", "management", "copywriting", "seo"]
+    for ind in industries:
+        url = "https://jobicy.com/api/v2/remote-jobs?count=100"
+        if ind:
+            url += f"&industry={ind}"
+        try:
+            d = get_json(url)
+        except Exception as e:
+            print(f"    [jobicy:{ind}] {str(e)[:40]}"); continue
+        for j in d.get("jobs", []):
+            jid = j.get("id") or j.get("url")
+            if jid in seen:
+                continue
+            seen.add(jid)
+            ji = j.get("jobIndustry")
+            cats = ji if isinstance(ji, list) else ([ji] if ji else [])
+            out.append(job(
+                "jobicy", jid,
+                title=j.get("jobTitle", ""), company=j.get("companyName", ""),
+                url=j.get("url", ""), work_model="remoto",
+                country=j.get("jobGeo", "") or "", market=MARKET,
+                published_date=iso_date(j.get("pubDate")),
+                description=strip_html((j.get("jobExcerpt", "") or "")),
+                categories=[str(c) for c in cats if c],
+            ))
+        time.sleep(0.3)
     return out
 
 
@@ -70,9 +97,11 @@ def fetch_remoteok():
 
 
 def fetch_himalayas():
+    # The API hard-caps limit at 20/call, but offset advances (totalCount ~100k),
+    # so page through it 20 at a time.
     out = []
-    for off in (0, 50, 100, 150):
-        d = get_json(f"https://himalayas.app/jobs/api?limit=50&offset={off}")
+    for off in range(0, 400, 20):
+        d = get_json(f"https://himalayas.app/jobs/api?limit=20&offset={off}")
         jobs = d.get("jobs", [])
         for j in jobs:
             restr = j.get("locationRestrictions") or []
@@ -87,9 +116,9 @@ def fetch_himalayas():
                 skills=[t for t in (j.get("categories") or []) if t][:8],
                 description=strip_html(j.get("excerpt", "")),
             ))
-        if len(jobs) < 50:
+        if len(jobs) < 20:
             break
-        time.sleep(0.3)
+        time.sleep(0.25)
     return out
 
 
@@ -111,7 +140,7 @@ def fetch_workingnomads():
 
 def fetch_arbeitnow():
     out = []
-    for page in (1, 2, 3):
+    for page in range(1, 9):   # ~100/page
         d = get_json(f"https://www.arbeitnow.com/api/job-board-api?page={page}")
         data = d.get("data", [])
         for j in data:

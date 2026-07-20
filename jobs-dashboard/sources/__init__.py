@@ -4,7 +4,7 @@
 All endpoints are public and key-free. (Adzuna, which needed a free key, was left
 out by choice — its adapter can be re-added later if a key is ever provided.)
 """
-from . import gupy, themuse, remote_boards
+from . import gupy, themuse, remote_boards, ats_boards, wwr
 
 REGISTRY = [
     ("gupy", gupy.fetch),
@@ -15,4 +15,8 @@ REGISTRY = [
     ("himalayas", remote_boards.fetch_himalayas),
     ("workingnomads", remote_boards.fetch_workingnomads),
     ("arbeitnow", remote_boards.fetch_arbeitnow),
+    ("weworkremotely", wwr.fetch),
+    ("greenhouse", ats_boards.fetch_greenhouse),
+    ("lever", ats_boards.fetch_lever),
+    ("ashby", ats_boards.fetch_ashby),
 ]

@@ -108,7 +108,7 @@
       if (fs.seniority.size && !fs.seniority.has(J.sen[i])) continue;
       if (fs.work_model.size && !fs.work_model.has(J.wm[i])) continue;
       if (fs.market.size && !fs.market.has(J.mk[i])) continue;
-      if (cutoff && J.seen[i] < cutoff) continue;
+      if (cutoff && (J.pub[i] || J.seen[i]) < cutoff) continue;   // by publication date
       if (q && searchable[i].indexOf(q) === -1) continue;
       filtered.push(i);
     }

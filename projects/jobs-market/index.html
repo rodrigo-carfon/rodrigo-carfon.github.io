@@ -64,6 +64,15 @@
   .seg-btn { font-family: var(--mono); font-size: 12px; padding: 5px 11px; background: var(--tile-2); color: var(--ink-2); border: none; cursor: pointer; }
   .seg-btn + .seg-btn { border-left: 1px solid var(--line); }
   .seg-btn.on { background: var(--blue); color: #fff; }
+  .xtab-wrap { overflow-x: auto; }
+  .xtab { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 12px; }
+  .xtab th, .xtab td { padding: 6px 9px; white-space: nowrap; text-align: right; }
+  .xtab thead th { color: var(--ink-3); font-weight: 500; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+  .xtab thead th:first-child { border: none; }
+  .xtab tbody th { text-align: left; color: var(--ink-2); font-weight: 600; }
+  .xtab tbody td { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .xtab tbody td.z { color: transparent; }
+  .xtab tbody tr:hover th { color: var(--blue); }
   .bars { display: flex; flex-direction: column; gap: 6px; }
   .bar-row { display: grid; grid-template-columns: 130px 1fr 42px; gap: 8px; align-items: center; font-size: 12px; }
   .bar-row .lab { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -390,7 +399,7 @@
   // hmMode "area": each column (area) is normalized by its total —
   //   the cell is "of this area's jobs, how many come from this portal".
   var hmMode = "portal";
-  function shortArea(s) { return s === "engenharia de software" ? "eng. de software" : s; }
+  function shortArea(s) { return s === "engenharia de software" ? "eng. software" : s; }
   function heatmap() {
     var host = $("c-heat");
     var nS = D.source.length, nA = D.area.length, i, j, k;
@@ -416,35 +425,21 @@
     rows.forEach(function (s) { cols.forEach(function (a) { var v = val(s, a); if (v > maxV) maxV = v; }); });
     if (maxV <= 0) maxV = 1;
 
-    var LW = 122, TH = 74, RH = 26, W = 900, PAD = 6;
-    var plotW = W - LW - PAD, cw = plotW / cols.length;
-    var H = TH + rows.length * RH + PAD;
-    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" font-family="Geist Mono, monospace">'];
-    // column headers (áreas), angled up-left so they clear the grid
-    cols.forEach(function (a, ci) {
-      var cx = LW + (ci + 0.5) * cw, cy = TH - 8;
-      svg.push('<text x="' + cx.toFixed(1) + '" y="' + cy + '" font-size="10" fill="var(--ink-3)" ' +
-        'text-anchor="end" transform="rotate(40 ' + cx.toFixed(1) + ' ' + cy + ')">' + esc(shortArea(D.area[a])) + '</text>');
+    function cell(v) {
+      if (v <= 0) return '<td class="z">·</td>';
+      var a = (0.05 + 0.5 * (v / maxV)).toFixed(3);
+      return '<td style="background:rgba(47,107,237,' + a + ')">' + Math.round(v * 100) + '%</td>';
+    }
+    var h = ['<div class="xtab-wrap"><table class="xtab"><thead><tr><th></th>'];
+    cols.forEach(function (a) { h.push('<th>' + esc(shortArea(D.area[a])) + '</th>'); });
+    h.push('</tr></thead><tbody>');
+    rows.forEach(function (s) {
+      h.push('<tr><th>' + esc(D.source[s]) + '</th>');
+      cols.forEach(function (a) { h.push(cell(val(s, a))); });
+      h.push('</tr>');
     });
-    // rows
-    rows.forEach(function (s, ri) {
-      var ry = TH + ri * RH;
-      svg.push('<text x="' + (LW - 8) + '" y="' + (ry + RH / 2 + 3).toFixed(1) + '" font-size="11" ' +
-        'fill="var(--ink-2)" text-anchor="end">' + esc(D.source[s]) + '</text>');
-      cols.forEach(function (a, ci) {
-        var v = val(s, a), ratio = v / maxV;
-        var x = LW + ci * cw, op = v > 0 ? (0.08 + 0.88 * ratio).toFixed(3) : 0.02;
-        svg.push('<rect x="' + (x + 1).toFixed(1) + '" y="' + (ry + 1) + '" width="' + (cw - 2).toFixed(1) +
-          '" height="' + (RH - 2) + '" rx="2" fill="var(--blue)" fill-opacity="' + op + '"/>');
-        if (v >= 0.05 && cw > 30) {
-          svg.push('<text x="' + (x + cw / 2).toFixed(1) + '" y="' + (ry + RH / 2 + 3).toFixed(1) +
-            '" font-size="9" text-anchor="middle" fill="' + (ratio > 0.5 ? "#fff" : "var(--ink-2)") + '">' +
-            Math.round(v * 100) + '%</text>');
-        }
-      });
-    });
-    svg.push('</svg>');
-    host.innerHTML = svg.join("");
+    h.push('</tbody></table></div>');
+    host.innerHTML = h.join("");
   }
   function bars(host, entries, topN, teal) {
     entries = entries.slice(0, topN);

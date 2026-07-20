@@ -58,6 +58,12 @@
   .chart-wide { grid-column: 1 / -1; }
   .chart-tile h3 { font-size: 13px; font-weight: 600; margin-bottom: .1rem; }
   .chart-tile .cap { font-size: 11px; color: var(--ink-3); font-family: var(--mono); margin-bottom: .8rem; }
+  .heat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: .8rem; }
+  .heat-head .cap { margin-bottom: 0; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+  .seg-btn { font-family: var(--mono); font-size: 12px; padding: 5px 11px; background: var(--tile-2); color: var(--ink-2); border: none; cursor: pointer; }
+  .seg-btn + .seg-btn { border-left: 1px solid var(--line); }
+  .seg-btn.on { background: var(--blue); color: #fff; }
   .bars { display: flex; flex-direction: column; gap: 6px; }
   .bar-row { display: grid; grid-template-columns: 130px 1fr 42px; gap: 8px; align-items: center; font-size: 12px; }
   .bar-row .lab { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -144,6 +150,19 @@
         <div class="tile chart-tile"><h3>Por senioridade</h3><div class="cap">distribuição de nível</div><div class="bars" id="c-seniority"></div></div>
         <div class="tile chart-tile"><h3>Por portal</h3><div class="cap">de onde vêm as vagas</div><div class="bars" id="c-source"></div></div>
         <div class="tile chart-tile"><h3>Empresas que mais publicam</h3><div class="cap">top 15</div><div class="bars" id="c-company"></div></div>
+        <div class="tile chart-tile chart-wide">
+          <div class="heat-head">
+            <div>
+              <h3>Concentração por portal × área</h3>
+              <div class="cap">quais portais concentram vagas em cada área</div>
+            </div>
+            <div class="seg" id="heat-mode">
+              <button type="button" class="seg-btn on" data-m="portal">% do portal</button>
+              <button type="button" class="seg-btn" data-m="area">% da área</button>
+            </div>
+          </div>
+          <div id="c-heat"></div>
+        </div>
         <div class="tile chart-tile chart-wide"><h3>Vagas publicadas por dia</h3><div class="cap">por data de publicação (janela de 90 dias)</div><div id="c-timeline"></div></div>
       </div>
     </section>
@@ -291,6 +310,13 @@
       }, 150);
     });
     $("sort").addEventListener("change", function (e) { sortKey = e.target.value; page = 0; render(); });
+    [].forEach.call($("heat-mode").children, function (b) {
+      b.addEventListener("click", function () {
+        hmMode = b.getAttribute("data-m");
+        [].forEach.call($("heat-mode").children, function (c) { c.classList.toggle("on", c === b); });
+        heatmap();
+      });
+    });
     $("clear").addEventListener("click", function () {
       filters.q = ""; filters.recency = null; $("q").value = "";
       FACETS.forEach(function (f) { filters[f].clear(); });
@@ -353,7 +379,72 @@
     bars($("c-seniority"), tally("sen", "seniority"), 8, true);
     bars($("c-source"), tally("src", "source"), 9);
     companyBars();
+    heatmap();
     timeline();
+  }
+
+  // ── portal × área heatmap ─────────────────────────────────────────────
+  // Answers "which portals concentrate their jobs in which areas?".
+  // hmMode "portal": each row (portal) is normalized by its own total —
+  //   the cell is "of this portal's jobs, how many are in this area".
+  // hmMode "area": each column (area) is normalized by its total —
+  //   the cell is "of this area's jobs, how many come from this portal".
+  var hmMode = "portal";
+  function shortArea(s) { return s === "engenharia de software" ? "eng. de software" : s; }
+  function heatmap() {
+    var host = $("c-heat");
+    var nS = D.source.length, nA = D.area.length, i, j, k;
+    var mat = [], rowT = [], colT = [];
+    for (i = 0; i < nS; i++) { mat.push(new Array(nA).fill(0)); rowT.push(0); }
+    for (j = 0; j < nA; j++) colT.push(0);
+    for (k = 0; k < filtered.length; k++) {
+      var s = J.src[filtered[k]], a = J.area[filtered[k]];
+      mat[s][a]++; rowT[s]++; colT[a]++;
+    }
+    var rows = [], cols = [];
+    for (i = 0; i < nS; i++) if (rowT[i] > 0) rows.push(i);
+    for (j = 0; j < nA; j++) if (colT[j] > 0) cols.push(j);
+    rows.sort(function (x, y) { return rowT[y] - rowT[x]; });
+    cols.sort(function (x, y) { return colT[y] - colT[x]; });
+    if (!rows.length || !cols.length) { host.innerHTML = '<div class="chart-empty">sem dados</div>'; return; }
+
+    function val(s, a) {
+      var c = mat[s][a];
+      return hmMode === "portal" ? (rowT[s] ? c / rowT[s] : 0) : (colT[a] ? c / colT[a] : 0);
+    }
+    var maxV = 0;
+    rows.forEach(function (s) { cols.forEach(function (a) { var v = val(s, a); if (v > maxV) maxV = v; }); });
+    if (maxV <= 0) maxV = 1;
+
+    var LW = 122, TH = 74, RH = 26, W = 900, PAD = 6;
+    var plotW = W - LW - PAD, cw = plotW / cols.length;
+    var H = TH + rows.length * RH + PAD;
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" font-family="Geist Mono, monospace">'];
+    // column headers (áreas), angled up-left so they clear the grid
+    cols.forEach(function (a, ci) {
+      var cx = LW + (ci + 0.5) * cw, cy = TH - 8;
+      svg.push('<text x="' + cx.toFixed(1) + '" y="' + cy + '" font-size="10" fill="var(--ink-3)" ' +
+        'text-anchor="end" transform="rotate(40 ' + cx.toFixed(1) + ' ' + cy + ')">' + esc(shortArea(D.area[a])) + '</text>');
+    });
+    // rows
+    rows.forEach(function (s, ri) {
+      var ry = TH + ri * RH;
+      svg.push('<text x="' + (LW - 8) + '" y="' + (ry + RH / 2 + 3).toFixed(1) + '" font-size="11" ' +
+        'fill="var(--ink-2)" text-anchor="end">' + esc(D.source[s]) + '</text>');
+      cols.forEach(function (a, ci) {
+        var v = val(s, a), ratio = v / maxV;
+        var x = LW + ci * cw, op = v > 0 ? (0.08 + 0.88 * ratio).toFixed(3) : 0.02;
+        svg.push('<rect x="' + (x + 1).toFixed(1) + '" y="' + (ry + 1) + '" width="' + (cw - 2).toFixed(1) +
+          '" height="' + (RH - 2) + '" rx="2" fill="var(--blue)" fill-opacity="' + op + '"/>');
+        if (v >= 0.05 && cw > 30) {
+          svg.push('<text x="' + (x + cw / 2).toFixed(1) + '" y="' + (ry + RH / 2 + 3).toFixed(1) +
+            '" font-size="9" text-anchor="middle" fill="' + (ratio > 0.5 ? "#fff" : "var(--ink-2)") + '">' +
+            Math.round(v * 100) + '%</text>');
+        }
+      });
+    });
+    svg.push('</svg>');
+    host.innerHTML = svg.join("");
   }
   function bars(host, entries, topN, teal) {
     entries = entries.slice(0, topN);

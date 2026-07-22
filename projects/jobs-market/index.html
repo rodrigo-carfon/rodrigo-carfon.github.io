@@ -15,6 +15,9 @@
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
   /* Page-local only — structure comes from the shared design system. */
+  /* No automatic scroll anchoring: filter clicks resize the charts, and we
+     correct the scroll ourselves in apply() — let the two not fight. */
+  html { overflow-anchor: none; }
   .hero-wrap { padding: 2.4rem 0 1.4rem; }
 
   .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap); }
@@ -288,7 +291,7 @@
         chip.onclick = function () {
           if (filters[facet].has(di)) { filters[facet].delete(di); chip.classList.remove("on"); }
           else { filters[facet].add(di); chip.classList.add("on"); }
-          page = 0; apply();
+          page = 0; apply(true);
         };
         host.appendChild(chip);
       });
@@ -305,7 +308,7 @@
       chip.onclick = function () {
         filters.recency = o[1];
         [].forEach.call(host.children, function (c) { c.classList.remove("on"); });
-        chip.classList.add("on"); page = 0; apply();
+        chip.classList.add("on"); page = 0; apply(true);
       };
       host.appendChild(chip);
     });
@@ -315,7 +318,7 @@
     var t;
     $("q").addEventListener("input", function (e) {
       clearTimeout(t); t = setTimeout(function () {
-        filters.q = e.target.value.trim().toLowerCase(); page = 0; apply();
+        filters.q = e.target.value.trim().toLowerCase(); page = 0; apply(true);
       }, 150);
     });
     $("sort").addEventListener("change", function (e) { sortKey = e.target.value; page = 0; render(); });
@@ -331,7 +334,7 @@
       FACETS.forEach(function (f) { filters[f].clear(); });
       document.querySelectorAll(".fchips .fchip.on").forEach(function (c) { c.classList.remove("on"); });
       [].forEach.call($("f-recency").children, function (c, i) { c.classList.toggle("on", i === 0); });
-      page = 0; apply();
+      page = 0; apply(true);
     });
     $("prev").addEventListener("click", function () { if (page > 0) { page--; render(); scrollTop(); } });
     $("next").addEventListener("click", function () {
@@ -340,7 +343,14 @@
   function scrollTop() { $("results").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ── filter → filtered index array ─────────────────────────────────────
-  function apply() {
+  // keepScroll: pin the filters panel in place. Re-rendering the charts above
+  // it changes their height (fewer bars / table rows), which would otherwise
+  // shove the page up or down under the cursor. We measure the panel's position
+  // before and after the re-render and correct the scroll by the delta.
+  function apply(keepScroll) {
+    var anchorEl = keepScroll ? $("filters") : null;
+    // Desired viewport offset of the filters panel (where it sits right now).
+    var viewBefore = anchorEl ? anchorEl.getBoundingClientRect().top : 0;
     var cutoff = filters.recency == null ? null : daysAgo(filters.recency);
     var q = filters.q, fs = filters;
     filtered = [];
@@ -356,6 +366,17 @@
     }
     $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
     renderCharts(); render();
+    if (anchorEl) {
+      // Absolute doc-Y of the panel now, minus the offset it should keep, is the
+      // scrollY that pins it in place — robust to the browser clamping scroll
+      // when the page shrinks. Force it instant (shared CSS scroll-behavior is
+      // smooth, which would animate and visibly show the nudge).
+      var target = anchorEl.getBoundingClientRect().top + window.scrollY - viewBefore;
+      var he = document.documentElement, prev = he.style.scrollBehavior;
+      he.style.scrollBehavior = "auto";
+      window.scrollTo(0, target);
+      he.style.scrollBehavior = prev;
+    }
   }
 
   // ── KPIs ──────────────────────────────────────────────────────────────

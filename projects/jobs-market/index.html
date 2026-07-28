@@ -407,7 +407,7 @@
   function renderCharts() {
     bars($("c-area"), tally("area", "area"), 11);
     bars($("c-seniority"), tally("sen", "seniority"), 8, true);
-    bars($("c-source"), tally("src", "source"), 9);
+    bars($("c-source"), tally("src", "source"), 20);   // show every portal (currently 12)
     companyBars();
     heatmap();
     timeline();

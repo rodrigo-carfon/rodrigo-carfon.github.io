@@ -1,6 +1,6 @@
 # Job-Market Explorer — daily multi-portal jobs pipeline
 
-**A data project: eight public job-portal APIs → a normalized, classified base in
+**A data project: twelve public job-portal APIs → a normalized, classified base in
 SQLite → an interactive dashboard.** Every posting is fetched daily, deduplicated,
 tagged with an área and a seniority level, and kept for a 90-day window.
 
@@ -9,7 +9,7 @@ refreshed daily by a scheduled workflow, no server.
 
 ## What it does
 
-Turns nine unrelated public job APIs into one queryable, comparable dataset:
+Turns twelve unrelated public job sources into one queryable, comparable dataset:
 
 1. **Collect** — one adapter per portal fetches postings and maps them to a single
    normalized schema, so the pipeline never sees portal-specific fields.
@@ -28,6 +28,8 @@ Turns nine unrelated public job APIs into one queryable, comparable dataset:
 | **Gupy** | Brazil | the BR anchor — public `employability-portal` endpoint |
 | **The Muse** | Global | structured seniority (`levels[]`) + category |
 | **Remotive · Jobicy · RemoteOK · Himalayas · Working Nomads · Arbeitnow** | Global remote | six remote-job boards; RemoteOK also carries salary |
+| **We Work Remotely** | Global remote | no JSON API — public RSS feed per category, all-remote by definition |
+| **Greenhouse · Lever · Ashby** | Global / BR | public key-free ATS boards, pulled from a curated list of company slugs and capped per company; adds named-company depth on top of the aggregators |
 
 _Adzuna (free key, BR breadth + salary) has an adapter slot but is left out until a
 key is provided — the registry drops it cleanly._
@@ -35,7 +37,7 @@ key is provided — the registry drops it cleanly._
 ## Architecture
 
 ```
-9 portal APIs                            ← public, key-free
+12 portal APIs                           ← public, key-free
      │  sources/*.py  (one adapter each → common schema)
      ▼
 pipeline.py  ──►  fetch (isolated per source) → classify → store → export
@@ -73,7 +75,9 @@ jobs-dashboard/
 │   ├── _common.py         # normalized-job builder + shared helpers
 │   ├── gupy.py            # Brazil
 │   ├── themuse.py         # structured seniority/category
-│   └── remote_boards.py   # the six remote boards
+│   ├── remote_boards.py   # the six remote-board aggregators
+│   ├── wwr.py             # We Work Remotely (RSS)
+│   └── ats_boards.py      # Greenhouse / Lever / Ashby, by company slug
 ├── requirements.txt       # (empty — standard library only)
 └── data/jobs.db           # generated: full history (do not hand-edit)
 

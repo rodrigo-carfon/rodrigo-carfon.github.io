@@ -35,17 +35,20 @@ def iso_date(value):
     return m.group(1) if m else ""
 
 
-def work_model_pt(remote_flag=None, raw=None):
-    """Normalize a work-model to remoto / híbrido / presencial / '' (unknown)."""
+def work_model_label(remote_flag=None, raw=None):
+    """Normalize a work-model to remote / hybrid / on-site / '' (unknown).
+
+    The labels are English (the dashboard renders them as-is); the strings we
+    match against stay bilingual, since BR portals describe it in Portuguese."""
     if remote_flag is True:
-        return "remoto"
+        return "remote"
     t = (raw or "").lower()
     if any(k in t for k in ("remote", "remoto", "anywhere", "home office", "home-office")):
-        return "remoto"
+        return "remote"
     if any(k in t for k in ("hybrid", "híbrido", "hibrido")):
-        return "híbrido"
+        return "hybrid"
     if any(k in t for k in ("on-site", "onsite", "presencial", "in office", "in-office")):
-        return "presencial"
+        return "on-site"
     return ""
 
 

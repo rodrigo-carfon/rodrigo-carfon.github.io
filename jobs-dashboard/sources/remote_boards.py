@@ -5,7 +5,7 @@ every posting and classify later. Each fetch_* returns normalized job dicts.
 """
 import time
 from ._http import get_json
-from ._common import strip_html, iso_date, work_model_pt, job
+from ._common import strip_html, iso_date, work_model_label, job
 
 MARKET = "Global remote"
 
@@ -29,7 +29,7 @@ def fetch_remotive():
             out.append(job(
                 "remotive", jid,
                 title=j.get("title", ""), company=j.get("company_name", ""),
-                url=j.get("url", ""), work_model="remoto",
+                url=j.get("url", ""), work_model="remote",
                 country=j.get("candidate_required_location", "") or "", market=MARKET,
                 published_date=iso_date(j.get("publication_date")),
                 skills=[t for t in (j.get("tags") or []) if t][:8],
@@ -64,7 +64,7 @@ def fetch_jobicy():
             out.append(job(
                 "jobicy", jid,
                 title=j.get("jobTitle", ""), company=j.get("companyName", ""),
-                url=j.get("url", ""), work_model="remoto",
+                url=j.get("url", ""), work_model="remote",
                 country=j.get("jobGeo", "") or "", market=MARKET,
                 published_date=iso_date(j.get("pubDate")),
                 description=strip_html((j.get("jobExcerpt", "") or "")),
@@ -85,7 +85,7 @@ def fetch_remoteok():
             "remoteok", j.get("id"),
             title=j.get("position", ""), company=j.get("company", ""),
             url=j.get("url") or f"https://remoteok.com/remote-jobs/{j.get('id')}",
-            work_model="remoto", country="", market=MARKET,
+            work_model="remote", country="", market=MARKET,
             salary_min=smin if smin else None,
             salary_max=smax if smax else None,
             salary_currency="USD" if (smin or smax) else None,
@@ -109,7 +109,7 @@ def fetch_himalayas():
                 "himalayas", j.get("guid") or j.get("title"),
                 title=j.get("title", ""), company=j.get("companyName", ""),
                 url=j.get("applicationLink") or j.get("guid", ""),
-                work_model="remoto",
+                work_model="remote",
                 country=", ".join(restr) if isinstance(restr, list) else str(restr),
                 market=MARKET,
                 published_date=iso_date(j.get("pubDate")),
@@ -129,7 +129,7 @@ def fetch_workingnomads():
         out.append(job(
             "workingnomads", j.get("url"),
             title=j.get("title", ""), company=j.get("company_name", ""),
-            url=j.get("url", ""), work_model=work_model_pt(raw=j.get("location")),
+            url=j.get("url", ""), work_model=work_model_label(raw=j.get("location")),
             country=j.get("location", "") or "", market=MARKET,
             published_date=iso_date(j.get("pub_date")),
             description=strip_html(j.get("description", "")),
@@ -148,7 +148,7 @@ def fetch_arbeitnow():
                 "arbeitnow", j.get("slug") or j.get("url"),
                 title=j.get("title", ""), company=j.get("company_name", ""),
                 url=j.get("url", ""),
-                work_model="remoto" if j.get("remote") else work_model_pt(raw=j.get("location")),
+                work_model="remote" if j.get("remote") else work_model_label(raw=j.get("location")),
                 country=j.get("location", "") or "", market=MARKET,
                 published_date=iso_date(j.get("created_at")),
                 skills=[t for t in (j.get("tags") or []) if t][:8],

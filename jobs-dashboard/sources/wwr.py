@@ -7,7 +7,7 @@ import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
-from ._common import strip_html, work_model_pt, job
+from ._common import strip_html, work_model_label, job
 
 FEEDS = [
     "https://weworkremotely.com/remote-jobs.rss",                     # all categories, most recent
@@ -49,7 +49,7 @@ def fetch():
             cat = (it.findtext("category") or "").strip()
             out.append(job("weworkremotely", link,
                 title=title, company=company, url=link,
-                work_model="remoto",
+                work_model="remote",
                 country=region or (it.findtext("country") or ""),
                 market="Global remote",
                 published_date=_rfc822(it.findtext("pubDate") or ""),

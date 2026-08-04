@@ -5,7 +5,7 @@ over title regexes. Docs: https://www.themuse.com/developers/api/v2
 """
 import time
 from ._http import get_json
-from ._common import strip_html, iso_date, work_model_pt, job
+from ._common import strip_html, iso_date, work_model_label, job
 
 BASE = "https://www.themuse.com/api/public/jobs"
 MAX_PAGES = 45   # the feed exposes ~20k pages; 45 × 20 ≈ 900 recent jobs
@@ -27,7 +27,7 @@ def fetch():
                 "themuse", j.get("id"),
                 title=j.get("name", ""), company=company,
                 url=(j.get("refs", {}) or {}).get("landing_page", ""),
-                work_model=work_model_pt(remote, loc_txt),
+                work_model=work_model_label(remote, loc_txt),
                 city=locs[0] if locs else "",
                 country=("Remote" if remote else (locs[0] if locs else "")),
                 market="Global remote" if remote else "Global",

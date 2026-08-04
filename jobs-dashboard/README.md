@@ -2,7 +2,7 @@
 
 **A data project: twelve public job-portal APIs → a normalized, classified base in
 SQLite → an interactive dashboard.** Every posting is fetched daily, deduplicated,
-tagged with an área and a seniority level, and kept for a 90-day window.
+tagged with an area and a seniority level, and kept for a 90-day window.
 
 🔗 **[Live dashboard](https://rodrigo-carfon.github.io/projects/jobs-market/)** ·
 refreshed daily by a scheduled workflow, no server.
@@ -13,8 +13,8 @@ Turns twelve unrelated public job sources into one queryable, comparable dataset
 
 1. **Collect** — one adapter per portal fetches postings and maps them to a single
    normalized schema, so the pipeline never sees portal-specific fields.
-2. **Classify** — derives área-de-atuação (data, engineering, product, marketing, …)
-   and seniority (estágio → gestão) from structured hints when a portal provides
+2. **Classify** — derives area of work (data, engineering, product, marketing, …)
+   and seniority (internship → lead/management) from structured hints when a portal provides
    them, else from the title.
 3. **Store** — upserts into SQLite, stamping `first_seen`/`last_seen` and a
    cross-portal `seen_on_n_portals` signal, keeping the full history.
@@ -68,7 +68,7 @@ manual *Run workflow* button. It runs the pipeline and commits `jobs.db` +
 ```
 jobs-dashboard/
 ├── pipeline.py            # orchestrator: fetch → classify → store → export
-├── classify.py            # área + seniority taxonomy (pure functions)
+├── classify.py            # area + seniority taxonomy (pure functions)
 ├── storage.py             # SQLite schema, upsert, 90-day columnar JSON export
 ├── sources/
 │   ├── _http.py           # get_json() with retry/backoff (stdlib only)

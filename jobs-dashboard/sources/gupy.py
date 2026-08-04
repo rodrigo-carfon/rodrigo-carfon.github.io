@@ -9,7 +9,7 @@ import os
 import time
 import urllib.parse
 from ._http import get_json
-from ._common import strip_html, iso_date, work_model_pt, job
+from ._common import strip_html, iso_date, work_model_label, job
 
 API = "https://employability-portal.gupy.io/api/v1/jobs"
 HEADERS = {"Origin": "https://portal.gupy.io", "Referer": "https://portal.gupy.io/"}
@@ -52,7 +52,7 @@ def fetch():
                     title=j.get("name", ""),
                     company=j.get("careerPageName", ""),
                     url=j.get("jobUrl", ""),
-                    work_model=work_model_pt(remote, j.get("workplaceType")),
+                    work_model=work_model_label(remote, j.get("workplaceType")),
                     city=j.get("city", "") or "",
                     state=j.get("state", "") or "",
                     country="BR", market="BR",

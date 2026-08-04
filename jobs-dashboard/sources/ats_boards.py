@@ -8,7 +8,7 @@ below with any company slug that returns jobs on its ATS.
 """
 import time
 from ._http import get_json
-from ._common import strip_html, iso_date, work_model_pt, job
+from ._common import strip_html, iso_date, work_model_label, job
 
 PER_COMPANY = 120   # cap so one big board can't dominate
 
@@ -43,7 +43,7 @@ def fetch_greenhouse():
             depts = [d.get("name", "") for d in (j.get("departments") or [])]
             out.append(job("greenhouse", j.get("id"),
                 title=j.get("title", ""), company=c.replace("wildlifestudios", "Wildlife Studios").title(),
-                url=j.get("absolute_url", ""), work_model=work_model_pt(raw=loc),
+                url=j.get("absolute_url", ""), work_model=work_model_label(raw=loc),
                 city=loc, country=country, market=market,
                 published_date=iso_date(j.get("updated_at") or j.get("first_published")),
                 categories=[d for d in depts if d]))
@@ -64,7 +64,7 @@ def fetch_lever():
             country, market = _market(loc)
             out.append(job("lever", j.get("id"),
                 title=j.get("text", ""), company=c.title(),
-                url=j.get("hostedUrl", ""), work_model=work_model_pt(raw=cats.get("commitment", "") + " " + loc),
+                url=j.get("hostedUrl", ""), work_model=work_model_label(raw=cats.get("commitment", "") + " " + loc),
                 city=loc, country=country, market=market,
                 published_date=iso_date(j.get("createdAt")),
                 categories=[cats.get("department") or cats.get("team") or ""]))
@@ -86,7 +86,7 @@ def fetch_ashby():
             out.append(job("ashby", j.get("id") or j.get("jobId"),
                 title=j.get("title", ""), company=c.title(),
                 url=j.get("jobUrl") or j.get("applyUrl", ""),
-                work_model="remoto" if remote else work_model_pt(raw=loc),
+                work_model="remote" if remote else work_model_label(raw=loc),
                 city=loc, country=country, market="Global remote" if remote else market,
                 published_date=iso_date(j.get("publishedAt")),
                 categories=[j.get("department", "") or j.get("teamName", "")]))

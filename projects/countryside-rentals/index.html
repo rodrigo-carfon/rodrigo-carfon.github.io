@@ -19,35 +19,7 @@
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
   /* Page-local only — structure comes from the shared design system. */
-  /* No automatic scroll anchoring: filter clicks resize the charts, and we
-     correct the scroll ourselves in apply() — let the two not fight. */
-  html { overflow-anchor: none; }
   .hero-wrap { padding: 2.4rem 0 1.4rem; }
-
-  /* Chart marks get their own steps, separate from the UI tokens. The shared
-     palette's dark values (--blue #6d99ff, --teal #33c0af, --amber #e8a54a) sit
-     at OKLCH L .70–.77, above the .48–.67 band a mark should hold on a dark
-     surface; these are the same hues stepped down into it. Both sets were run
-     through the palette validator, all-pairs, against their own surface:
-     light #2f6bed/#0f9d8f/#e08a1e and dark #638ef3/#00aa9a/#c58421 clear the
-     lightness band, chroma floor, CVD separation (ΔE 13.0 / 14.3 protan) and
-     the normal-vision floor (22.3 / 18.3). Amber on white lands at 2.68:1,
-     below the 3:1 relief line — which is why the one amber mark on the page is
-     always directly labelled and never carries meaning by colour alone. */
-  :root { --mark-blue:#2f6bed; --mark-teal:#0f9d8f; --mark-amber:#e08a1e; --mark-dim:#79818f; }
-  @media (prefers-color-scheme: dark) {
-    :root { --mark-blue:#638ef3; --mark-teal:#00aa9a; --mark-amber:#c58421; --mark-dim:#7c8698; }
-  }
-  :root[data-theme="light"] { --mark-blue:#2f6bed; --mark-teal:#0f9d8f; --mark-amber:#e08a1e; --mark-dim:#79818f; }
-  :root[data-theme="dark"]  { --mark-blue:#638ef3; --mark-teal:#00aa9a; --mark-amber:#c58421; --mark-dim:#7c8698; }
-
-  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap); }
-  @media (max-width: 880px){ .kpis { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 520px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
-  .kpi .n { font-family: var(--mono); font-size: 1.5rem; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
-  .kpi .n.blue { color: var(--blue); } .kpi .n.teal { color: var(--teal); } .kpi .n.amber { color: var(--amber); }
-  .kpi .n small { font-size: .62em; letter-spacing: 0; }
-  .kpi .l { font-size: 11.5px; color: var(--ink-3); margin-top: .5rem; line-height: 1.35; }
 
   /* ── filters ── */
   .filters { display: flex; flex-direction: column; gap: .95rem; }
@@ -78,32 +50,8 @@
     border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer; }
   .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
 
-  /* ── charts ── */
-  .charts { display: grid; grid-template-columns: 1.45fr 1fr; gap: var(--gap); }
-  @media (max-width: 820px){ .charts { grid-template-columns: 1fr; } }
-  .chart-tile h3 { font-size: 13px; font-weight: 600; margin-bottom: .1rem; }
-  .chart-tile .cap { font-size: 11px; color: var(--ink-3); font-family: var(--mono); margin-bottom: .7rem; line-height: 1.5; }
-  .legend { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: .6rem; font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
-  .legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .scatter-wrap { position: relative; }
-  .scatter-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .tip {
-    position: absolute; pointer-events: none; opacity: 0; transition: opacity .1s;
-    background: var(--tile); border: 1px solid var(--line); border-radius: 8px;
-    box-shadow: var(--shadow); padding: .5rem .65rem; font-family: var(--mono);
-    font-size: 11px; color: var(--ink-2); line-height: 1.5; white-space: nowrap; z-index: 5;
-  }
-  .tip b { color: var(--ink); font-weight: 600; }
-  .bars { display: flex; flex-direction: column; gap: 6px; }
-  .bar-row { display: grid; grid-template-columns: 108px 1fr 34px; gap: 8px; align-items: center; font-size: 12px; }
-  .bar-row .lab { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bar-track { background: var(--tile-2); border-radius: 4px; height: 15px; overflow: hidden; }
-  .bar-fill { height: 100%; background: var(--mark-blue); border-radius: 4px; min-width: 2px; transition: width .25s; }
-  .bar-row .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
-  .chart-empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.4rem 0; text-align: center; }
-
   /* ── result cards ── */
+  .empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.4rem 0; text-align: center; }
   .results-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
   .sortsel { font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--tile-2);
     border: 1px solid var(--line); border-radius: 7px; padding: 4px 8px; }
@@ -167,7 +115,7 @@
     <a class="nav-logo" href="/"><span>~/</span>rodrigo-carfon</a>
     <ul class="nav-links">
       <li><a href="#filters">filtros</a></li>
-      <li><a href="#charts">visão geral</a></li>
+      <li><a href="#results">imóveis</a></li>
       <li><a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/rentals-dashboard" class="nav-cta">código ↗</a></li>
     </ul>
   </div>
@@ -189,41 +137,6 @@
   </section>
 
   <div id="app" style="display:none">
-
-    <!-- KPIs -->
-    <section class="kpis" style="margin-bottom:var(--section-gap)">
-      <div class="tile kpi"><div class="n blue" id="k-total">–</div><div class="l">imóveis num raio de 200 km</div></div>
-      <div class="tile kpi"><div class="n amber" id="k-new1">–</div><div class="l">apareceram hoje</div></div>
-      <div class="tile kpi"><div class="n" id="k-new7">–</div><div class="l">apareceram nos últimos 7 dias</div></div>
-      <div class="tile kpi"><div class="n teal" id="k-match">–</div><div class="l">dentro do perfil buscado</div></div>
-      <div class="tile kpi"><div class="n" id="k-rent">–</div><div class="l">aluguel mediano</div></div>
-      <div class="tile kpi"><div class="n" id="k-cities">–</div><div class="l">cidades com anúncios</div></div>
-    </section>
-
-    <!-- Charts -->
-    <section id="charts" style="margin-bottom:var(--section-gap)">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:0 .25rem .9rem">
-        <h2>Visão geral</h2>
-        <span class="note">acompanha os filtros ativos</span>
-      </div>
-      <div class="charts">
-        <div class="tile chart-tile">
-          <h3>Aluguel por tamanho do terreno</h3>
-          <div class="cap" id="sc-cap">quanto se paga por mês para cada tamanho de terreno</div>
-          <div class="scatter-wrap"><div id="c-scatter"></div><div class="tip" id="tip"></div></div>
-          <div class="legend">
-            <span><i style="background:var(--mark-dim)"></i>anúncio</span>
-            <span><i style="background:var(--mark-teal)"></i>dentro do perfil buscado</span>
-            <span><i style="background:var(--mark-amber)"></i>a chácara de hoje</span>
-          </div>
-        </div>
-        <div class="tile chart-tile">
-          <h3>Onde estão os imóveis</h3>
-          <div class="cap">cidades com mais opções de aluguel rural</div>
-          <div class="bars" id="c-city"></div>
-        </div>
-      </div>
-    </section>
 
     <!-- Filters -->
     <section id="filters" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
@@ -282,10 +195,10 @@
 </footer>
 
 <script>
-/* Countryside Rentals — client-side dashboard over the columnar data.json.
+/* Countryside Rentals — client-side search over the columnar data.json.
    Inlined (not a separate app.js) so the markup and its logic always deploy
    together — a cached old script against new markup can't happen.
-   No framework, no chart library. */
+   No framework. Filter, sort, look at the photos, open the ad — nothing else. */
 (function () {
   "use strict";
   var D, L, N, GEN;                  // dict, columns, count, generated date
@@ -295,11 +208,6 @@
   var page = 0, PAGE = 24;
   var filtered = [];
 
-  // The rental this whole search exists to replace. Drawn on the scatter as the
-  // reference point, so every other listing is read against it rather than
-  // against an abstract average.
-  var CURRENT = { rent: 10000, land: 6000, label: "a chácara de hoje" };
-
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return (s || "").replace(/[&<>"]/g, function (c) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
@@ -307,8 +215,6 @@
   var brl = function (v) { return v == null ? "–" : "R$ " + Math.round(v).toLocaleString("pt-BR"); };
   var daysAgo = function (n) { var d = new Date(GEN); d.setDate(d.getDate() - n);
     return d.toISOString().slice(0, 10); };
-  function median(a) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; });
-    return s[Math.floor(s.length / 2)]; }
 
   // ── numeric range facets ──────────────────────────────────────────────
   // Rent and land are continuous; chips need buckets. The rent edges are the
@@ -339,7 +245,6 @@
     }
     buildChips();
     wire();
-    renderKpis();
     $("meta").textContent = "atualizado em " + GEN.split("-").reverse().join("/") + " · " +
       N.toLocaleString("pt-BR") + " imóveis num raio de " + data.radius_km +
       " km de " + data.origin + " · " + (data.total_base || N).toLocaleString("pt-BR") +
@@ -356,7 +261,7 @@
     var c = document.createElement("span");
     c.className = "fchip" + (cls ? " " + cls : "");
     c.innerHTML = esc(label) + (count != null ? '<span class="c">' + count + "</span>" : "");
-    c.onclick = function () { onToggle(c); page = 0; apply(true); };
+    c.onclick = function () { onToggle(c); page = 0; apply(); };
     host.appendChild(c);
     return c;
   }
@@ -409,10 +314,18 @@
       filters.only = !filters.only; el.classList.toggle("on", filters.only);
     }, "match");
 
+    // These carry counts: with the KPI row gone, "how many turned up today" —
+    // the whole point of running this daily — has to live somewhere, and the
+    // chip that filters to it is the honest place for it.
     var opts = [["qualquer data", null], ["hoje", 0], ["7 dias", 7], ["30 dias", 30]];
     var host = $("f-recency");
     opts.forEach(function (o, idx) {
-      var c = chip(host, o[0], null, function (el) {
+      var n = null;
+      if (o[1] != null) {
+        var cut = daysAgo(o[1]); n = 0;
+        for (var i = 0; i < N; i++) if (L.seen[i] >= cut) n++;
+      }
+      var c = chip(host, o[0], n, function (el) {
         filters.recency = o[1];
         [].forEach.call(host.children, function (x) { x.classList.remove("on"); });
         el.classList.add("on");
@@ -425,7 +338,7 @@
     var t;
     $("q").addEventListener("input", function (e) {
       clearTimeout(t); t = setTimeout(function () {
-        filters.q = e.target.value.trim().toLowerCase(); page = 0; apply(true);
+        filters.q = e.target.value.trim().toLowerCase(); page = 0; apply();
       }, 150);
     });
     $("sort").addEventListener("change", function (e) { sortKey = e.target.value; page = 0; render(); });
@@ -434,7 +347,7 @@
       Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) { filters[f].clear(); });
       document.querySelectorAll(".fchips .fchip.on").forEach(function (c) { c.classList.remove("on"); });
       [].forEach.call($("f-recency").children, function (c, i) { c.classList.toggle("on", i === 0); });
-      page = 0; apply(true);
+      page = 0; apply();
     });
     $("prev").addEventListener("click", function () { if (page > 0) { page--; render(); scrollTop(); } });
     $("next").addEventListener("click", function () {
@@ -455,12 +368,7 @@
   function scrollTop() { $("results").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ── filter → filtered index array ─────────────────────────────────────
-  // keepScroll: pin the filters panel in place. Re-rendering the charts above
-  // it changes their height, which would otherwise shove the page under the
-  // cursor. Measure before and after, correct by the delta.
-  function apply(keepScroll) {
-    var anchorEl = keepScroll ? $("filters") : null;
-    var viewBefore = anchorEl ? anchorEl.getBoundingClientRect().top : 0;
+  function apply() {
     var cutoff = filters.recency == null ? null : daysAgo(filters.recency);
     var q = filters.q, f = filters;
     filtered = [];
@@ -483,14 +391,7 @@
       filtered.push(i);
     }
     $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
-    renderCharts(); render();
-    if (anchorEl) {
-      var target = anchorEl.getBoundingClientRect().top + window.scrollY - viewBefore;
-      var he = document.documentElement, prev = he.style.scrollBehavior;
-      he.style.scrollBehavior = "auto";
-      window.scrollTo(0, target);
-      he.style.scrollBehavior = prev;
-    }
+    render();
   }
   function inBucket(set, buckets, v, inclusive) {
     if (!set.size) return true;
@@ -500,141 +401,6 @@
       if (v >= b[1] && (inclusive ? v <= b[2] : v < b[2])) return true;
     }
     return false;
-  }
-
-  // ── KPIs (dataset-level, never filtered) ──────────────────────────────
-  function renderKpis() {
-    var d7 = daysAgo(7), cities = new Set(), n1 = 0, n7 = 0, m = 0, rents = [];
-    for (var i = 0; i < N; i++) {
-      cities.add(L.city[i]);
-      if (L.seen[i] === GEN) n1++;
-      if (L.seen[i] >= d7) n7++;
-      if (L.match[i]) m++;
-      if (L.rent[i]) rents.push(L.rent[i]);
-    }
-    $("k-total").textContent = n0(N);
-    $("k-new1").textContent = n0(n1);
-    $("k-new7").textContent = n0(n7);
-    $("k-match").textContent = n0(m);
-    $("k-rent").innerHTML = '<small>R$ </small>' + n0(median(rents));
-    $("k-cities").textContent = n0(cities.size);
-  }
-
-  // ── charts ────────────────────────────────────────────────────────────
-  function renderCharts() { scatter(); cityBars(); }
-
-  // Rent (linear) against land area (log). Log on x because land spans three
-  // orders of magnitude — on a linear axis every listing under a hectare would
-  // pile into the first 2% of the width. The x domain is fixed to the range
-  // where the decision actually lives; the caption reports what falls outside
-  // rather than silently clipping it.
-  var X0 = 3000, X1 = 100000, Y1 = 30000;
-  function scatter() {
-    var host = $("c-scatter"), tip = $("tip");
-    var W = 560, H = 300, PL = 52, PR = 14, PT = 12, PB = 34;
-    var pts = [], off = 0, i, k;
-    for (k = 0; k < filtered.length; k++) {
-      i = filtered[k];
-      if (!L.rent[i] || !L.land[i]) continue;
-      if (L.land[i] < X0 || L.land[i] > X1 || L.rent[i] > Y1) { off++; continue; }
-      pts.push(i);
-    }
-    if (pts.length < 2) {
-      host.innerHTML = '<div class="chart-empty">poucos imóveis para montar o gráfico</div>';
-      $("sc-cap").textContent = "quanto se paga por mês para cada tamanho de terreno";
-      return;
-    }
-    var lx0 = Math.log10(X0), lx1 = Math.log10(X1);
-    var X = function (a) { return PL + (Math.log10(a) - lx0) / (lx1 - lx0) * (W - PL - PR); };
-    var Y = function (r) { return H - PB - (r / Y1) * (H - PT - PB); };
-
-    var s = ['<svg viewBox="0 0 ' + W + ' ' + H + '" font-family="Geist Mono, monospace" role="img" ' +
-             'aria-label="Gráfico de dispersão do aluguel mensal por área de terreno dos imóveis filtrados">'];
-    // recessive grid + axes
-    for (var gy = 0; gy <= 3; gy++) {
-      var v = Y1 * gy / 3, y = Y(v);
-      s.push('<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) +
-             '" stroke="var(--chart-grid)" stroke-width="1"/>');
-      s.push('<text x="' + (PL - 7) + '" y="' + (y + 3.5).toFixed(1) + '" font-size="9" fill="var(--ink-3)" ' +
-             'text-anchor="end">' + (v ? (v / 1000) + "k" : "0") + '</text>');
-    }
-    [3000, 10000, 30000, 100000].forEach(function (a) {
-      var x = X(a);
-      s.push('<line x1="' + x.toFixed(1) + '" y1="' + PT + '" x2="' + x.toFixed(1) + '" y2="' + (H - PB) +
-             '" stroke="var(--chart-grid)" stroke-width="1"/>');
-      s.push('<text x="' + x.toFixed(1) + '" y="' + (H - PB + 15) + '" font-size="9" fill="var(--ink-3)" ' +
-             'text-anchor="middle">' + (a >= 10000 ? (a / 10000) + " ha" : (a / 1000) + "k m²") + '</text>');
-    });
-    s.push('<text x="' + (PL - 38) + '" y="' + (PT + 6) + '" font-size="9" fill="var(--ink-3)">R$/mês</text>');
-
-    // Non-matches first, matches on top: the highlighted subset must never be
-    // buried under the neutral cloud it is meant to stand out from.
-    var order = pts.slice().sort(function (a, b) { return L.match[a] - L.match[b]; });
-    order.forEach(function (i) {
-      var m = L.match[i];
-      s.push('<circle cx="' + X(L.land[i]).toFixed(1) + '" cy="' + Y(L.rent[i]).toFixed(1) +
-             '" r="' + (m ? 3.6 : 2.8) + '" fill="' + (m ? "var(--mark-teal)" : "var(--mark-dim)") +
-             '" fill-opacity="' + (m ? .85 : .42) + '"' +
-             (m ? ' stroke="var(--tile)" stroke-width="1"' : "") + '/>');
-    });
-
-    // The reference point, always directly labelled — it is the one mark on the
-    // page whose colour sits below the 3:1 contrast line, so it never relies on
-    // colour alone to be found.
-    var cx = X(CURRENT.land), cy = Y(CURRENT.rent);
-    s.push('<line x1="' + PL + '" y1="' + cy.toFixed(1) + '" x2="' + cx.toFixed(1) + '" y2="' + cy.toFixed(1) +
-           '" stroke="var(--mark-amber)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>');
-    s.push('<line x1="' + cx.toFixed(1) + '" y1="' + cy.toFixed(1) + '" x2="' + cx.toFixed(1) + '" y2="' + (H - PB) +
-           '" stroke="var(--mark-amber)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>');
-    s.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="6" fill="var(--mark-amber)" ' +
-           'stroke="var(--tile)" stroke-width="2"/>');
-    s.push('<text x="' + (cx + 11).toFixed(1) + '" y="' + (cy - 7).toFixed(1) + '" font-size="9.5" ' +
-           'font-weight="500" fill="var(--ink-2)">' + CURRENT.label + '</text>');
-    s.push('</svg>');
-    host.innerHTML = s.join("");
-
-    var cheaper = 0;
-    for (k = 0; k < pts.length; k++)
-      if (L.rent[pts[k]] < CURRENT.rent && L.land[pts[k]] >= CURRENT.land) cheaper++;
-    $("sc-cap").innerHTML = "<b>" + cheaper + "</b> dos " + pts.length + " no gráfico custam menos " +
-      "que a chácara de hoje e têm terreno igual ou maior" +
-      (off ? " · " + off + " ficaram fora da escala" : "");
-
-    // Hover layer: nearest point under the cursor, in SVG user units.
-    var svg = host.firstChild;
-    svg.addEventListener("mousemove", function (ev) {
-      var r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W,
-          sy = (ev.clientY - r.top) / r.height * H, best = null, bd = 12 * 12;
-      for (var k2 = 0; k2 < pts.length; k2++) {
-        var i2 = pts[k2], dx = X(L.land[i2]) - sx, dy = Y(L.rent[i2]) - sy, d = dx * dx + dy * dy;
-        if (d < bd) { bd = d; best = i2; }
-      }
-      if (best == null) { tip.style.opacity = 0; return; }
-      tip.innerHTML = "<b>" + esc(D.city[L.city[best]]) + "</b> · " + Math.round(L.km[best]) + " km<br>" +
-        brl(L.rent[best]) + "/mês · " + n0(L.land[best]) + " m²<br>" +
-        (L.ppm[best] != null ? "R$ " + L.ppm[best].toFixed(2).replace(".", ",") + " por m²" : "");
-      tip.style.opacity = 1;
-      tip.style.left = Math.min(r.width - 150, ev.clientX - r.left + 12) + "px";
-      tip.style.top = (ev.clientY - r.top + 12) + "px";
-    });
-    svg.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
-  }
-
-  function cityBars() {
-    var m = {}, k;
-    for (k = 0; k < filtered.length; k++) { var c = L.city[filtered[k]]; m[c] = (m[c] || 0) + 1; }
-    var entries = Object.keys(m).map(function (di) { return [D.city[+di] || "?", m[di]]; })
-      .filter(function (e) { return e[0] && e[0] !== "?"; })
-      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12);
-    var host = $("c-city");
-    if (!entries.length) { host.innerHTML = '<div class="chart-empty">sem dados</div>'; return; }
-    var max = entries[0][1];
-    host.innerHTML = entries.map(function (e) {
-      var pct = Math.max(2, e[1] / max * 100);
-      return '<div class="bar-row"><span class="lab" title="' + esc(e[0]) + '">' + esc(e[0]) +
-        '</span><div class="bar-track"><div class="bar-fill" style="width:' + pct +
-        '%"></div></div><span class="val">' + e[1] + "</span></div>";
-    }).join("");
   }
 
   // ── results ───────────────────────────────────────────────────────────
@@ -662,7 +428,7 @@
   function render() {
     var idx = sortIdx(filtered), start = page * PAGE;
     $("list").innerHTML = idx.slice(start, start + PAGE).map(card).join("") ||
-      '<div class="chart-empty">nenhum imóvel com esses filtros.</div>';
+      '<div class="empty">nenhum imóvel com esses filtros.</div>';
     var pages = Math.max(1, Math.ceil(filtered.length / PAGE));
     $("pinfo").textContent = "página " + (page + 1) + " de " + pages.toLocaleString("pt-BR");
     $("prev").disabled = page === 0;

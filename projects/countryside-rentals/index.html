@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chácaras e sítios para alugar — até 200 km de Campinas</title>
+<meta name="author" content="Rodrigo Carvalho">
+<meta name="description" content="Chácaras, sítios e fazendas para alugar num raio de 200 km de Campinas, coletados todos os dias e filtrados por distância exata. Filtre por aluguel, área de terreno, distância e características.">
+<!-- Not part of the portfolio: this is a private tool for a family property
+     search. Unlisted (no link from the home page) and excluded from search
+     engines — the URL still works for anyone it is shared with. -->
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chácaras e sítios para alugar — até 200 km de Campinas">
+<meta property="og:description" content="Chácaras, sítios e fazendas para alugar num raio de 200 km de Campinas, atualizados diariamente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  /* Page-local only — structure comes from the shared design system. */
+  /* No automatic scroll anchoring: filter clicks resize the charts, and we
+     correct the scroll ourselves in apply() — let the two not fight. */
+  html { overflow-anchor: none; }
+  .hero-wrap { padding: 2.4rem 0 1.4rem; }
+
+  /* Chart marks get their own steps, separate from the UI tokens. The shared
+     palette's dark values (--blue #6d99ff, --teal #33c0af, --amber #e8a54a) sit
+     at OKLCH L .70–.77, above the .48–.67 band a mark should hold on a dark
+     surface; these are the same hues stepped down into it. Both sets were run
+     through the palette validator, all-pairs, against their own surface:
+     light #2f6bed/#0f9d8f/#e08a1e and dark #638ef3/#00aa9a/#c58421 clear the
+     lightness band, chroma floor, CVD separation (ΔE 13.0 / 14.3 protan) and
+     the normal-vision floor (22.3 / 18.3). Amber on white lands at 2.68:1,
+     below the 3:1 relief line — which is why the one amber mark on the page is
+     always directly labelled and never carries meaning by colour alone. */
+  :root { --mark-blue:#2f6bed; --mark-teal:#0f9d8f; --mark-amber:#e08a1e; --mark-dim:#79818f; }
+  @media (prefers-color-scheme: dark) {
+    :root { --mark-blue:#638ef3; --mark-teal:#00aa9a; --mark-amber:#c58421; --mark-dim:#7c8698; }
+  }
+  :root[data-theme="light"] { --mark-blue:#2f6bed; --mark-teal:#0f9d8f; --mark-amber:#e08a1e; --mark-dim:#79818f; }
+  :root[data-theme="dark"]  { --mark-blue:#638ef3; --mark-teal:#00aa9a; --mark-amber:#c58421; --mark-dim:#7c8698; }
+
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap); }
+  @media (max-width: 880px){ .kpis { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi .n { font-family: var(--mono); font-size: 1.5rem; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .kpi .n.blue { color: var(--blue); } .kpi .n.teal { color: var(--teal); } .kpi .n.amber { color: var(--amber); }
+  .kpi .n small { font-size: .62em; letter-spacing: 0; }
+  .kpi .l { font-size: 11.5px; color: var(--ink-3); margin-top: .5rem; line-height: 1.35; }
+
+  /* ── filters ── */
+  .filters { display: flex; flex-direction: column; gap: .95rem; }
+  .filter-search { display: flex; gap: .6rem; align-items: center; }
+  .filter-search input {
+    flex: 1; background: var(--tile-2); border: 1px solid var(--line); border-radius: 9px;
+    padding: .6rem .85rem; color: var(--ink); font-family: var(--sans); font-size: 14px;
+  }
+  .filter-search input:focus { outline: none; border-color: var(--blue); }
+  .fgroup { display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: baseline; }
+  .fgroup > .flabel { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ink-3); min-width: 82px; }
+  .fchips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .fchip {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+    background: var(--tile-2); border: 1px solid var(--line);
+    padding: 3px 9px; border-radius: 999px; cursor: pointer; user-select: none;
+    transition: all .12s; white-space: nowrap;
+  }
+  .fchip:hover { border-color: var(--blue); }
+  .fchip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .fchip.match.on { background: var(--teal); border-color: var(--teal); }
+  .fchip .c { opacity: .6; margin-left: 4px; }
+  .filter-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .filter-foot .count { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
+  .filter-foot .count b { color: var(--blue); }
+  .btn-clear { font-family: var(--mono); font-size: 12px; color: var(--ink-3); background: none;
+    border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer; }
+  .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  /* ── charts ── */
+  .charts { display: grid; grid-template-columns: 1.45fr 1fr; gap: var(--gap); }
+  @media (max-width: 820px){ .charts { grid-template-columns: 1fr; } }
+  .chart-tile h3 { font-size: 13px; font-weight: 600; margin-bottom: .1rem; }
+  .chart-tile .cap { font-size: 11px; color: var(--ink-3); font-family: var(--mono); margin-bottom: .7rem; line-height: 1.5; }
+  .legend { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: .6rem; font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .scatter-wrap { position: relative; }
+  .scatter-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transition: opacity .1s;
+    background: var(--tile); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: var(--shadow); padding: .5rem .65rem; font-family: var(--mono);
+    font-size: 11px; color: var(--ink-2); line-height: 1.5; white-space: nowrap; z-index: 5;
+  }
+  .tip b { color: var(--ink); font-weight: 600; }
+  .bars { display: flex; flex-direction: column; gap: 6px; }
+  .bar-row { display: grid; grid-template-columns: 108px 1fr 34px; gap: 8px; align-items: center; font-size: 12px; }
+  .bar-row .lab { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { background: var(--tile-2); border-radius: 4px; height: 15px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--mark-blue); border-radius: 4px; min-width: 2px; transition: width .25s; }
+  .bar-row .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+  .chart-empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.4rem 0; text-align: center; }
+
+  /* ── result cards ── */
+  .results-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .sortsel { font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--tile-2);
+    border: 1px solid var(--line); border-radius: 7px; padding: 4px 8px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: var(--gap); }
+  .card { border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden;
+    background: var(--tile-2); display: flex; flex-direction: column; }
+  .card:hover { border-color: var(--blue); }
+  /* Fixed box + object-fit: the CDN returns whatever ratio the advertiser
+     uploaded, and 876 cards reflowing as images land would be unusable. */
+  .card-ph { position: relative; aspect-ratio: 3 / 2; background: var(--line-2); overflow: hidden; }
+  .card-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card-ph.noimg::after { content: "sem foto"; position: absolute; inset: 0; display: grid;
+    place-items: center; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .ph-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 26px; height: 26px;
+    border: none; border-radius: 50%; background: rgba(0,0,0,.42); color: #fff; cursor: pointer;
+    font-size: 15px; line-height: 1; opacity: 0; transition: opacity .15s; }
+  .card-ph:hover .ph-nav { opacity: 1; }
+  .ph-nav.prev { left: 6px; } .ph-nav.next { right: 6px; }
+  .ph-count { position: absolute; right: 6px; bottom: 6px; font-family: var(--mono); font-size: 10px;
+    color: #fff; background: rgba(0,0,0,.5); padding: 1px 6px; border-radius: 999px; }
+  .card-badges { position: absolute; left: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .cb { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .04em;
+    padding: 2px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; }
+  .cb.new { background: var(--amber); } .cb.match { background: var(--teal); }
+  .cb.drop { background: var(--blue); }
+  .card-body { padding: .7rem .8rem .8rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
+  .card-rent { font-family: var(--mono); font-size: 1.05rem; font-weight: 500; color: var(--ink);
+    font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .card-rent .mo { font-size: .62em; color: var(--ink-3); }
+  .card-rent .was { font-size: .6em; color: var(--teal); margin-left: 5px; }
+  .card-t { font-size: 12.5px; font-weight: 600; line-height: 1.35; }
+  .card-t a { color: var(--ink); text-decoration: none; }
+  .card-t a:hover { color: var(--blue); }
+  .card-facts { font-family: var(--mono); font-size: 11px; color: var(--ink-2); line-height: 1.6; }
+  .card-facts .sep { color: var(--ink-3); margin: 0 4px; }
+  .card-feats { display: flex; flex-wrap: wrap; gap: 3px; margin-top: .1rem; }
+  .ftag { font-family: var(--mono); font-size: 9.5px; color: var(--ink-2); background: var(--tile);
+    border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; }
+  .card-foot { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: auto;
+    padding-top: .4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pager { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.4rem; }
+  .pager button { font-family: var(--mono); font-size: 12px; padding: 5px 12px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--tile-2); color: var(--ink-2); cursor: pointer; }
+  .pager button:disabled { opacity: .4; cursor: default; }
+  .pager .pinfo { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+  .loading { text-align: center; padding: 4rem 0; color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
+  .meta-line { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-top: 1.2rem; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="/"><span>~/</span>rodrigo-carfon</a>
+    <ul class="nav-links">
+      <li><a href="#filters">filtros</a></li>
+      <li><a href="#charts">visão geral</a></li>
+      <li><a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/rentals-dashboard" class="nav-cta">código ↗</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container">
+
+  <section class="hero-wrap">
+    <div class="eyebrow">busca de imóvel · atualizado todo dia</div>
+    <h1 class="mt-sm">Chácaras e sítios para alugar, <span class="h-accent">perto de Campinas</span>.</h1>
+    <p class="lead mt-md" style="max-width:66ch">
+      Todo dia, um robô lê os anúncios do VivaReal, do ZAP e da OLX — os três compartilham
+      a mesma base — separa tudo que é imóvel rural para alugar e calcula a distância exata
+      até Campinas pelas coordenadas do próprio anúncio. O que passa de 200 km é descartado.
+      O resto está aqui embaixo: filtre por aluguel, tamanho do terreno, distância,
+      características e há quanto tempo o anúncio apareceu.
+    </p>
+    <div class="meta-line" id="meta">carregando…</div>
+  </section>
+
+  <div id="app" style="display:none">
+
+    <!-- KPIs -->
+    <section class="kpis" style="margin-bottom:var(--section-gap)">
+      <div class="tile kpi"><div class="n blue" id="k-total">–</div><div class="l">imóveis num raio de 200 km</div></div>
+      <div class="tile kpi"><div class="n amber" id="k-new1">–</div><div class="l">apareceram hoje</div></div>
+      <div class="tile kpi"><div class="n" id="k-new7">–</div><div class="l">apareceram nos últimos 7 dias</div></div>
+      <div class="tile kpi"><div class="n teal" id="k-match">–</div><div class="l">dentro do perfil buscado</div></div>
+      <div class="tile kpi"><div class="n" id="k-rent">–</div><div class="l">aluguel mediano</div></div>
+      <div class="tile kpi"><div class="n" id="k-cities">–</div><div class="l">cidades com anúncios</div></div>
+    </section>
+
+    <!-- Charts -->
+    <section id="charts" style="margin-bottom:var(--section-gap)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:0 .25rem .9rem">
+        <h2>Visão geral</h2>
+        <span class="note">acompanha os filtros ativos</span>
+      </div>
+      <div class="charts">
+        <div class="tile chart-tile">
+          <h3>Aluguel por tamanho do terreno</h3>
+          <div class="cap" id="sc-cap">quanto se paga por mês para cada tamanho de terreno</div>
+          <div class="scatter-wrap"><div id="c-scatter"></div><div class="tip" id="tip"></div></div>
+          <div class="legend">
+            <span><i style="background:var(--mark-dim)"></i>anúncio</span>
+            <span><i style="background:var(--mark-teal)"></i>dentro do perfil buscado</span>
+            <span><i style="background:var(--mark-amber)"></i>a chácara de hoje</span>
+          </div>
+        </div>
+        <div class="tile chart-tile">
+          <h3>Onde estão os imóveis</h3>
+          <div class="cap">cidades com mais opções de aluguel rural</div>
+          <div class="bars" id="c-city"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section id="filters" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
+      <div class="filters">
+        <div class="filter-search">
+          <input id="q" type="search" placeholder="Buscar por título, cidade ou imobiliária…" autocomplete="off">
+        </div>
+        <div class="fgroup"><span class="flabel">Perfil</span><div class="fchips" id="f-only"></div></div>
+        <div class="fgroup"><span class="flabel">Aluguel</span><div class="fchips" id="f-rent"></div></div>
+        <div class="fgroup"><span class="flabel">Terreno</span><div class="fchips" id="f-land"></div></div>
+        <div class="fgroup"><span class="flabel">Distância</span><div class="fchips" id="f-band"></div></div>
+        <div class="fgroup"><span class="flabel">Tipo</span><div class="fchips" id="f-pt"></div></div>
+        <div class="fgroup"><span class="flabel">Quartos</span><div class="fchips" id="f-bed"></div></div>
+        <div class="fgroup"><span class="flabel">Tem</span><div class="fchips" id="f-feat"></div></div>
+        <div class="fgroup"><span class="flabel">Cidade</span><div class="fchips" id="f-city"></div></div>
+        <div class="fgroup"><span class="flabel">Apareceu</span><div class="fchips" id="f-recency"></div></div>
+        <div class="filter-foot">
+          <div class="count"><b id="fcount">0</b> imóveis com esses filtros</div>
+          <button class="btn-clear" id="clear">limpar filtros</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
+      <div class="results-head">
+        <h2>Imóveis</h2>
+        <select class="sortsel" id="sort">
+          <option value="new">mais recentes primeiro</option>
+          <option value="rent">menor aluguel</option>
+          <option value="land">maior terreno</option>
+          <option value="ppm">melhor custo por m²</option>
+          <option value="near">mais perto de Campinas</option>
+          <option value="drop">maior queda de preço</option>
+        </select>
+      </div>
+      <div class="cards" id="list"></div>
+      <div class="pager">
+        <button id="prev">← anterior</button>
+        <span class="pinfo" id="pinfo">–</span>
+        <button id="next">próxima →</button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="loading" id="loading">carregando os anúncios…</div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <p>Busca pessoal de imóvel · dados públicos dos portais, atualizados diariamente</p>
+    <p>Sempre confirme no anúncio antes de decidir qualquer coisa · <a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/rentals-dashboard">como isso funciona</a></p>
+  </div>
+</footer>
+
+<script>
+/* Countryside Rentals — client-side dashboard over the columnar data.json.
+   Inlined (not a separate app.js) so the markup and its logic always deploy
+   together — a cached old script against new markup can't happen.
+   No framework, no chart library. */
+(function () {
+  "use strict";
+  var D, L, N, GEN;                  // dict, columns, count, generated date
+  var searchable = [];               // per-row lowercased "title city agency"
+  var filters = { q: "", recency: null, only: false };
+  var sortKey = "new";
+  var page = 0, PAGE = 24;
+  var filtered = [];
+
+  // The rental this whole search exists to replace. Drawn on the scatter as the
+  // reference point, so every other listing is read against it rather than
+  // against an abstract average.
+  var CURRENT = { rent: 10000, land: 6000, label: "a chácara de hoje" };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return (s || "").replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var n0 = function (v) { return (v == null ? "–" : Math.round(v).toLocaleString("pt-BR")); };
+  var brl = function (v) { return v == null ? "–" : "R$ " + Math.round(v).toLocaleString("pt-BR"); };
+  var daysAgo = function (n) { var d = new Date(GEN); d.setDate(d.getDate() - n);
+    return d.toISOString().slice(0, 10); };
+  function median(a) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; });
+    return s[Math.floor(s.length / 2)]; }
+
+  // ── numeric range facets ──────────────────────────────────────────────
+  // Rent and land are continuous; chips need buckets. The rent edges are the
+  // ones the search is calibrated on, so "R$6–10k" and "R$10–14k" line up with
+  // the target profile instead of cutting across it.
+  var RENT_BUCKETS = [["até R$4 mil", 0, 4000], ["R$4–6 mil", 4000, 6000],
+                      ["R$6–10 mil", 6000, 10000], ["R$10–14 mil", 10000, 14000],
+                      ["acima de R$14 mil", 14000, Infinity]];
+  var LAND_BUCKETS = [["3–5 mil m²", 3000, 5000], ["5–10 mil m²", 5000, 10000],
+                      ["1–2 hectares", 10000, 20000], ["2–10 hectares", 20000, 100000],
+                      ["acima de 10 ha", 100000, Infinity]];
+  var BED_BUCKETS = [["1–2", 1, 2], ["3", 3, 3], ["4", 4, 4], ["5+", 5, Infinity]];
+  // Must stay in lockstep with geo.BANDS in the pipeline — these are the exact
+  // label strings it writes into the dictionary. verify_snapshot.py asserts it.
+  var BAND_ORDER = ["até 25 km", "25–50 km", "50–100 km", "100–150 km", "150–200 km"];
+
+  // Facets backed by a dictionary column: chip value is the dict index.
+  var DICT_FACETS = { pt: "property_type", band: "band", city: "city", feat: "feature" };
+  Object.keys(DICT_FACETS).forEach(function (f) { filters[f] = new Set(); });
+  ["rent", "land", "bed"].forEach(function (f) { filters[f] = new Set(); });
+
+  // ── boot ──────────────────────────────────────────────────────────────
+  fetch("data.json").then(function (r) { return r.json(); }).then(function (data) {
+    D = data.dict; L = data.listings; N = data.count; GEN = data.generated;
+    for (var i = 0; i < N; i++) {
+      searchable[i] = (L.title[i] + " " + D.city[L.city[i]] + " " +
+                       D.advertiser[L.adv[i]]).toLowerCase();
+    }
+    buildChips();
+    wire();
+    renderKpis();
+    $("meta").textContent = "atualizado em " + GEN.split("-").reverse().join("/") + " · " +
+      N.toLocaleString("pt-BR") + " imóveis num raio de " + data.radius_km +
+      " km de " + data.origin + " · " + (data.total_base || N).toLocaleString("pt-BR") +
+      " no histórico · coletado de VivaReal, ZAP e OLX";
+    $("loading").style.display = "none";
+    $("app").style.display = "block";
+    apply();
+  }).catch(function (e) {
+    $("loading").textContent = "Não foi possível carregar os anúncios (data.json). " + e;
+  });
+
+  // ── chips ─────────────────────────────────────────────────────────────
+  function chip(host, label, count, onToggle, cls) {
+    var c = document.createElement("span");
+    c.className = "fchip" + (cls ? " " + cls : "");
+    c.innerHTML = esc(label) + (count != null ? '<span class="c">' + count + "</span>" : "");
+    c.onclick = function () { onToggle(c); page = 0; apply(true); };
+    host.appendChild(c);
+    return c;
+  }
+  function toggleSet(set, key) {
+    return function (el) {
+      if (set.has(key)) { set.delete(key); el.classList.remove("on"); }
+      else { set.add(key); el.classList.add("on"); }
+    };
+  }
+  function bucketCount(col, lo, hi) {
+    var n = 0;
+    for (var i = 0; i < N; i++) { var v = col[i]; if (v != null && v >= lo && v < hi) n++; }
+    return n;
+  }
+  function buildChips() {
+    // dictionary-backed facets, ordered by frequency over the whole base
+    Object.keys(DICT_FACETS).forEach(function (f) {
+      var counts = {}, i, k;
+      for (i = 0; i < N; i++) {
+        var v = L[f][i];
+        if (f === "feat") { for (k = 0; k < v.length; k++) counts[v[k]] = (counts[v[k]] || 0) + 1; }
+        else counts[v] = (counts[v] || 0) + 1;
+      }
+      var order = Object.keys(counts).map(Number)
+        .sort(function (a, b) { return counts[b] - counts[a]; });
+      // 116 towns is more chips than anyone can scan — show the busiest and let
+      // the search box reach the rest (it indexes the town name).
+      if (f === "city") order = order.slice(0, 18);
+      // Distance is the one ordered facet — it must read near→far, not by
+      // frequency and not alphabetically ("up to 25 km" would sort last).
+      if (f === "band") order.sort(function (a, b) {
+        return BAND_ORDER.indexOf(D.band[a]) - BAND_ORDER.indexOf(D.band[b]); });
+      var host = $("f-" + f);
+      order.forEach(function (di) {
+        if (!D[DICT_FACETS[f]][di]) return;   // skip the empty-string slot
+        chip(host, D[DICT_FACETS[f]][di], counts[di], toggleSet(filters[f], di));
+      });
+    });
+
+    RENT_BUCKETS.forEach(function (b, i) {
+      chip($("f-rent"), b[0], bucketCount(L.rent, b[1], b[2]), toggleSet(filters.rent, i)); });
+    LAND_BUCKETS.forEach(function (b, i) {
+      chip($("f-land"), b[0], bucketCount(L.land, b[1], b[2]), toggleSet(filters.land, i)); });
+    BED_BUCKETS.forEach(function (b, i) {
+      chip($("f-bed"), b[0], bucketCount(L.bed, b[1], b[2] + 1), toggleSet(filters.bed, i)); });
+
+    var nMatch = 0;
+    for (var i = 0; i < N; i++) if (L.match[i]) nMatch++;
+    chip($("f-only"), "só o perfil buscado", nMatch, function (el) {
+      filters.only = !filters.only; el.classList.toggle("on", filters.only);
+    }, "match");
+
+    var opts = [["qualquer data", null], ["hoje", 0], ["7 dias", 7], ["30 dias", 30]];
+    var host = $("f-recency");
+    opts.forEach(function (o, idx) {
+      var c = chip(host, o[0], null, function (el) {
+        filters.recency = o[1];
+        [].forEach.call(host.children, function (x) { x.classList.remove("on"); });
+        el.classList.add("on");
+      });
+      if (idx === 0) c.classList.add("on");
+    });
+  }
+
+  function wire() {
+    var t;
+    $("q").addEventListener("input", function (e) {
+      clearTimeout(t); t = setTimeout(function () {
+        filters.q = e.target.value.trim().toLowerCase(); page = 0; apply(true);
+      }, 150);
+    });
+    $("sort").addEventListener("change", function (e) { sortKey = e.target.value; page = 0; render(); });
+    $("clear").addEventListener("click", function () {
+      filters.q = ""; filters.recency = null; filters.only = false; $("q").value = "";
+      Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) { filters[f].clear(); });
+      document.querySelectorAll(".fchips .fchip.on").forEach(function (c) { c.classList.remove("on"); });
+      [].forEach.call($("f-recency").children, function (c, i) { c.classList.toggle("on", i === 0); });
+      page = 0; apply(true);
+    });
+    $("prev").addEventListener("click", function () { if (page > 0) { page--; render(); scrollTop(); } });
+    $("next").addEventListener("click", function () {
+      if ((page + 1) * PAGE < filtered.length) { page++; render(); scrollTop(); } });
+
+    // Photo gallery — one delegated handler for every card on the page.
+    $("list").addEventListener("click", function (e) {
+      var btn = e.target.closest(".ph-nav"); if (!btn) return;
+      var box = btn.closest(".card-ph"), ids = box.dataset.ph.split(",");
+      var at = (+box.dataset.at + (btn.classList.contains("next") ? 1 : -1) + ids.length) % ids.length;
+      box.dataset.at = at;
+      box.querySelector("img").src = photoURL(ids[at]);
+      box.querySelector(".ph-count").textContent = (at + 1) + "/" + ids.length;
+    });
+  }
+  function scrollTop() { $("results").scrollIntoView({ behavior: "smooth", block: "start" }); }
+
+  // ── filter → filtered index array ─────────────────────────────────────
+  // keepScroll: pin the filters panel in place. Re-rendering the charts above
+  // it changes their height, which would otherwise shove the page under the
+  // cursor. Measure before and after, correct by the delta.
+  function apply(keepScroll) {
+    var anchorEl = keepScroll ? $("filters") : null;
+    var viewBefore = anchorEl ? anchorEl.getBoundingClientRect().top : 0;
+    var cutoff = filters.recency == null ? null : daysAgo(filters.recency);
+    var q = filters.q, f = filters;
+    filtered = [];
+    outer:
+    for (var i = 0; i < N; i++) {
+      if (f.only && !L.match[i]) continue;
+      if (f.pt.size && !f.pt.has(L.pt[i])) continue;
+      if (f.band.size && !f.band.has(L.band[i])) continue;
+      if (f.city.size && !f.city.has(L.city[i])) continue;
+      if (!inBucket(f.rent, RENT_BUCKETS, L.rent[i])) continue;
+      if (!inBucket(f.land, LAND_BUCKETS, L.land[i])) continue;
+      if (!inBucket(f.bed, BED_BUCKETS, L.bed[i], true)) continue;
+      if (f.feat.size) {           // every selected feature must be present
+        var have = L.feat[i];
+        for (var it = f.feat.values(), s = it.next(); !s.done; s = it.next())
+          if (have.indexOf(s.value) === -1) continue outer;
+      }
+      if (cutoff && L.seen[i] < cutoff) continue;
+      if (q && searchable[i].indexOf(q) === -1) continue;
+      filtered.push(i);
+    }
+    $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
+    renderCharts(); render();
+    if (anchorEl) {
+      var target = anchorEl.getBoundingClientRect().top + window.scrollY - viewBefore;
+      var he = document.documentElement, prev = he.style.scrollBehavior;
+      he.style.scrollBehavior = "auto";
+      window.scrollTo(0, target);
+      he.style.scrollBehavior = prev;
+    }
+  }
+  function inBucket(set, buckets, v, inclusive) {
+    if (!set.size) return true;
+    if (v == null) return false;
+    for (var it = set.values(), s = it.next(); !s.done; s = it.next()) {
+      var b = buckets[s.value];
+      if (v >= b[1] && (inclusive ? v <= b[2] : v < b[2])) return true;
+    }
+    return false;
+  }
+
+  // ── KPIs (dataset-level, never filtered) ──────────────────────────────
+  function renderKpis() {
+    var d7 = daysAgo(7), cities = new Set(), n1 = 0, n7 = 0, m = 0, rents = [];
+    for (var i = 0; i < N; i++) {
+      cities.add(L.city[i]);
+      if (L.seen[i] === GEN) n1++;
+      if (L.seen[i] >= d7) n7++;
+      if (L.match[i]) m++;
+      if (L.rent[i]) rents.push(L.rent[i]);
+    }
+    $("k-total").textContent = n0(N);
+    $("k-new1").textContent = n0(n1);
+    $("k-new7").textContent = n0(n7);
+    $("k-match").textContent = n0(m);
+    $("k-rent").innerHTML = '<small>R$ </small>' + n0(median(rents));
+    $("k-cities").textContent = n0(cities.size);
+  }
+
+  // ── charts ────────────────────────────────────────────────────────────
+  function renderCharts() { scatter(); cityBars(); }
+
+  // Rent (linear) against land area (log). Log on x because land spans three
+  // orders of magnitude — on a linear axis every listing under a hectare would
+  // pile into the first 2% of the width. The x domain is fixed to the range
+  // where the decision actually lives; the caption reports what falls outside
+  // rather than silently clipping it.
+  var X0 = 3000, X1 = 100000, Y1 = 30000;
+  function scatter() {
+    var host = $("c-scatter"), tip = $("tip");
+    var W = 560, H = 300, PL = 52, PR = 14, PT = 12, PB = 34;
+    var pts = [], off = 0, i, k;
+    for (k = 0; k < filtered.length; k++) {
+      i = filtered[k];
+      if (!L.rent[i] || !L.land[i]) continue;
+      if (L.land[i] < X0 || L.land[i] > X1 || L.rent[i] > Y1) { off++; continue; }
+      pts.push(i);
+    }
+    if (pts.length < 2) {
+      host.innerHTML = '<div class="chart-empty">poucos imóveis para montar o gráfico</div>';
+      $("sc-cap").textContent = "quanto se paga por mês para cada tamanho de terreno";
+      return;
+    }
+    var lx0 = Math.log10(X0), lx1 = Math.log10(X1);
+    var X = function (a) { return PL + (Math.log10(a) - lx0) / (lx1 - lx0) * (W - PL - PR); };
+    var Y = function (r) { return H - PB - (r / Y1) * (H - PT - PB); };
+
+    var s = ['<svg viewBox="0 0 ' + W + ' ' + H + '" font-family="Geist Mono, monospace" role="img" ' +
+             'aria-label="Gráfico de dispersão do aluguel mensal por área de terreno dos imóveis filtrados">'];
+    // recessive grid + axes
+    for (var gy = 0; gy <= 3; gy++) {
+      var v = Y1 * gy / 3, y = Y(v);
+      s.push('<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) +
+             '" stroke="var(--chart-grid)" stroke-width="1"/>');
+      s.push('<text x="' + (PL - 7) + '" y="' + (y + 3.5).toFixed(1) + '" font-size="9" fill="var(--ink-3)" ' +
+             'text-anchor="end">' + (v ? (v / 1000) + "k" : "0") + '</text>');
+    }
+    [3000, 10000, 30000, 100000].forEach(function (a) {
+      var x = X(a);
+      s.push('<line x1="' + x.toFixed(1) + '" y1="' + PT + '" x2="' + x.toFixed(1) + '" y2="' + (H - PB) +
+             '" stroke="var(--chart-grid)" stroke-width="1"/>');
+      s.push('<text x="' + x.toFixed(1) + '" y="' + (H - PB + 15) + '" font-size="9" fill="var(--ink-3)" ' +
+             'text-anchor="middle">' + (a >= 10000 ? (a / 10000) + " ha" : (a / 1000) + "k m²") + '</text>');
+    });
+    s.push('<text x="' + (PL - 38) + '" y="' + (PT + 6) + '" font-size="9" fill="var(--ink-3)">R$/mês</text>');
+
+    // Non-matches first, matches on top: the highlighted subset must never be
+    // buried under the neutral cloud it is meant to stand out from.
+    var order = pts.slice().sort(function (a, b) { return L.match[a] - L.match[b]; });
+    order.forEach(function (i) {
+      var m = L.match[i];
+      s.push('<circle cx="' + X(L.land[i]).toFixed(1) + '" cy="' + Y(L.rent[i]).toFixed(1) +
+             '" r="' + (m ? 3.6 : 2.8) + '" fill="' + (m ? "var(--mark-teal)" : "var(--mark-dim)") +
+             '" fill-opacity="' + (m ? .85 : .42) + '"' +
+             (m ? ' stroke="var(--tile)" stroke-width="1"' : "") + '/>');
+    });
+
+    // The reference point, always directly labelled — it is the one mark on the
+    // page whose colour sits below the 3:1 contrast line, so it never relies on
+    // colour alone to be found.
+    var cx = X(CURRENT.land), cy = Y(CURRENT.rent);
+    s.push('<line x1="' + PL + '" y1="' + cy.toFixed(1) + '" x2="' + cx.toFixed(1) + '" y2="' + cy.toFixed(1) +
+           '" stroke="var(--mark-amber)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>');
+    s.push('<line x1="' + cx.toFixed(1) + '" y1="' + cy.toFixed(1) + '" x2="' + cx.toFixed(1) + '" y2="' + (H - PB) +
+           '" stroke="var(--mark-amber)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>');
+    s.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="6" fill="var(--mark-amber)" ' +
+           'stroke="var(--tile)" stroke-width="2"/>');
+    s.push('<text x="' + (cx + 11).toFixed(1) + '" y="' + (cy - 7).toFixed(1) + '" font-size="9.5" ' +
+           'font-weight="500" fill="var(--ink-2)">' + CURRENT.label + '</text>');
+    s.push('</svg>');
+    host.innerHTML = s.join("");
+
+    var cheaper = 0;
+    for (k = 0; k < pts.length; k++)
+      if (L.rent[pts[k]] < CURRENT.rent && L.land[pts[k]] >= CURRENT.land) cheaper++;
+    $("sc-cap").innerHTML = "<b>" + cheaper + "</b> dos " + pts.length + " no gráfico custam menos " +
+      "que a chácara de hoje e têm terreno igual ou maior" +
+      (off ? " · " + off + " ficaram fora da escala" : "");
+
+    // Hover layer: nearest point under the cursor, in SVG user units.
+    var svg = host.firstChild;
+    svg.addEventListener("mousemove", function (ev) {
+      var r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W,
+          sy = (ev.clientY - r.top) / r.height * H, best = null, bd = 12 * 12;
+      for (var k2 = 0; k2 < pts.length; k2++) {
+        var i2 = pts[k2], dx = X(L.land[i2]) - sx, dy = Y(L.rent[i2]) - sy, d = dx * dx + dy * dy;
+        if (d < bd) { bd = d; best = i2; }
+      }
+      if (best == null) { tip.style.opacity = 0; return; }
+      tip.innerHTML = "<b>" + esc(D.city[L.city[best]]) + "</b> · " + Math.round(L.km[best]) + " km<br>" +
+        brl(L.rent[best]) + "/mês · " + n0(L.land[best]) + " m²<br>" +
+        (L.ppm[best] != null ? "R$ " + L.ppm[best].toFixed(2).replace(".", ",") + " por m²" : "");
+      tip.style.opacity = 1;
+      tip.style.left = Math.min(r.width - 150, ev.clientX - r.left + 12) + "px";
+      tip.style.top = (ev.clientY - r.top + 12) + "px";
+    });
+    svg.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+  }
+
+  function cityBars() {
+    var m = {}, k;
+    for (k = 0; k < filtered.length; k++) { var c = L.city[filtered[k]]; m[c] = (m[c] || 0) + 1; }
+    var entries = Object.keys(m).map(function (di) { return [D.city[+di] || "?", m[di]]; })
+      .filter(function (e) { return e[0] && e[0] !== "?"; })
+      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12);
+    var host = $("c-city");
+    if (!entries.length) { host.innerHTML = '<div class="chart-empty">sem dados</div>'; return; }
+    var max = entries[0][1];
+    host.innerHTML = entries.map(function (e) {
+      var pct = Math.max(2, e[1] / max * 100);
+      return '<div class="bar-row"><span class="lab" title="' + esc(e[0]) + '">' + esc(e[0]) +
+        '</span><div class="bar-track"><div class="bar-fill" style="width:' + pct +
+        '%"></div></div><span class="val">' + e[1] + "</span></div>";
+    }).join("");
+  }
+
+  // ── results ───────────────────────────────────────────────────────────
+  function photoURL(id, w, h) {
+    // medias[].url from the endpoint is a template; data.json stores only the
+    // id and the page asks the CDN for exactly the size the card renders.
+    return "https://resizedimgs.vivareal.com/img/vr-listing/" + id +
+           "/photo.jpg?action=crop&dimension=" + (w || 480) + "x" + (h || 320);
+  }
+  function sortIdx(arr) {
+    var a = arr.slice();
+    var by = {
+      rent: function (x, y) { return (L.rent[x] || 1e9) - (L.rent[y] || 1e9); },
+      land: function (x, y) { return (L.land[y] || 0) - (L.land[x] || 0); },
+      ppm:  function (x, y) { return (L.ppm[x] == null ? 1e9 : L.ppm[x]) - (L.ppm[y] == null ? 1e9 : L.ppm[y]); },
+      near: function (x, y) { return (L.km[x] == null ? 1e9 : L.km[x]) - (L.km[y] == null ? 1e9 : L.km[y]); },
+      drop: function (x, y) { return drop(y) - drop(x); },
+      new:  function (x, y) { return L.seen[x] < L.seen[y] ? 1 : L.seen[x] > L.seen[y] ? -1 :
+                                     (L.rent[x] || 0) - (L.rent[y] || 0); }
+    };
+    return a.sort(by[sortKey] || by.new);
+  }
+  function drop(i) { return (L.rent0[i] && L.rent[i] && L.rent0[i] > L.rent[i]) ? L.rent0[i] - L.rent[i] : 0; }
+
+  function render() {
+    var idx = sortIdx(filtered), start = page * PAGE;
+    $("list").innerHTML = idx.slice(start, start + PAGE).map(card).join("") ||
+      '<div class="chart-empty">nenhum imóvel com esses filtros.</div>';
+    var pages = Math.max(1, Math.ceil(filtered.length / PAGE));
+    $("pinfo").textContent = "página " + (page + 1) + " de " + pages.toLocaleString("pt-BR");
+    $("prev").disabled = page === 0;
+    $("next").disabled = (page + 1) * PAGE >= filtered.length;
+  }
+
+  function card(i) {
+    var ph = L.ph[i] || [], badges = [];
+    if (L.seen[i] === GEN) badges.push('<span class="cb new">novo</span>');
+    if (L.match[i]) badges.push('<span class="cb match">no perfil</span>');
+    if (drop(i)) badges.push('<span class="cb drop">↓ baixou</span>');
+
+    var photo = ph.length
+      ? '<div class="card-ph" data-ph="' + esc(ph.join(",")) + '" data-at="0">' +
+        '<img src="' + photoURL(ph[0]) + '" loading="lazy" decoding="async" alt="" ' +
+        "onerror=\"this.remove();this.parentNode.classList.add('noimg')\">" +
+        (ph.length > 1
+          ? '<button class="ph-nav prev" type="button" aria-label="foto anterior">‹</button>' +
+            '<button class="ph-nav next" type="button" aria-label="próxima foto">›</button>' +
+            '<span class="ph-count">1/' + ph.length + "</span>"
+          : "") +
+        '<div class="card-badges">' + badges.join("") + "</div></div>"
+      : '<div class="card-ph noimg"><div class="card-badges">' + badges.join("") + "</div></div>";
+
+    var facts = [];
+    if (L.land[i]) facts.push(n0(L.land[i]) + " m² de terreno");
+    if (L.bed[i]) facts.push(L.bed[i] + (L.bed[i] > 1 ? " quartos" : " quarto"));
+    if (L.built[i]) facts.push(n0(L.built[i]) + " m² construídos");
+    var geo = (L.km[i] != null ? Math.round(L.km[i]) + " km" : "—") +
+              (L.approx[i] ? "≈" : "") + " de Campinas";
+
+    var feats = (L.feat[i] || []).slice(0, 4).map(function (fi) {
+      return '<span class="ftag">' + esc(D.feature[fi]) + "</span>"; }).join("");
+
+    var was = drop(i) ? '<span class="was">antes ' + brl(L.rent0[i]) + "</span>" : "";
+    var nads = L.nads[i] > 1 ? " · em " + L.nads[i] + " anúncios" : "";
+
+    return '<div class="card">' + photo + '<div class="card-body">' +
+      '<div class="card-rent">' + brl(L.rent[i]) + '<span class="mo">/mês</span>' + was + "</div>" +
+      '<div class="card-t"><a href="' + esc(L.url[i]) + '" target="_blank" rel="noopener">' +
+        esc(L.title[i]) + "</a></div>" +
+      '<div class="card-facts">' + esc(D.property_type[L.pt[i]]) + '<span class="sep">·</span>' +
+        esc(D.city[L.city[i]]) + "<br>" + facts.join('<span class="sep">·</span>') + "<br>" + geo + "</div>" +
+      (feats ? '<div class="card-feats">' + feats + "</div>" : "") +
+      '<div class="card-foot">' + esc(D.advertiser[L.adv[i]] || "—") + nads + "</div>" +
+      "</div></div>";
+  }
+})();
+</script>
+</body>
+</html>

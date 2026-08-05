@@ -23,5 +23,6 @@ plugins:
 exclude:
   - commodity-risk-dashboard/
   - jobs-dashboard/
+  - rentals-dashboard/
   - README.md
   - LICENSE

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" width="520" height="260" role="img" aria-label="Countryside rentals pipeline diagram: the shared portal endpoint, sharded collection, a 200 km radius filter around Campinas, classification, SQLite and the dashboard">
+<rect width="520" height="260" fill="#f4f6f9"/>
+<style>
+  .lbl { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; fill: #171b24; }
+  .cap { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 8px; fill: #79818f; }
+  .box { fill: #ffffff; stroke: #dde1e8; stroke-width: 1.5; }
+  .box-on { fill: #e7eefe; stroke: #2f6bed; stroke-width: 1.5; }
+  .src { fill: #ffffff; stroke: #dde1e8; stroke-width: 1.2; }
+  .arr { stroke: #79818f; stroke-width: 1.4; }
+  .ring { fill: none; stroke: #0f9d8f; stroke-width: 1.4; }
+  .dot { fill: #79818f; }
+  .dot-in { fill: #0f9d8f; }
+</style>
+
+<!-- one endpoint, three portals -->
+<rect class="box-on" x="20" y="88" width="92" height="26" rx="6"/>
+<text class="lbl" x="66" y="105" text-anchor="middle" fill="#1f52c9">glue-api</text>
+<rect class="src" x="20" y="120" width="92" height="22" rx="6"/>
+<text class="cap" x="66" y="134" text-anchor="middle">vivareal · zap · olx</text>
+<text class="cap" x="66" y="158" text-anchor="middle">one shared inventory</text>
+<text class="cap" x="66" y="170" text-anchor="middle">state × type × price</text>
+
+<path class="arr" d="M116 114 L142 114" marker-end="url(#a)"/>
+
+<!-- normalize -->
+<rect class="box" x="146" y="96" width="80" height="36" rx="6"/>
+<text class="lbl" x="186" y="112" text-anchor="middle">normalize</text>
+<text class="cap" x="186" y="124" text-anchor="middle">rent · land · geo</text>
+
+<path class="arr" d="M230 114 L256 114" marker-end="url(#a)"/>
+
+<!-- the 200 km radius around Campinas -->
+<circle class="ring" cx="304" cy="114" r="42" stroke-dasharray="4 3"/>
+<circle class="dot-in" cx="304" cy="114" r="3.5"/>
+<circle class="dot-in" cx="288" cy="98" r="2.2"/>
+<circle class="dot-in" cx="322" cy="106" r="2.2"/>
+<circle class="dot-in" cx="296" cy="132" r="2.2"/>
+<circle class="dot-in" cx="318" cy="130" r="2.2"/>
+<circle class="dot-in" cx="282" cy="120" r="2.2"/>
+<circle class="dot" cx="262" cy="72" r="2.2" opacity=".45"/>
+<circle class="dot" cx="350" cy="80" r="2.2" opacity=".45"/>
+<circle class="dot" cx="346" cy="152" r="2.2" opacity=".45"/>
+<text class="cap" x="304" y="172" text-anchor="middle" fill="#0f9d8f">200 km · Campinas</text>
+<text class="cap" x="304" y="184" text-anchor="middle">haversine on the ad's own lat/lon</text>
+
+<path class="arr" d="M350 114 L376 114" marker-end="url(#a)"/>
+
+<!-- classify + store -->
+<rect class="box" x="380" y="70" width="80" height="34" rx="6"/>
+<text class="lbl" x="420" y="85" text-anchor="middle">classify</text>
+<text class="cap" x="420" y="97" text-anchor="middle">type · features</text>
+
+<rect class="box" x="380" y="112" width="80" height="34" rx="6"/>
+<text class="lbl" x="420" y="127" text-anchor="middle">sqlite</text>
+<text class="cap" x="420" y="139" text-anchor="middle">first seen · rent history</text>
+
+<path class="arr" d="M420 104 L420 112"/>
+<path class="arr" d="M420 150 L420 176" marker-end="url(#a)"/>
+
+<rect class="box-on" x="368" y="180" width="104" height="30" rx="6"/>
+<text class="lbl" x="420" y="199" text-anchor="middle" fill="#1f52c9">dashboard</text>
+
+<text class="cap" x="20" y="234">daily · self-hosted runner · stdlib only</text>
+
+<defs>
+  <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="#79818f"/>
+  </marker>
+</defs>
+</svg>

@@ -1,0 +1,59 @@
+name: Refresh countryside-rentals data
+
+# Daily ingestion for the Countryside Rentals dashboard. Reads the Grupo OLX
+# listings endpoint (VivaReal / ZAP / OLX share one inventory), keeps every rural
+# property advertised for rent, measures each one's distance from Campinas and
+# drops what falls outside 200 km, then updates the SQLite history and writes the
+# snapshot the dashboard reads — committing both back to the repo. GitHub Pages
+# redeploys the page automatically. No secrets: the endpoint is key-free.
+
+on:
+  schedule:
+    # 09:40 UTC every day (= 06:40 in Campinas, UTC-3). Deliberately clear of the
+    # other two jobs (jobs at 06:20 UTC, commodities at 22:30 UTC) so they never
+    # contend or race on a push. Morning local time rather than the small hours
+    # because this one needs the self-hosted machine to be awake.
+    - cron: "40 9 * * *"
+  workflow_dispatch: {}   # allow manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-rentals
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    # NOT ubuntu-latest, unlike the other two workflows. The portal endpoint
+    # answers 200 from a residential connection and 403 from a datacenter IP —
+    # measured, both ways — so a GitHub-hosted runner collects nothing at all.
+    # This runs on a self-hosted runner (see rentals-dashboard/README.md for the
+    # one-time setup). If the machine is off at 09:40 the job simply queues and
+    # runs when the runner comes back.
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: rentals-dashboard
+    steps:
+      - uses: actions/checkout@v4
+      # No setup-python step: the self-hosted runner uses the Python already
+      # installed on the machine, and the pipeline is standard-library only.
+      - name: Show Python version
+        run: python --version
+      - name: Run ETL (fetch → geo filter → classify → SQLite → snapshot)
+        run: python pipeline.py
+      - name: Verify the snapshot contract before publishing it
+        run: python verify_snapshot.py
+      - name: Commit refreshed artifacts (only if changed)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # rentals.db is the durable history; data.json is the served snapshot.
+          git add data/rentals.db ../projects/countryside-rentals/data.json
+          if git diff --cached --quiet; then
+            echo "No changes — nothing to commit."
+          else
+            git commit -m "chore: daily rentals snapshot [skip ci]"
+            git push
+          fi

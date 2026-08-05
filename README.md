@@ -6,9 +6,12 @@ engineering, BI and analytics.
 **Live:** [rodrigo-carfon.github.io](https://rodrigo-carfon.github.io)
 &nbsp;·&nbsp;
 [![Refresh commodity data](https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/actions/workflows/refresh-commodities.yml/badge.svg)](https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/actions/workflows/refresh-commodities.yml)
+[![Refresh job-market data](https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/actions/workflows/refresh-jobs.yml/badge.svg)](https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/actions/workflows/refresh-jobs.yml)
+[![Refresh countryside-rentals data](https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/actions/workflows/refresh-rentals.yml/badge.svg)](https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/actions/workflows/refresh-rentals.yml)
 
-A Jekyll home page and two standalone case studies, unified by a single design system. Hosted on
-GitHub Pages with no build tooling beyond Jekyll itself.
+A Jekyll home page and three standalone case studies, unified by a single design system. Hosted on
+GitHub Pages with no build tooling beyond Jekyll itself. The repo also carries one **private tool**
+(Countryside Rentals) that is published but deliberately unlisted — see below.
 
 ## Highlights
 
@@ -20,13 +23,18 @@ GitHub Pages with no build tooling beyond Jekyll itself.
 - **Interactive charts, no chart library.** The same page ships a hand-written interactive layer —
   a portfolio-frontier explorer, a date-range filter and a hover crosshair — built on plain SVG and
   vanilla JS, with a server-rendered fallback and an accessible data table.
-- **One design system, three pages.** Home and both case studies share a single stylesheet
+- **An interactive dashboard over a live base.** The
+  [Job-Market Explorer](https://rodrigo-carfon.github.io/projects/jobs-market/) collects twelve
+  public portal APIs daily into one normalized, classified base and ships a dictionary-encoded
+  columnar JSON the page filters entirely client-side — fifteen thousand rows, no backend.
+- **One design system, every page.** Home and every project page share a single stylesheet
   ([`assets/css/style.css`](assets/css/style.css)) with light and dark themes.
 
 ## Tech
 
 Jekyll on GitHub Pages · plain CSS (no framework) · Inter / Geist Mono · Python (pandas, numpy,
-yfinance) · SQLite · GitHub Actions · charts as hand-authored SVG.
+yfinance; the jobs and rentals pipelines are standard-library only) · SQLite · GitHub Actions,
+hosted and self-hosted · charts as hand-authored SVG.
 
 ## Project structure
 
@@ -39,13 +47,24 @@ assets/css/style.css              # the shared design system — linked by every
 projects/
 ├── google-maps-scraper/          # case study — hand-written
 │   └── index.html
+├── jobs-market/                  # dashboard — hand-written page + generated data.json
+│   ├── index.html
+│   └── data.json
+├── countryside-rentals/          # PRIVATE TOOL — published but unlisted, in Portuguese
+│   ├── index.html                #   not linked from the home page; noindex, nofollow
+│   └── data.json
 └── coffee-cotton-frontier/       # case study — GENERATED, do not hand-edit
     └── index.html                #   rendered by commodity-risk-dashboard/build_dashboard.py
 
-commodity-risk-dashboard/         # the ETL + generator behind the Coffee & Cotton study
-.github/workflows/                # the scheduled workflow that refreshes that study
+commodity-risk-dashboard/         # ETL + page generator behind the Coffee & Cotton study
+jobs-dashboard/                   # ETL behind the Job-Market Explorer
+rentals-dashboard/                # ETL behind Countryside Rentals (self-hosted runner)
+.github/workflows/                # the three scheduled refresh workflows
 pdf/                              # meta-refresh stubs preserving the old project URLs
 ```
+
+The three ETL directories are listed in `_config.yml`'s `exclude:`, so Jekyll never serves their
+`.py` or `.db` files. Each has its own README.
 
 ## Local development
 
@@ -55,14 +74,18 @@ The project pages and the stylesheet are static — they need nothing but an HTT
 python -m http.server 8000        # from the repo root
 # → http://localhost:8000/projects/google-maps-scraper/
 # → http://localhost:8000/projects/coffee-cotton-frontier/
+# → http://localhost:8000/projects/jobs-market/
+# → http://localhost:8000/projects/countryside-rentals/
 ```
 
 The home page is the only file containing Liquid, so it requires Jekyll to render. There is no
 `Gemfile` in the repo — GitHub Pages builds the site on push. To preview the home locally, install
 Ruby 3.1 (with DevKit) and add a `Gemfile` declaring `github-pages` and `webrick`.
 
-To rebuild the Coffee & Cotton study, see
-[`commodity-risk-dashboard/README.md`](commodity-risk-dashboard/README.md).
+To rebuild a data project, see its own README:
+[commodities](commodity-risk-dashboard/README.md) ·
+[jobs](jobs-dashboard/README.md) ·
+[rentals](rentals-dashboard/README.md).
 
 ## Notes for editing
 
@@ -72,6 +95,18 @@ To rebuild the Coffee & Cotton study, see
 - **The project pages carry no Jekyll front matter, by design:** they contain zero Liquid, so a
   plain static server renders them byte-for-byte identically to production and previewing needs no
   Ruby.
+- **The dashboard pages inline their JavaScript** rather than loading an `app.js`, so the markup and
+  the logic that reads it always deploy together — a cached old script against new markup can't
+  happen.
+- **`refresh-rentals.yml` targets a self-hosted runner, not `ubuntu-latest`.** The property endpoint
+  answers `200` from a residential IP and `403` from a datacenter one, so that job will collect
+  nothing on a GitHub-hosted runner. Setup is in
+  [`rentals-dashboard/README.md`](rentals-dashboard/README.md).
+- **Countryside Rentals is intentionally unlisted, not secret.** It is a private tool for a family
+  property search, not a portfolio piece: no tile on the home page, `noindex, nofollow` in its head,
+  and its copy is in Portuguese because the person using it is. The URL is public and works for
+  anyone it is shared with — GitHub Pages has no access control, so treat it as shareable-by-link
+  rather than protected.
 
 ---
 

@@ -115,8 +115,14 @@
      uploaded, and 876 cards reflowing as images land would be unusable. */
   .card-ph { position: relative; aspect-ratio: 3 / 2; background: var(--line-2); overflow: hidden; }
   .card-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .card-ph.noimg::after { content: "sem foto"; position: absolute; inset: 0; display: grid;
-    place-items: center; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  /* Shown only when the photo fails to load — a dead grey box tells you nothing,
+     so hand the reader the one thing that still works: the ad itself. */
+  .ph-fallback { display: none; position: absolute; inset: 0; place-items: center;
+    text-align: center; font-family: var(--mono); font-size: 11px; line-height: 1.5;
+    color: var(--ink-3); text-decoration: none; padding: 0 .8rem; }
+  .ph-fallback:hover { color: var(--blue); }
+  .card-ph.noimg .ph-fallback { display: grid; }
+  .card-ph.noimg .ph-nav, .card-ph.noimg .ph-count { display: none; }
   .ph-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 26px; height: 26px;
     border: none; border-radius: 50%; background: rgba(0,0,0,.42); color: #fff; cursor: pointer;
     font-size: 15px; line-height: 1; opacity: 0; transition: opacity .15s; }
@@ -437,10 +443,12 @@
     // Photo gallery — one delegated handler for every card on the page.
     $("list").addEventListener("click", function (e) {
       var btn = e.target.closest(".ph-nav"); if (!btn) return;
-      var box = btn.closest(".card-ph"), ids = box.dataset.ph.split(",");
+      var box = btn.closest(".card-ph"), img = box.querySelector("img");
+      if (!img) return;          // the photo failed and the node is gone
+      var ids = box.dataset.ph.split(",");
       var at = (+box.dataset.at + (btn.classList.contains("next") ? 1 : -1) + ids.length) % ids.length;
       box.dataset.at = at;
-      box.querySelector("img").src = photoURL(ids[at]);
+      img.src = photoURL(ids[at]);
       box.querySelector(".ph-count").textContent = (at + 1) + "/" + ids.length;
     });
   }
@@ -667,17 +675,27 @@
     if (L.match[i]) badges.push('<span class="cb match">no perfil</span>');
     if (drop(i)) badges.push('<span class="cb drop">↓ baixou</span>');
 
+    // The CDN 403s any request carrying a Referer from this domain, so the
+    // images are requested with referrerpolicy="no-referrer". Outbound links to
+    // the listing deliberately keep their referrer — that traffic is the one
+    // thing this page gives back to the portals.
+    var fb = '<a class="ph-fallback" href="' + esc(L.url[i]) +
+             '" target="_blank" rel="noopener">ver fotos no anúncio ↗</a>';
     var photo = ph.length
       ? '<div class="card-ph" data-ph="' + esc(ph.join(",")) + '" data-at="0">' +
         '<img src="' + photoURL(ph[0]) + '" loading="lazy" decoding="async" alt="" ' +
-        "onerror=\"this.remove();this.parentNode.classList.add('noimg')\">" +
+        'referrerpolicy="no-referrer" ' +
+        // Order matters: read parentNode BEFORE removing the node, or `this`
+        // is already detached and the class never lands on the box.
+        "onerror=\"this.parentNode.classList.add('noimg');this.remove()\">" + fb +
         (ph.length > 1
           ? '<button class="ph-nav prev" type="button" aria-label="foto anterior">‹</button>' +
             '<button class="ph-nav next" type="button" aria-label="próxima foto">›</button>' +
             '<span class="ph-count">1/' + ph.length + "</span>"
           : "") +
         '<div class="card-badges">' + badges.join("") + "</div></div>"
-      : '<div class="card-ph noimg"><div class="card-badges">' + badges.join("") + "</div></div>";
+      : '<div class="card-ph noimg">' + fb +
+        '<div class="card-badges">' + badges.join("") + "</div></div>";
 
     var facts = [];
     if (L.land[i]) facts.push(n0(L.land[i]) + " m² de terreno");

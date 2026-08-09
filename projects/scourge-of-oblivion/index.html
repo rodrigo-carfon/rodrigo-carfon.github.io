@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Scourge of Oblivion — mecânicas dos 5 bosses</title>
+<meta name="author" content="Rodrigo Carvalho">
+<meta name="description" content="Resumo das mecânicas principais dos cinco bosses do The Scourge of Oblivion, boss final da Grand Library Quest do Tibia.">
+<!-- Not part of the portfolio: a personal reference sheet for a game raid.
+     Unlisted (no link from the home page) and excluded from search engines —
+     the URL still works for anyone it is shared with. Same treatment as
+     /projects/countryside-rentals/. -->
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Scourge of Oblivion — mecânicas dos 5 bosses">
+<meta property="og:description" content="A mecânica central de cada um dos cinco bosses da Grand Library Quest, num resumo de uma página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  /* Page-local only. Tokens, nav, footer, chips and type come from the shared sheet. */
+
+  /* The shared sheet has no red; the boss forms need one that reads as "stop"
+     against both grounds. Declared for all three theme states, like the sheet. */
+  :root { --red: #d0453a; --red-l: #fbe6e3; --green: #0f9d8f; --green-l: #dcf3f0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --red: #f0776c; --red-l: #34191a; --green: #33c0af; --green-l: #113230; }
+  }
+  :root[data-theme="light"] { --red: #d0453a; --red-l: #fbe6e3; --green: #0f9d8f; --green-l: #dcf3f0; }
+  :root[data-theme="dark"]  { --red: #f0776c; --red-l: #34191a; --green: #33c0af; --green-l: #113230; }
+
+  .hero { padding: 2.6rem 0 .4rem; }
+  h1 em { font-style: normal; color: var(--blue); }
+  .meta-line {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    letter-spacing: .02em; margin-top: 1.2rem; line-height: 1.8;
+  }
+  .sec { padding: 1.9rem 0 0; }
+  .sec-head {
+    display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap;
+    padding-bottom: 1rem;
+  }
+  .sec-head .note { margin-left: auto; }
+
+  /* the loop */
+  .loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--gap); }
+  .loop-step {
+    background: var(--tile); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1rem 1.1rem; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+  .loop-step .n {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .loop-step b { font-size: 13.5px; font-weight: 600; }
+  .loop-step p { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; }
+
+  /* boss cards */
+  .bosses { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+  @media (max-width: 760px) { .bosses { grid-template-columns: 1fr; } }
+  .boss {
+    background: var(--tile); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.25rem 1.35rem; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: .7rem;
+  }
+  .boss.final { grid-column: 1 / -1; border-color: color-mix(in srgb, var(--blue) 32%, var(--line)); }
+  .boss-top { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+  .boss-n {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+    color: #fff; background: var(--blue); border-radius: 6px;
+    padding: 2px 7px; flex: none;
+  }
+  .boss h3 { font-size: 15.5px; }
+  .boss-where {
+    margin-left: auto; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .boss-key {
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.6;
+  }
+  .boss-key b { color: var(--ink); font-weight: 600; }
+  .rule-line {
+    display: flex; gap: 8px; align-items: baseline;
+    font-size: 12.5px; line-height: 1.55;
+    background: var(--red-l); border-left: 3px solid var(--red);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: .6rem .8rem;
+  }
+  .rule-line .k {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--red); font-weight: 500; flex: none;
+  }
+  .rule-line.ok { background: var(--teal-l); border-left-color: var(--teal); }
+  .rule-line.ok .k { color: var(--teal); }
+
+  /* forms table */
+  .scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .forms { min-width: 460px; background: var(--tile); }
+  .forms th, .forms td { text-align: left; padding: 9px 14px; }
+  .forms td { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .forms tbody tr:last-child td { border-bottom: 0; }
+  .swatch { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; white-space: nowrap; }
+  .swatch::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: currentColor; flex: none; }
+  .s-amber { color: var(--amber); }
+  .s-red   { color: var(--red); }
+  .s-blue  { color: var(--blue); }
+  .s-green { color: var(--green); }
+  .go   { color: var(--teal); font-weight: 600; }
+  .stop { color: var(--red);  font-weight: 600; }
+
+  /* never-do list */
+  .never { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem 1.4rem; }
+  @media (max-width: 700px) { .never { grid-template-columns: 1fr; } }
+  .never div {
+    display: grid; grid-template-columns: 16px 1fr; gap: 9px;
+    font-size: 13px; color: var(--ink-2); line-height: 1.55;
+    padding-bottom: .55rem; border-bottom: 1px solid var(--line-2);
+  }
+  .never div .x { color: var(--red); font-family: var(--mono); font-weight: 500; }
+  .never div b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="/"><span>~/</span>rodrigo-carfon</a>
+    <ul class="nav-links">
+      <li><a href="#ciclo">ciclo</a></li>
+      <li><a href="#bosses">bosses</a></li>
+      <li><a href="#nunca" class="nav-cta">o que não fazer</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container">
+
+  <section class="hero">
+    <div class="eyebrow">Tibia · Grand Library Quest</div>
+    <h1 class="mt-sm">The Scourge of <em>Oblivion</em> — a mecânica de cada boss</h1>
+    <p class="lead mt-sm" style="max-width:62ch">
+      Cinco bosses em sequência: quatro mini bosses, um em cada canto da sala, e o boss
+      final no centro. Cada um tem uma única mecânica que decide a luta — é ela que está
+      resumida aqui.
+    </p>
+    <div class="meta-line">
+      grupo máx. 10 jogadores · pré-requisito: as 4 livrarias concluídas · sentido horário<br>
+      cuidado permanente: os pisos rosas da sala principal dão dano alto de holy
+    </div>
+  </section>
+
+  <!-- ── CICLO ──────────────────────────────────────────────────────────── -->
+  <section id="ciclo" class="sec">
+    <div class="sec-head">
+      <h2>O ciclo que se repete cinco vezes</h2>
+      <span class="note">nunca entre num teleport durante a invasão</span>
+    </div>
+    <div class="loop">
+      <div class="loop-step">
+        <span class="n">01</span>
+        <b>Invasão</b>
+        <p>Summons nascem sem parar na sala principal. Finalize todos.</p>
+      </div>
+      <div class="loop-step">
+        <span class="n">02</span>
+        <b>Mensagem laranja</b>
+        <p>Surge no centro da tela após ~1 min. É o sinal de que a invasão parou.</p>
+      </div>
+      <div class="loop-step">
+        <span class="n">03</span>
+        <b>Mini boss</b>
+        <p>Entre no teleport da vez e finalize o boss daquele canto.</p>
+      </div>
+      <div class="loop-step">
+        <span class="n">04</span>
+        <b>Volta</b>
+        <p>Retorne à sala principal — a próxima onda começa sozinha.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BOSSES ─────────────────────────────────────────────────────────── -->
+  <section id="bosses" class="sec">
+    <div class="sec-head">
+      <h2>Os cinco bosses</h2>
+      <span class="note">na ordem em que são feitos</span>
+    </div>
+
+    <div class="bosses">
+
+      <article class="boss">
+        <div class="boss-top">
+          <span class="boss-n">01</span>
+          <h3>The Spellstealer</h3>
+          <span class="boss-where">direita-norte</span>
+        </div>
+        <p class="boss-key">
+          O boss alterna entre <b>negro</b> (mortal), <b>verde</b> e <b>vermelho</b> (imortais).
+          Nas formas coloridas ele só volta a ser atacável depois de passar pelo
+          <b>teleport da mesma cor</b> — verde na esquerda-norte, vermelho na direita-sul.
+        </p>
+        <div class="rule-line ok">
+          <span class="k">loop</span>
+          <span>Puxe o boss até o portal da cor dele, volte a hitar, repita até finalizar.</span>
+        </div>
+      </article>
+
+      <article class="boss">
+        <div class="boss-top">
+          <span class="boss-n">02</span>
+          <h3>The Scion of Havoc</h3>
+          <span class="boss-where">direita-sul</span>
+        </div>
+        <p class="boss-key">
+          Um jogador trapa o boss num canto; o resto do grupo mantém os fire elementals
+          longe dele. Ataque em <b>single target</b> — ou <em>exori hur</em>, se estiver de longe.
+        </p>
+        <div class="rule-line">
+          <span class="k">nunca</span>
+          <span>Matar os fire elementals: eles explodem por ~1k em todos por perto <b>e curam o boss</b>.</span>
+        </div>
+      </article>
+
+      <article class="boss">
+        <div class="boss-top">
+          <span class="boss-n">03</span>
+          <h3>Os irmãos Chill e Freeze</h3>
+          <span class="boss-where">esquerda-sul</span>
+        </div>
+        <p class="boss-key">
+          Dois bosses e vários summons que <b>se curam quando estão próximos</b>. Um jogador
+          leva o Chill para um canto, outro leva o Freeze para o canto oposto, e o resto
+          do grupo segura os summons longe dos dois.
+        </p>
+        <div class="rule-line ok">
+          <span class="k">separou</span>
+          <span>Sem cura cruzada, os dois caem normalmente.</span>
+        </div>
+      </article>
+
+      <article class="boss">
+        <div class="boss-top">
+          <span class="boss-n">04</span>
+          <h3>The Devourer of Secrets</h3>
+          <span class="boss-where">esquerda-norte</span>
+        </div>
+        <p class="boss-key">
+          Quatro <b>Books of Secrets</b>, um em cada canto, e War Golems que nascem para
+          destruí-los. Cure os livros, mate os golems e trape o boss <b>no centro da sala</b>,
+          de onde dá para ver a vida dos quatro ao mesmo tempo.
+        </p>
+        <div class="rule-line">
+          <span class="k">custo</span>
+          <span>Cada livro perdido deixa o boss <b>mais forte</b>. E não ataque os livros.</span>
+        </div>
+      </article>
+
+      <article class="boss final">
+        <div class="boss-top">
+          <span class="boss-n">05</span>
+          <h3>The Scourge of Oblivion</h3>
+          <span class="boss-where">sala principal · boss final</span>
+        </div>
+        <p class="boss-key">
+          Nasce depois da quinta invasão, e aqui <b>os summons não param</b> até o fim da luta.
+          Leve o boss para o lado do teleport da direita-norte e trape ele ali, com dois
+          knights: um de frente e outro colado no teleport. Esse canto é o que anula duas
+          das quatro direções da magia de morte.
+        </p>
+
+        <div class="scroller">
+          <table class="forms">
+            <thead>
+              <tr><th>Forma</th><th>Efeito</th><th>Ação</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="swatch s-amber">Amarelo</span></td>
+                <td>Forma normal, vulnerável</td>
+                <td><span class="go">Ataque</span> — é a única janela de dano</td>
+              </tr>
+              <tr>
+                <td><span class="swatch s-red">Vermelho</span></td>
+                <td>Reflete todo o dano recebido</td>
+                <td><span class="stop">Não ataque</span> — você se mata sozinho</td>
+              </tr>
+              <tr>
+                <td><span class="swatch s-blue">Azul</span></td>
+                <td>Imortal + reta de morte nas 4 direções, a cada ~3 s</td>
+                <td><span class="stop">Saia das retas</span> e use utamo tempo</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rule-line">
+          <span class="k">dano</span>
+          <span>
+            A reta passa de <b>15k sem proteção</b>. Com resistência a death empilhada
+            (shield +10%, Moon Mirror +5%, Cobra Amulet, might ring, utamo tempo na forma azul)
+            fica entre <b>4k e 8k</b>. O Koshei protege, mas deixa 50% mais fraco a holy.
+          </span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── NUNCA ──────────────────────────────────────────────────────────── -->
+  <section id="nunca" class="sec" style="padding-bottom:3.25rem">
+    <div class="sec-head">
+      <h2>O que não fazer</h2>
+      <span class="note">os erros que acabam com a run</span>
+    </div>
+    <div class="never">
+      <div><span class="x">✕</span><span>Entrar num teleport <b>antes da mensagem laranja</b>.</span></div>
+      <div><span class="x">✕</span><span>Matar os <b>fire elementals</b> do Scion of Havoc.</span></div>
+      <div><span class="x">✕</span><span>Deixar Chill, Freeze e os summons <b>próximos entre si</b>.</span></div>
+      <div><span class="x">✕</span><span>Atacar ou deixar morrer os <b>Books of Secrets</b>.</span></div>
+      <div><span class="x">✕</span><span>Atacar o boss final nas formas <b>vermelha</b> ou <b>azul</b>.</span></div>
+      <div><span class="x">✕</span><span>Pisar nos <b>pisos rosas</b> da sala principal.</span></div>
+      <div><span class="x">✕</span><span>Entrar no <b>teleport sul</b> — ele sai da quest.</span></div>
+      <div><span class="x">✕</span><span>Descuidar nos <b>SQMs de holy</b> logo depois da porta, na ida e na volta.</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <p>Resumo pessoal de raid · mecânicas conforme relatadas no vídeo de Henry Knight sobre o boss</p>
+    <p>Números de dano e drops variam por servidor e por versão do jogo</p>
+  </div>
+</footer>
+
+</body>
+</html>

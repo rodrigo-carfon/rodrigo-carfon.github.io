@@ -43,12 +43,15 @@
   .fchip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
   .fchip.match.on { background: var(--teal); border-color: var(--teal); }
   .fchip .c { opacity: .6; margin-left: 4px; }
-  .filter-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .filter-foot .count { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
-  .filter-foot .count b { color: var(--blue); }
+  .filter-foot { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .btn-clear { font-family: var(--mono); font-size: 12px; color: var(--ink-3); background: none;
     border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer; }
   .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  /* The collapsible wrapper. Above the mobile breakpoint the summary is hidden
+     and script keeps the panel open, so desktop sees no toggle at all. */
+  .filterbox > summary { display: none; }
+  .rcount { font-family: var(--mono); font-size: .68em; font-weight: 500; color: var(--blue); }
 
   /* ── result cards ── */
   .empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.4rem 0; text-align: center; }
@@ -106,6 +109,78 @@
 
   .loading { text-align: center; padding: 4rem 0; color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
   .meta-line { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-top: 1.2rem; }
+
+  /* ── touch ──────────────────────────────────────────────────────────────
+     Independent of width: a hover-only control is not "small" on a phone, it
+     is invisible. The gallery arrows were opacity:0 until :hover, which meant
+     that on every touch device the photos after the first were unreachable. */
+  @media (hover: none) {
+    .ph-nav { opacity: 1; background: rgba(0,0,0,.5); width: 34px; height: 34px; font-size: 19px; }
+    .card:hover { border-color: var(--line); }   /* no sticky hover state after a tap */
+  }
+
+  /* ── mobile ─────────────────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    /* 2.1rem of tile padding either side costs ~17% of a 390px screen. */
+    .tile-pad-lg { padding: 1.15rem 1rem; }
+    .hero-wrap { padding: 1.5rem 0 .9rem; }
+    .meta-line { margin-top: .9rem; line-height: 1.5; }
+
+    /* Label above its chips instead of beside them: an 82px label left the
+       chips barely 280px to wrap inside. */
+    .fgroup { flex-direction: column; align-items: stretch; gap: .45rem; }
+    .fgroup > .flabel { min-width: 0; }
+    .filters { gap: 1.15rem; }
+
+    /* Chips were ~20px tall — under half the 44px touch target, and packed
+       tight enough to mis-tap. */
+    .fchip { font-size: 12.5px; padding: 8px 13px; }
+    .fchips { gap: 7px; }
+    /* 16px is the threshold below which iOS Safari zooms the page on focus. */
+    .filter-search input { font-size: 16px; padding: .7rem .9rem; }
+
+    .filter-foot { justify-content: stretch; }
+    .btn-clear { width: 100%; padding: 10px; font-size: 13px; }
+
+    .results-head { flex-direction: column; align-items: stretch; gap: .7rem; }
+    .sortsel { width: 100%; font-size: 14px; padding: 10px; }
+
+    .cards { grid-template-columns: 1fr; gap: 1.1rem; }
+    .card-t { font-size: 13.5px; }
+    .card-facts { font-size: 12px; }
+    .card-body { padding: .85rem .9rem 1rem; }
+
+    .pager { gap: .7rem; margin-top: 1.6rem; }
+    .pager button { padding: 11px 18px; font-size: 13px; flex: 1; }
+    .pager .pinfo { font-size: 12px; white-space: nowrap; }
+
+    /* The toggle. list-style:none + ::marker for Safari, which still paints a
+       disclosure triangle when only ::-webkit-details-marker is cleared. */
+    .filterbox > summary {
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; list-style: none; padding: .25rem 0;
+      font-family: var(--mono); font-size: 14px; color: var(--ink);
+    }
+    .filterbox > summary::-webkit-details-marker { display: none; }
+    .filterbox > summary::marker { content: ""; }
+    .filterbox > summary > span:first-child::after {
+      content: "▾"; color: var(--ink-3); margin-left: .5rem; display: inline-block;
+      transition: transform .15s;
+    }
+    .filterbox[open] > summary > span:first-child::after { transform: rotate(180deg); }
+    .filterbox[open] > summary {
+      margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line-2);
+    }
+    .ft-active { font-size: 12px; color: var(--blue); }
+  }
+
+  @media (max-width: 430px) {
+    .nav-inner { gap: .5rem; padding: .6rem 1rem; }
+    .nav-links { gap: .75rem; }
+    .nav-links a { font-size: 12px; }
+    .nav-cta { padding: 6px 10px; }
+    .container { padding: 0 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -132,6 +207,15 @@
 
     <!-- Filters -->
     <section id="filters" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
+      <!-- A <details> so the phone gets a collapsed panel with no JS to hide it.
+           Nine chip groups unfold to well over a screen's worth on a 390px
+           display, which pushed every listing below the fold. Opened by script
+           above the mobile breakpoint, where there is room for all of it. -->
+      <details class="filterbox" id="filterbox">
+        <summary>
+          <span>Filtros</span>
+          <span class="ft-active" id="factive"></span>
+        </summary>
       <div class="filters">
         <div class="filter-search">
           <input id="q" type="search" placeholder="Buscar por título, cidade ou imobiliária…" autocomplete="off">
@@ -146,16 +230,19 @@
         <div class="fgroup"><span class="flabel">Cidade</span><div class="fchips" id="f-city"></div></div>
         <div class="fgroup"><span class="flabel">Apareceu</span><div class="fchips" id="f-recency"></div></div>
         <div class="filter-foot">
-          <div class="count"><b id="fcount">0</b> imóveis com esses filtros</div>
           <button class="btn-clear" id="clear">limpar filtros</button>
         </div>
       </div>
+      </details>
     </section>
 
     <!-- Results -->
     <section id="results" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
       <div class="results-head">
-        <h2>Imóveis</h2>
+        <!-- The match count lives here, not in the filter panel: on a phone that
+             panel is collapsed most of the time, and this is the number you
+             actually watch while filtering. -->
+        <h2>Imóveis <span class="rcount" id="fcount">0</span></h2>
         <select class="sortsel" id="sort">
           <option value="new">mais recentes primeiro</option>
           <option value="rent">menor aluguel</option>
@@ -326,8 +413,31 @@
     });
   }
 
+  // The filter panel is a <details> that ships closed, which is what a phone
+  // wants. Anything wider gets it open and the toggle hidden. Re-checked on
+  // resize so a rotation to landscape can't leave a desktop-width layout with
+  // its filters collapsed behind a summary that CSS has hidden.
+  var MOBILE = 720;
+  function syncFilterBox() {
+    if (window.innerWidth > MOBILE) $("filterbox").open = true;
+  }
+
+  // How many filters are on, for the collapsed summary — otherwise the panel
+  // hides the fact that a filter is narrowing the list.
+  function activeCount() {
+    var n = 0;
+    Object.keys(DICT_FACETS).concat(["rent", "land", "bed"])
+      .forEach(function (f) { n += filters[f].size; });
+    if (filters.q) n++;
+    if (filters.recency != null) n++;
+    if (filters.only) n++;
+    return n;
+  }
+
   function wire() {
     var t;
+    syncFilterBox();
+    window.addEventListener("resize", syncFilterBox);
     $("q").addEventListener("input", function (e) {
       clearTimeout(t); t = setTimeout(function () {
         filters.q = e.target.value.trim().toLowerCase(); page = 0; apply();
@@ -383,6 +493,8 @@
       filtered.push(i);
     }
     $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
+    var a = activeCount();
+    $("factive").textContent = a ? a + (a > 1 ? " filtros ativos" : " filtro ativo") : "";
     render();
   }
   function inBucket(set, buckets, v, inclusive) {

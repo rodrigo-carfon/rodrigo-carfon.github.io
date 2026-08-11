@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Florescer de Gaia — proposta de e-commerce</title>
+<meta name="description" content="Proposta de loja virtual para a Florescer de Gaia: cosméticos artesanais, cristais e rituais de autocuidado.">
+<meta name="author" content="Rodrigo Carvalho">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="demo-bar">
+  <strong>Proposta de site</strong> &nbsp;·&nbsp; navegação e carrinho funcionam de verdade. Preços e contato entram depois.
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a href="#topo" class="brand">
+      <span class="brand-name" data-loja="nome">Florescer de Gaia</span>
+      <span class="brand-sub">Campinas · SP</span>
+    </a>
+    <nav class="nav">
+      <a href="#catalogo">Produtos</a>
+      <a href="#ritual">O ritual</a>
+      <a href="#marca">A marca</a>
+    </nav>
+    <button class="cart-btn" id="abrir-carrinho">
+      <span class="label">Sacola</span>
+      <span class="cart-count" id="cart-count" data-empty="true">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="topo">
+
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div>
+        <p class="eyebrow">Feito à mão em Campinas</p>
+        <h1>Ferramentas de cura para <em>corpo, mente e espírito</em></h1>
+        <p>Cosméticos artesanais, cristais e rituais de autocuidado — criados em pequenos lotes, com intenção em cada etapa. Cada peça carrega uma história e uma energia própria.</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="#catalogo">Ver produtos</a>
+          <a class="btn btn-ghost" href="#" data-instagram target="_blank" rel="noopener">Instagram</a>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <img src="img/sabonete-lavanda-anil.jpg" alt="Sabonetes glicerinados artesanais de lavanda e anil">
+      </figure>
+    </div>
+  </section>
+
+  <section class="pillars">
+    <div class="wrap pillars-inner">
+      <div class="pillar">
+        <p class="pillar-title">Artesanal</p>
+        <p class="pillar-desc">Produzido em pequenos lotes, à mão</p>
+      </div>
+      <div class="pillar">
+        <p class="pillar-title">Cristais naturais</p>
+        <p class="pillar-desc">Pedras brutas — cada peça é única</p>
+      </div>
+      <div class="pillar">
+        <p class="pillar-title">Sob encomenda</p>
+        <p class="pillar-desc">Lembrancinhas personalizadas para eventos</p>
+      </div>
+      <div class="pillar">
+        <p class="pillar-title">Atendimento direto</p>
+        <p class="pillar-desc">Pedido fechado pelo WhatsApp, com a Isa</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="catalogo">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Catálogo</p>
+        <h2>Escolha o seu ritual</h2>
+        <p>Da limpeza energética do anil ao brilho do Carnaval — tudo o que a Florescer de Gaia produz, reunido em um lugar só.</p>
+      </div>
+
+      <div class="filters" id="filtros"></div>
+      <div class="grid" id="grade"></div>
+    </div>
+  </section>
+
+  <section class="editorial" id="ritual">
+    <div class="wrap editorial-inner">
+      <figure class="editorial-figure">
+        <img src="img/spa-jelly-detalhe.jpg" alt="Spa Jelly para os pés, em sachês artesanais">
+      </figure>
+      <div>
+        <p class="eyebrow">O ritual da casa</p>
+        <h2>A água vira gel. O gel vira água.</h2>
+        <p>O Spa Jelly não é só um esfoliante. É uma pausa: você observa a transformação acontecer nas suas mãos, e a rotina corrida perde a força por alguns minutos.</p>
+        <p>Retira a pele morta, hidrata os pés e — principalmente — devolve você para o presente. Uma alquimia que é impossível não se apaixonar.</p>
+        <p><a class="btn btn-gold" href="#catalogo">Conhecer o Spa Jelly</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="marca">
+    <div class="wrap editorial-inner" style="padding:0;gap:70px">
+      <div>
+        <p class="eyebrow">A marca</p>
+        <h2 style="font-size:clamp(2rem,4vw,2.8rem);margin:14px 0 18px">Um cantinho mágico</h2>
+        <p style="color:var(--muted)">A Florescer de Gaia nasceu das mãos da Isa Massaro, em Campinas. Sabonetes, géis, esfoliantes e joias em cristal bruto — tudo produzido em casa, em pequenas quantidades, do jeito que dá pra cuidar de cada detalhe.</p>
+        <p style="color:var(--muted)">A marca circula por feiras da região e atende também sob encomenda, preparando lembrancinhas para casamentos e eventos.</p>
+        <p><a class="btn btn-gold" href="#" data-instagram target="_blank" rel="noopener">Acompanhar no Instagram</a></p>
+      </div>
+      <figure class="editorial-figure" style="border-color:var(--line)">
+        <img src="img/marca-banner.jpg" alt="A marca Florescer de Gaia em uma feira, com as fundadoras segurando produtos">
+      </figure>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-brand-name" data-loja="nome">Florescer de Gaia</p>
+        <p style="margin:8px 0 0;font-size:.9rem">Ferramentas de cura para corpo, mente e espírito.<br>Campinas · SP</p>
+      </div>
+      <div>
+        <h4>Produtos</h4>
+        <ul>
+          <li><a href="#catalogo">Cristais e acessórios</a></li>
+          <li><a href="#catalogo">Banho e corpo</a></li>
+          <li><a href="#catalogo">Rituais e autocuidado</a></li>
+          <li><a href="#catalogo">Lembrancinhas</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contato</h4>
+        <ul>
+          <li><a href="#" data-instagram target="_blank" rel="noopener">@florescerdgaia</a></li>
+          <li>WhatsApp — a definir</li>
+          <li>E-mail — a definir</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Proposta de site · não é uma loja em operação</span>
+      <span id="pendencias-geral"></span>
+    </div>
+  </div>
+</footer>
+
+<div class="overlay" id="overlay" data-open="false"></div>
+
+<div class="modal" id="modal" data-open="false" role="dialog" aria-modal="true"></div>
+
+<aside class="drawer" id="drawer" data-open="false" aria-label="Sacola de compras">
+  <div class="drawer-head">
+    <h3>Sua sacola</h3>
+    <button id="fechar-carrinho" aria-label="Fechar" style="font-size:1.5rem;line-height:1">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-foot">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cart-total">—</span>
+    </div>
+    <button class="btn btn-wa" id="finalizar" disabled>Finalizar no WhatsApp</button>
+    <p class="drawer-note">O pedido é fechado direto com a Isa, pelo WhatsApp — com o valor final e o frete.</p>
+  </div>
+</aside>
+
+<script src="assets/products.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

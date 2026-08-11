@@ -439,9 +439,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 }
 
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; }
-.modal-media { background: var(--sand); }
-.modal-media img { height: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
-.modal-thumbs { display: flex; gap: 8px; padding: 8px; }
+.modal-media { background: var(--sand); display: flex; flex-direction: column; }
+.modal-media > img { aspect-ratio: 1 / 1; object-fit: cover; width: 100%; }
+.modal-thumbs { display: flex; gap: 8px; padding: 8px; flex-wrap: wrap; }
 .modal-thumbs img {
   width: 62px; height: 62px; object-fit: cover;
   border: 1px solid transparent; cursor: pointer;

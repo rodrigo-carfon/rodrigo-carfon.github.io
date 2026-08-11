@@ -19,10 +19,23 @@ direta das legendas — nada foi inventado.
 
 Dos 12 posts, 5 não continham produto (foto pessoal, participação em feira,
 agradecimento a clientes, e um post de outra conta que marcou a marca).
-Os 7 restantes renderam **10 itens de catálogo**.
+Os 7 restantes renderam **7 produtos de catálogo**, alguns com variações de
+cor e tamanho.
 
-Vale saber: 12 posts é o teto do que o Instagram entrega para um visitante
-deslogado. Não é limitação da extração — é o quanto a plataforma renderiza.
+### O teto dos 12 posts
+
+O perfil tem **112 publicações**, mas o Instagram entrega apenas as 12 mais
+recentes para quem não está logado. Isso foi verificado por três caminhos:
+
+- `api/v1/users/web_profile_info` responde **400** (endpoint fechado)
+- `?__a=1&__d=dis` devolve corpo vazio
+- navegador real rolando o perfil trava em 12 e **não exibe muro de login** —
+  simplesmente não há paginação para visitante anônimo
+
+Chegar às publicações mais antigas exige sessão autenticada. O caminho limpo
+é a exportação de dados da própria conta (Configurações → Central de contas →
+Suas informações e permissões → Baixar suas informações), que traz todas as
+fotos e legendas em ZIP.
 
 As imagens foram baixadas e versionadas em `img/` porque as URLs do CDN do
 Instagram são assinadas e expiram em poucos dias.
@@ -79,6 +92,9 @@ GitHub Pages.
 
 - catálogo com filtro por categoria
 - página de produto em modal, com galeria, variações e quantidade
+- variações (cor, tamanho, acabamento) são versões de **um mesmo produto** —
+  trocar a versão troca a foto e o preço, e cada versão vira uma linha própria
+  no carrinho. Isso evita o mesmo item aparecer duplicado na vitrine.
 - carrinho persistente (`localStorage`) — sobrevive ao refresh
 - checkout via WhatsApp com o pedido montado automaticamente
 - total que lida com preços em aberto ("A combinar")

@@ -353,7 +353,25 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
   margin-bottom: 5px;
 }
 .card-name { font-family: var(--font-display); font-size: 1.32rem; margin-bottom: 5px; }
-.card-resumo { font-size: .86rem; color: var(--muted); line-height: 1.5; margin-bottom: 14px; flex: 1; }
+.card-resumo { font-size: .86rem; color: var(--muted); line-height: 1.5; margin-bottom: 10px; flex: 1; }
+
+.card-var {
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--plum-soft);
+  margin: 0 0 12px;
+}
+
+.price-from {
+  font-family: var(--font-body);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: -2px;
+}
 
 .card-foot {
   display: flex;

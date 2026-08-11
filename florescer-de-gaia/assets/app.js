@@ -11,7 +11,7 @@
   var carrinho = carregarCarrinho();
   var filtroAtual = "todos";
   var produtoAberto = null;
-  var variacaoEscolhida = null;
+  var variacaoEscolhida = null;   // nome da variação, ou null
   var quantidade = 1;
 
   /* ---------- utilidades ---------- */
@@ -30,6 +30,33 @@
 
   function acharProduto(id) {
     return PRODUTOS.filter(function (p) { return p.id === id; })[0];
+  }
+
+  function acharVariacao(produto, nome) {
+    if (!produto || !nome || !produto.variacoes) return null;
+    return produto.variacoes.filter(function (v) { return v.nome === nome; })[0] || null;
+  }
+
+  /* Preço efetivo: o da variação quando existir, senão o do produto. */
+  function precoEfetivo(produto, nomeVariacao) {
+    var v = acharVariacao(produto, nomeVariacao);
+    if (v && v.preco !== null && v.preco !== undefined) return v.preco;
+    return (produto.preco === null || produto.preco === undefined) ? null : produto.preco;
+  }
+
+  /* Menor preço entre as variações — é o que o card mostra ("a partir de"). */
+  function precoVitrine(produto) {
+    if (!produto.variacoes || !produto.variacoes.length) return produto.preco;
+    var precos = produto.variacoes
+      .map(function (v) { return precoEfetivo(produto, v.nome); })
+      .filter(function (x) { return x !== null; });
+    if (!precos.length) return null;
+    return Math.min.apply(null, precos);
+  }
+
+  function imagemDaVariacao(produto, nomeVariacao) {
+    var v = acharVariacao(produto, nomeVariacao);
+    return (v && v.imagem) ? v.imagem : produto.imagem;
   }
 
   function nomeCategoria(slug) {
@@ -87,8 +114,9 @@
     carrinho.forEach(function (item) {
       var p = acharProduto(item.id);
       if (!p) return;
-      if (p.preco === null || p.preco === undefined) temAberto = true;
-      else soma += p.preco * item.qtd;
+      var preco = precoEfetivo(p, item.variacao);
+      if (preco === null) temAberto = true;
+      else soma += preco * item.qtd;
     });
     return { soma: soma, temAberto: temAberto };
   }
@@ -125,7 +153,10 @@
       if (p.sobEncomenda) selos.push('<span class="badge badge-rose">Sob encomenda</span>');
       if (p.estoque === false) selos.push('<span class="badge">Esgotado</span>');
 
+      var qtdVar = (p.variacoes || []).length;
       var pend = (p.pendencias || []).length;
+      var vitrine = precoVitrine(p);
+      var prefixo = (qtdVar > 1 && vitrine !== null) ? '<span class="price-from">a partir de </span>' : "";
 
       return '' +
         '<article class="card">' +
@@ -137,10 +168,11 @@
           '<p class="card-cat">' + escapar(nomeCategoria(p.categoria)) + "</p>" +
           '<h3 class="card-name">' + escapar(p.nome) + "</h3>" +
           '<p class="card-resumo">' + escapar(p.resumo) + "</p>" +
+          (qtdVar > 1 ? '<p class="card-var">' + qtdVar + " versões disponíveis</p>" : "") +
           '<div class="card-foot">' +
-            precoHTML(p.preco) +
+            "<span>" + prefixo + precoHTML(vitrine) + "</span>" +
             '<button class="card-add" data-abrir="' + p.id + '">' +
-              (p.sobEncomenda ? "Orçar" : "Adicionar") +
+              (p.sobEncomenda ? "Orçar" : (qtdVar > 1 ? "Ver opções" : "Adicionar")) +
             "</button>" +
           "</div>" +
         "</article>";
@@ -159,7 +191,7 @@
 
     produtoAberto = p;
     quantidade = 1;
-    variacaoEscolhida = (p.variacoes && p.variacoes.length) ? p.variacoes[0] : null;
+    variacaoEscolhida = (p.variacoes && p.variacoes.length) ? p.variacoes[0].nome : null;
 
     var galeria = [p.imagem].concat(p.imagensExtras || []);
 
@@ -168,7 +200,8 @@
           '<span class="field-label">Versão</span>' +
           '<div class="opts" id="opcoes">' +
             p.variacoes.map(function (v, i) {
-              return '<button class="opt" data-var="' + escapar(v) + '" aria-pressed="' + (i === 0) + '">' + escapar(v) + "</button>";
+              return '<button class="opt" data-var="' + escapar(v.nome) + '" aria-pressed="' + (i === 0) + '">' +
+                     escapar(v.nome) + "</button>";
             }).join("") +
           "</div>" +
         "</div>"
@@ -184,7 +217,7 @@
       '<button class="modal-close" data-fechar aria-label="Fechar">&times;</button>' +
       '<div class="modal-grid">' +
         '<div class="modal-media">' +
-          '<img id="modal-img" src="' + galeria[0] + '" alt="' + escapar(p.nome) + '">' +
+          '<img id="modal-img" src="' + imagemDaVariacao(p, variacaoEscolhida) + '" alt="' + escapar(p.nome) + '">' +
           (galeria.length > 1
             ? '<div class="modal-thumbs">' + galeria.map(function (src, i) {
                 return '<img src="' + src + '" alt="" data-thumb="' + src + '" aria-current="' + (i === 0) + '">';
@@ -194,7 +227,7 @@
         '<div class="modal-body">' +
           '<p class="eyebrow">' + escapar(nomeCategoria(p.categoria)) + "</p>" +
           "<h3>" + escapar(p.nome) + "</h3>" +
-          '<div class="modal-price">' + precoHTML(p.preco) + "</div>" +
+          '<div class="modal-price" id="modal-price">' + precoHTML(precoEfetivo(p, variacaoEscolhida)) + "</div>" +
           '<p class="modal-desc">' + escapar(p.descricao) + "</p>" +
           htmlVariacoes +
           '<div class="field">' +
@@ -208,8 +241,8 @@
           '<button class="btn btn-plum" id="add-carrinho"' + (p.estoque === false ? " disabled" : "") + ">" +
             (p.estoque === false ? "Esgotado" : (p.sobEncomenda ? "Pedir orçamento" : "Adicionar à sacola")) +
           "</button>" +
-          (p.preco === null
-            ? '<p class="modal-note">Preço a combinar no atendimento. Você fecha o pedido pelo WhatsApp e recebe o valor final com o frete.</p>'
+          (precoEfetivo(p, variacaoEscolhida) === null
+            ? '<p class="modal-note" id="nota-preco">Preço a combinar no atendimento. Você fecha o pedido pelo WhatsApp e recebe o valor final com o frete.</p>'
             : "") +
           '<p class="modal-note"><a href="' + p.origem + '" target="_blank" rel="noopener">Ver publicação original no Instagram &rarr;</a></p>' +
           htmlPendencias +
@@ -227,6 +260,14 @@
       b.addEventListener("click", function () {
         variacaoEscolhida = b.dataset.var;
         $$("#modal [data-var]").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
+
+        // a foto e o preço acompanham a versão escolhida
+        var novaImagem = imagemDaVariacao(p, variacaoEscolhida);
+        $("#modal-img").src = novaImagem;
+        $$("#modal [data-thumb]").forEach(function (o) {
+          o.setAttribute("aria-current", o.dataset.thumb === novaImagem);
+        });
+        $("#modal-price").innerHTML = precoHTML(precoEfetivo(p, variacaoEscolhida));
       });
     });
 
@@ -276,12 +317,11 @@
       corpo.innerHTML = carrinho.map(function (item) {
         var p = acharProduto(item.id);
         if (!p) return "";
-        var subtotal = p.preco !== null && p.preco !== undefined
-          ? formatarPreco(p.preco * item.qtd)
-          : "Sob consulta";
+        var preco = precoEfetivo(p, item.variacao);
+        var subtotal = preco !== null ? formatarPreco(preco * item.qtd) : "Sob consulta";
         return '' +
           '<div class="cart-line">' +
-            '<img src="' + p.imagem + '" alt="">' +
+            '<img src="' + imagemDaVariacao(p, item.variacao) + '" alt="">' +
             "<div style=\"flex:1\">" +
               '<p class="cart-line-name">' + escapar(p.nome) + "</p>" +
               (item.variacao ? '<p class="cart-line-var">Versão: ' + escapar(item.variacao) + "</p>" : "") +
@@ -317,9 +357,10 @@
     carrinho.forEach(function (item) {
       var p = acharProduto(item.id);
       if (!p) return;
+      var preco = precoEfetivo(p, item.variacao);
       var linha = "• " + item.qtd + "x " + p.nome;
       if (item.variacao) linha += " (" + item.variacao + ")";
-      if (p.preco !== null && p.preco !== undefined) linha += " — " + formatarPreco(p.preco * item.qtd);
+      if (preco !== null) linha += " — " + formatarPreco(preco * item.qtd);
       linhas.push(linha);
     });
     var t = totalizar();
@@ -376,7 +417,7 @@
     var pendentes = [];
     if (!LOJA.whatsapp) pendentes.push("WhatsApp");
     if (!LOJA.email) pendentes.push("e-mail");
-    var semPreco = PRODUTOS.filter(function (p) { return p.preco === null; }).length;
+    var semPreco = PRODUTOS.filter(function (p) { return precoVitrine(p) === null; }).length;
     if (semPreco) pendentes.push(semPreco + " preços");
 
     if (pendentes.length) {

@@ -10,10 +10,18 @@
    preco:      null  ->  o card mostra "Sob consulta".
                          Troque por um número, ex: 89.90
    estoque:    true / false  ->  false mostra o selo "Esgotado"
-   variacoes:  [] ou lista de opções, ex: ["Dourado", "Prata"]
+   variacoes:  cor, tamanho ou acabamento do MESMO produto.
+               Cada variação pode ter foto e preço próprios:
+                 { nome: "Pink 60g", imagem: "...", preco: 24.90 }
+               Se a variação não tiver preco, vale o preco do produto.
    pendencias: lista do que ainda falta descobrir. Aparece
                APENAS no modo revisão (link no rodapé),
                nunca para o cliente final.
+
+   REGRA ANTI-DUPLICATA
+   --------------------
+   Cor, tamanho e acabamento NÃO viram produtos separados —
+   viram variações. Um produto por item de catálogo real.
    ============================================================= */
 
 const LOJA = {
@@ -68,34 +76,22 @@ const PRODUTOS = [
     pendencias: ["preço", "aro ajustável ou numerado?", "quais cristais estão disponíveis", "FOTO PRÓPRIA — a atual é um recorte da foto do colar", "confirmar se é item à venda"]
   },
   {
-    id: "bracelete-cristal-dourado",
-    nome: "Bracelete de Cristal Bruto — Dourado",
+    id: "bracelete-cristal-bruto",
+    nome: "Bracelete de Cristal Bruto",
     categoria: "cristais",
     preco: null,
     estoque: true,
     destaque: true,
     imagem: "img/bracelete-a.jpg",
     imagensExtras: ["img/braceletes-cristal.jpg"],
-    resumo: "Bracelete aberto com acabamento dourado e cristal bruto.",
-    descricao: "Bracelete aberto de haste martelada com acabamento dourado e cristal bruto engastado.\n\nNa foto aparecem versões com quartzo rosa, ametista e uma pedra verde musgo. O acabamento dourado aquece o tom das pedras claras.",
-    variacoes: [],
+    resumo: "Haste martelada com cristal bruto engastado. Dourado ou prata.",
+    descricao: "Bracelete aberto de haste martelada com cristal bruto engastado.\n\nLegenda original do post: \"Braceletes com acabamento no dourado e no prata!\"\n\nNas fotos aparecem peças com quartzo rosa, ametista, quartzo transparente e uma pedra verde musgo. O acabamento dourado aquece o tom das pedras claras; o prata deixa o conjunto mais frio.",
+    variacoes: [
+      { nome: "Dourado", imagem: "img/bracelete-a.jpg" },
+      { nome: "Prata",   imagem: "img/bracelete-b.jpg" }
+    ],
     origem: "https://www.instagram.com/p/DL3XvguxKUO/",
-    pendencias: ["preço", "quais cristais podem ser escolhidos", "tamanho único ou ajustável?"]
-  },
-  {
-    id: "bracelete-cristal-prata",
-    nome: "Bracelete de Cristal Bruto — Prata",
-    categoria: "cristais",
-    preco: null,
-    estoque: true,
-    destaque: false,
-    imagem: "img/bracelete-b.jpg",
-    imagensExtras: ["img/braceletes-cristal.jpg"],
-    resumo: "Mesmo modelo, acabamento prateado.",
-    descricao: "Bracelete aberto de haste martelada com acabamento prata e cristal bruto engastado.\n\nMesma linha do modelo dourado, com acabamento mais frio — combina especialmente com quartzos transparentes e ametista.",
-    variacoes: [],
-    origem: "https://www.instagram.com/p/DL3XvguxKUO/",
-    pendencias: ["preço", "quais cristais podem ser escolhidos", "FOTO PRÓPRIA — a foto do post destaca o modelo dourado"]
+    pendencias: ["preço", "quais cristais podem ser escolhidos", "tamanho único ou ajustável?", "FOTO do acabamento prata — as fotos do post mostram só o dourado"]
   },
   {
     id: "sabonete-lavanda-anil",
@@ -112,48 +108,23 @@ const PRODUTOS = [
     pendencias: ["preço", "peso da barra", "validade", "lista completa de ingredientes (exigida para cosmético)"]
   },
   {
-    id: "gel-glitter-dourado-60g",
-    nome: "Gel Corporal com Glitter — Dourado 60g",
+    id: "gel-corporal-glitter",
+    nome: "Gel Corporal com Glitter",
     categoria: "banho",
     preco: null,
     estoque: true,
     destaque: true,
     imagem: "img/gel-glitter-dourado.jpg",
     imagensExtras: ["img/gel-glitter.jpg", "img/campanha-carnaval.jpg"],
-    resumo: "Brilho dourado para cabelo, corpo, roupa e maquiagem.",
-    descricao: "Gel corporal com glitter dourado, cheirinho delicioso e super brilhante.\n\nA gente usa glitter no cabelo, na roupa, na maquiagem E NO CORPINHO! Bisnaga de 60g, prática de levar na bolsa e reaplicar durante a festa.",
-    variacoes: [],
+    resumo: "Cheirinho delicioso e muito brilho. Dourado ou pink, 60g ou 150g.",
+    descricao: "Gel corporal com glitter, cheirinho delicioso e super brilhante.\n\nA gente usa glitter no cabelo, na roupa, na maquiagem E NO CORPINHO! Disponível nos tamanhos de 60g e 150g — a bisnaga de 60g cabe na bolsa para reaplicar durante a festa.",
+    variacoes: [
+      { nome: "Dourado 60g", imagem: "img/gel-glitter-dourado.jpg" },
+      { nome: "Pink 60g",    imagem: "img/gel-glitter-pink.jpg" },
+      { nome: "150g",        imagem: "img/gel-glitter.jpg" }
+    ],
     origem: "https://www.instagram.com/p/DUTMxxPDd7x/",
-    pendencias: ["preço", "qual é a fragrância", "CONFERIR ESTOQUE — post de Carnaval avisava 'tempo contado nos estoques'"]
-  },
-  {
-    id: "gel-glitter-pink-60g",
-    nome: "Gel Corporal com Glitter — Pink 60g",
-    categoria: "banho",
-    preco: null,
-    estoque: true,
-    destaque: false,
-    imagem: "img/gel-glitter-pink.jpg",
-    imagensExtras: ["img/gel-glitter.jpg", "img/campanha-carnaval.jpg"],
-    resumo: "Mesma fórmula, brilho pink intenso.",
-    descricao: "Gel corporal com glitter pink, cheirinho delicioso e super brilhante.\n\nMesma fórmula do dourado, em rosa vibrante. Bisnaga de 60g.",
-    variacoes: [],
-    origem: "https://www.instagram.com/p/DUTMxxPDd7x/",
-    pendencias: ["preço", "qual é a fragrância", "CONFERIR ESTOQUE"]
-  },
-  {
-    id: "gel-glitter-150g",
-    nome: "Gel Corporal com Glitter — 150g",
-    categoria: "banho",
-    preco: null,
-    estoque: true,
-    destaque: false,
-    imagem: "img/gel-glitter.jpg",
-    resumo: "Versão grande, para o bloco inteiro.",
-    descricao: "A versão família do gel corporal com glitter, em embalagem de 150g — para dividir com as amigas e atravessar o Carnaval inteiro.\n\nA legenda do post confirma os dois tamanhos: disponível nos tamanhos de 60g e 150g.",
-    variacoes: [],
-    origem: "https://www.instagram.com/p/DUTMxxPDd7x/",
-    pendencias: ["preço", "quais cores saem no 150g", "FOTO PRÓPRIA — a foto mostra só bisnagas de 60g"]
+    pendencias: ["preço de cada tamanho", "qual é a fragrância", "quais cores saem no 150g", "FOTO do 150g — as fotos mostram só bisnagas de 60g", "CONFERIR ESTOQUE: post de Carnaval avisava 'tempo contado nos estoques'"]
   },
   {
     id: "spa-jelly-pes",
@@ -166,7 +137,10 @@ const PRODUTOS = [
     imagensExtras: ["img/spa-jelly-detalhe.jpg"],
     resumo: "A água vira gel, o gel vira água. Esfolia, hidrata e desacelera.",
     descricao: "Uma experiência sensorial que te desacelera e te traz pro presente.\n\nAlém de retirar a pele morta e hidratar os pés, o Spa Jelly também nos ajuda a desacelerar da rotina corrida que temos. Nos faz estar mais presentes ao momento e aos nossos sentidos.\n\nObservar a água se transformando em gel, e depois o gel se transformando em água, é realmente hipnotizante. Uma alquimia que é impossível não se apaixonar.",
-    variacoes: ["Azul", "Branco"],
+    variacoes: [
+      { nome: "Azul",   imagem: "img/spa-jelly.jpg" },
+      { nome: "Branco", imagem: "img/spa-jelly-detalhe.jpg" }
+    ],
     origem: "https://www.instagram.com/p/DYnStQgsBKs/",
     pendencias: ["preço", "NOME REAL DE CADA VERSÃO — o rótulo não está legível na foto", "peso do sachê", "modo de uso escrito", "rende quantas aplicações?"]
   },

@@ -75,6 +75,7 @@
   .filterbox > summary { display: none; }
 
   /* ── results ─────────────────────────────────────────────────────────── */
+  .markbar { display: none; }
   .empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.8rem 0; text-align: center; }
   .results-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
   .rh-right { display: flex; align-items: center; gap: .5rem; }
@@ -191,6 +192,20 @@
     /* 16px is the threshold below which iOS Safari zooms the page on focus. */
     .filter-search input { font-size: 16px; padding: .7rem .9rem; }
     .btn-clear { padding: 11px; font-size: 13px; }
+    /* Four equal segments, full width, counts stacked under the label so the
+       whole thing reads as one control rather than four loose pills. */
+    .markbar { display: block; margin-bottom: 1rem; }
+    .markbar .fchips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .markbar .fchip {
+      border-radius: 9px; text-align: center; padding: 9px 4px;
+      font-size: 11.5px; line-height: 1.3; white-space: normal;
+      display: flex; flex-direction: column; justify-content: center; min-height: 46px;
+    }
+    .markbar .fchip .c { display: block; margin: 2px 0 0; opacity: .8; }
+    /* The rail still carries this group for desktop; on mobile the bar above
+       is the same filter, so showing both would be two controls for one state. */
+    #g-mark { display: none; }
+
     .results-head { flex-direction: column; align-items: stretch; gap: .7rem; }
     .rh-right { flex-direction: column; align-items: stretch; }
     .sortsel, .btn-copy { width: 100%; font-size: 14px; padding: 10px; }
@@ -259,7 +274,7 @@
             <div class="filter-search">
               <input id="q" type="search" placeholder="Buscar cidade, título…" autocomplete="off">
             </div>
-            <details class="fdrop" open><summary>Minha seleção<span class="fsel" id="s-mark"></span><span class="caret">▾</span></summary><div class="fchips" id="f-mark"></div></details>
+            <details class="fdrop" id="g-mark" open><summary>Minha seleção<span class="fsel" id="s-mark"></span><span class="caret">▾</span></summary><div class="fchips" id="f-mark"></div></details>
             <details class="fdrop" open><summary>Perfil<span class="fsel" id="s-only"></span><span class="caret">▾</span></summary><div class="fchips" id="f-only"></div></details>
             <details class="fdrop" open><summary>Aluguel<span class="fsel" id="s-rent"></span><span class="caret">▾</span></summary><div class="fchips" id="f-rent"></div></details>
             <details class="fdrop" open><summary>Terreno<span class="fsel" id="s-land"></span><span class="caret">▾</span></summary><div class="fchips" id="f-land"></div></details>
@@ -275,6 +290,12 @@
       </aside>
 
       <section id="results">
+        <!-- Mobile only. On a phone the rail is collapsed behind one toggle, and
+             this is the control she touches on every visit — hiding it two taps
+             and a scroll deep made the whole keep/discard loop cost more than it
+             saved. On desktop the rail is always open, so the same four options
+             stay where they were, as its first dropdown. -->
+        <div class="markbar"><div class="fchips" id="f-mark-m"></div></div>
         <div class="results-head">
           <h2>Imóveis <span class="rcount" id="fcount">0</span></h2>
           <div class="rh-right">
@@ -510,15 +531,23 @@
     });
   }
 
-  // Rebuilt whenever a mark changes, so the counts stay honest.
+  // Rebuilt whenever a mark changes, so the counts stay honest — and rendered
+  // into BOTH hosts: the rail dropdown (desktop) and the segmented bar above
+  // the results (mobile). Repainting both on every change is also what keeps
+  // the two in sync; there is no separate syncing code to get wrong.
   function buildMarkChips() {
-    var host = $("f-mark");
-    host.innerHTML = "";
     var opts = [["tudo", "", null], ["★ favoritos", "fav", countMark("fav")],
                 ["sem marca", "none", null], ["descartados", "out", countMark("out")]];
-    opts.forEach(function (o) {
-      var c = chip(host, o[0], o[2], exclusive(host, o[1], "mark"));
-      if (filters.mark === o[1]) c.classList.add("on");
+    ["f-mark", "f-mark-m"].forEach(function (hid) {
+      var host = $(hid);
+      host.innerHTML = "";
+      opts.forEach(function (o) {
+        var c = chip(host, o[0], o[2], function () {
+          filters.mark = o[1];
+          buildMarkChips();
+        });
+        if (filters.mark === o[1]) c.classList.add("on");
+      });
     });
     $("copyfav").disabled = countMark("fav") === 0;
   }
@@ -572,7 +601,7 @@
       Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) { filters[f].clear(); });
       document.querySelectorAll(".fchips .fchip.on").forEach(function (c) { c.classList.remove("on"); });
       [].forEach.call($("f-recency").children, function (c, i) { c.classList.toggle("on", i === 0); });
-      [].forEach.call($("f-mark").children, function (c, i) { c.classList.toggle("on", i === 0); });
+      buildMarkChips();          // repaints both mark hosts with "tudo" selected
       page = 0; apply();
     });
     $("prev").addEventListener("click", function () { if (page > 0) { page--; render(); scrollTop(); } });

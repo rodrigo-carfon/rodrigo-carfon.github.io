@@ -259,7 +259,11 @@ def export_snapshot(conn, out_path, active_days=10, today=None, max_raw_mb=4):
             dicts[col].append(val)
         return d[val]
 
-    cols = {k: [] for k in ("title", "url", "city", "st", "pt", "adv", "por",
+    # `uid` is the one column the page cannot do without and can never reorder
+    # around: the reader's own marks (kept / discarded / noted) are stored in her
+    # browser against it. Row order changes every refresh as listings come and
+    # go, so anything keyed on array position would scramble her picks overnight.
+    cols = {k: [] for k in ("uid", "title", "url", "city", "st", "pt", "adv", "por",
                             "band", "km", "lat", "lon", "rent", "condo", "land",
                             "built", "ppm", "bed", "suite", "bath", "park",
                             "feat", "ph", "match", "pub", "seen", "nads",
@@ -268,6 +272,7 @@ def export_snapshot(conn, out_path, active_days=10, today=None, max_raw_mb=4):
         (uid, portals, title, url, ptype, city, state, lat, lon, km, band, approx,
          rent, condo, land, built, ppm, bed, suite, bath, park, feats, photos,
          adv, match, pub, seen, dk) = r
+        cols["uid"].append(uid)
         cols["title"].append(title or "")
         cols["url"].append(url or "")
         cols["city"].append(code("city", city))

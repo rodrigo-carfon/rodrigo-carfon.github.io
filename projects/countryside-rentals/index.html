@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chácaras e sítios para alugar — até 200 km de Campinas</title>
 <meta name="author" content="Rodrigo Carvalho">
-<meta name="description" content="Chácaras, sítios e fazendas para alugar num raio de 200 km de Campinas, coletados todos os dias e filtrados por distância exata. Filtre por aluguel, área de terreno, distância e características.">
+<meta name="description" content="Chácaras, sítios e fazendas para alugar num raio de 200 km de Campinas, coletados todos os dias e filtrados por distância exata.">
 <!-- Not part of the portfolio: this is a private tool for a family property
      search. Unlisted (no link from the home page) and excluded from search
      engines — the URL still works for anyone it is shared with. -->
@@ -19,51 +19,83 @@
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
   /* Page-local only — structure comes from the shared design system. */
-  .hero-wrap { padding: 2.4rem 0 1.4rem; }
+  .hero-wrap { padding: 2rem 0 1.1rem; }
+  .meta-line { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-top: .9rem; }
 
-  /* ── filters ── */
-  .filters { display: flex; flex-direction: column; gap: .95rem; }
-  .filter-search { display: flex; gap: .6rem; align-items: center; }
-  .filter-search input {
-    flex: 1; background: var(--tile-2); border: 1px solid var(--line); border-radius: 9px;
-    padding: .6rem .85rem; color: var(--ink); font-family: var(--sans); font-size: 14px;
+  /* ── layout: filter rail + results ───────────────────────────────────── */
+  .layout { display: grid; grid-template-columns: 246px 1fr; gap: var(--gap); align-items: start; }
+  /* The rail follows you down the page, so changing a filter after scrolling
+     into the results never means scrolling back up. Its own scrollbar keeps a
+     long facet list from pushing the viewport around. */
+  .side { position: sticky; top: 62px; max-height: calc(100vh - 82px); overflow-y: auto; }
+  .side.tile { padding: 1rem 1.05rem; }
+
+  /* ── filter groups as dropdowns ──────────────────────────────────────── */
+  .fdrop { border-top: 1px solid var(--line-2); }
+  .fdrop:first-of-type { border-top: none; }
+  .fdrop > summary {
+    display: flex; align-items: center; gap: .5rem;
+    cursor: pointer; list-style: none; padding: .58rem 0;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ink-3);
   }
-  .filter-search input:focus { outline: none; border-color: var(--blue); }
-  .fgroup { display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: baseline; }
-  .fgroup > .flabel { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
-    text-transform: uppercase; color: var(--ink-3); min-width: 82px; }
-  .fchips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .fdrop > summary::-webkit-details-marker { display: none; }
+  .fdrop > summary::marker { content: ""; }
+  .fdrop > summary:hover { color: var(--ink-2); }
+  .fdrop[open] > summary { color: var(--ink); }
+  .fdrop > summary .caret { margin-left: auto; color: var(--ink-3); transition: transform .15s; }
+  .fdrop[open] > summary .caret { transform: rotate(180deg); }
+  .fdrop > summary .fsel:not(:empty) {
+    font-size: 10px; color: #fff; background: var(--blue); border-radius: 999px;
+    padding: 1px 6px; letter-spacing: 0;
+  }
+  .fdrop .fchips { padding: 0 0 .85rem; }
+
+  .fchips { display: flex; flex-wrap: wrap; gap: 5px; }
   .fchip {
     font-family: var(--mono); font-size: 11px; color: var(--ink-2);
     background: var(--tile-2); border: 1px solid var(--line);
-    padding: 3px 9px; border-radius: 999px; cursor: pointer; user-select: none;
+    padding: 4px 9px; border-radius: 999px; cursor: pointer; user-select: none;
     transition: all .12s; white-space: nowrap;
   }
   .fchip:hover { border-color: var(--blue); }
   .fchip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
   .fchip.match.on { background: var(--teal); border-color: var(--teal); }
   .fchip .c { opacity: .6; margin-left: 4px; }
-  .filter-foot { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .filter-search input {
+    width: 100%; background: var(--tile-2); border: 1px solid var(--line); border-radius: 9px;
+    padding: .55rem .75rem; color: var(--ink); font-family: var(--sans); font-size: 14px;
+    margin-bottom: .35rem;
+  }
+  .filter-search input:focus { outline: none; border-color: var(--blue); }
   .btn-clear { font-family: var(--mono); font-size: 12px; color: var(--ink-3); background: none;
-    border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer; }
+    border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; cursor: pointer;
+    width: 100%; margin-top: .8rem; }
   .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
-
-  /* The collapsible wrapper. Above the mobile breakpoint the summary is hidden
-     and script keeps the panel open, so desktop sees no toggle at all. */
   .filterbox > summary { display: none; }
-  .rcount { font-family: var(--mono); font-size: .68em; font-weight: 500; color: var(--blue); }
 
-  /* ── result cards ── */
-  .empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.4rem 0; text-align: center; }
-  .results-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-  .sortsel { font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--tile-2);
-    border: 1px solid var(--line); border-radius: 7px; padding: 4px 8px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: var(--gap); }
+  /* ── results ─────────────────────────────────────────────────────────── */
+  .empty { font-size: 12px; color: var(--ink-3); font-family: var(--mono); padding: 1.8rem 0; text-align: center; }
+  .results-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .rh-right { display: flex; align-items: center; gap: .5rem; }
+  .rcount { font-family: var(--mono); font-size: .68em; font-weight: 500; color: var(--blue); }
+  .sortsel, .btn-copy {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--tile-2);
+    border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; cursor: pointer;
+  }
+  .btn-copy:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-copy[disabled] { opacity: .45; cursor: default; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: var(--gap); }
   .card { border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden;
-    background: var(--tile-2); display: flex; flex-direction: column; }
+    background: var(--tile-2); display: flex; flex-direction: column; transition: border-color .15s, opacity .15s; }
   .card:hover { border-color: var(--blue); }
+  .card.fav { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+  .card.out { opacity: .5; }
+  .card.out:hover { opacity: 1; }
+
   /* Fixed box + object-fit: the CDN returns whatever ratio the advertiser
-     uploaded, and 876 cards reflowing as images land would be unusable. */
+     uploaded, and hundreds of cards reflowing as images land would be unusable. */
   .card-ph { position: relative; aspect-ratio: 3 / 2; background: var(--line-2); overflow: hidden; }
   .card-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* Shown only when the photo fails to load — a dead grey box tells you nothing,
@@ -81,11 +113,32 @@
   .ph-nav.prev { left: 6px; } .ph-nav.next { right: 6px; }
   .ph-count { position: absolute; right: 6px; bottom: 6px; font-family: var(--mono); font-size: 10px;
     color: #fff; background: rgba(0,0,0,.5); padding: 1px 6px; border-radius: 999px; }
-  .card-badges { position: absolute; left: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .card-badges { position: absolute; left: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 58%; }
   .cb { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .04em;
     padding: 2px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; }
   .cb.new { background: var(--amber); } .cb.match { background: var(--teal); }
   .cb.drop { background: var(--blue); }
+
+  /* ── keep / discard ──────────────────────────────────────────────────── */
+  /* Always painted, never hover-gated: on a touch screen a hover-only control
+     is not small, it is invisible. */
+  .mk { position: absolute; right: 6px; top: 6px; display: flex; gap: 4px; }
+  .mkb {
+    width: 28px; height: 28px; border: none; border-radius: 50%; cursor: pointer;
+    background: rgba(0,0,0,.45); color: #fff; font-size: 13px; line-height: 1;
+    display: grid; place-items: center; padding: 0; transition: background .12s, transform .12s;
+  }
+  .mkb:hover { transform: scale(1.12); }
+  .mkb.fav.on { background: var(--teal); }
+  .mkb.out.on { background: var(--amber); }
+  .note {
+    display: none; width: 100%; margin-top: .45rem; font-family: var(--sans); font-size: 12px;
+    background: var(--tile); border: 1px solid var(--line); border-radius: 7px;
+    padding: .4rem .55rem; color: var(--ink);
+  }
+  .note:focus { outline: none; border-color: var(--teal); }
+  .card.fav .note, .note.filled { display: block; }
+
   .card-body { padding: .7rem .8rem .8rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
   .card-rent { font-family: var(--mono); font-size: 1.05rem; font-weight: 500; color: var(--ink);
     font-variant-numeric: tabular-nums; line-height: 1.2; }
@@ -101,61 +154,55 @@
     border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; }
   .card-foot { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: auto;
     padding-top: .4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   .pager { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.4rem; }
-  .pager button { font-family: var(--mono); font-size: 12px; padding: 5px 12px; border-radius: 7px;
+  .pager button { font-family: var(--mono); font-size: 12px; padding: 6px 12px; border-radius: 7px;
     border: 1px solid var(--line); background: var(--tile-2); color: var(--ink-2); cursor: pointer; }
   .pager button:disabled { opacity: .4; cursor: default; }
   .pager .pinfo { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
-
   .loading { text-align: center; padding: 4rem 0; color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
-  .meta-line { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-top: 1.2rem; }
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg); font-family: var(--mono); font-size: 12.5px;
+    padding: .6rem 1rem; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: opacity .2s; z-index: 200; max-width: 90vw; text-align: center;
+  }
+  .toast.on { opacity: 1; }
 
-  /* ── touch ──────────────────────────────────────────────────────────────
-     Independent of width: a hover-only control is not "small" on a phone, it
-     is invisible. The gallery arrows were opacity:0 until :hover, which meant
-     that on every touch device the photos after the first were unreachable. */
+  /* ── touch ───────────────────────────────────────────────────────────── */
   @media (hover: none) {
     .ph-nav { opacity: 1; background: rgba(0,0,0,.5); width: 34px; height: 34px; font-size: 19px; }
-    .card:hover { border-color: var(--line); }   /* no sticky hover state after a tap */
+    .mkb { width: 34px; height: 34px; font-size: 15px; }
+    .card:hover { border-color: var(--line); }
+    .card.fav:hover { border-color: var(--teal); }
   }
 
-  /* ── mobile ─────────────────────────────────────────────────────────── */
+  /* ── mobile ──────────────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .side { position: static; max-height: none; overflow: visible; }
+  }
   @media (max-width: 720px) {
-    /* 2.1rem of tile padding either side costs ~17% of a 390px screen. */
-    .tile-pad-lg { padding: 1.15rem 1rem; }
-    .hero-wrap { padding: 1.5rem 0 .9rem; }
-    .meta-line { margin-top: .9rem; line-height: 1.5; }
-
-    /* Label above its chips instead of beside them: an 82px label left the
-       chips barely 280px to wrap inside. */
-    .fgroup { flex-direction: column; align-items: stretch; gap: .45rem; }
-    .fgroup > .flabel { min-width: 0; }
-    .filters { gap: 1.15rem; }
-
-    /* Chips were ~20px tall — under half the 44px touch target, and packed
-       tight enough to mis-tap. */
+    .tile-pad-lg, .side.tile { padding: 1.15rem 1rem; }
+    .hero-wrap { padding: 1.4rem 0 .8rem; }
     .fchip { font-size: 12.5px; padding: 8px 13px; }
     .fchips { gap: 7px; }
+    .fdrop > summary { padding: .8rem 0; font-size: 11.5px; }
     /* 16px is the threshold below which iOS Safari zooms the page on focus. */
     .filter-search input { font-size: 16px; padding: .7rem .9rem; }
-
-    .filter-foot { justify-content: stretch; }
-    .btn-clear { width: 100%; padding: 10px; font-size: 13px; }
-
+    .btn-clear { padding: 11px; font-size: 13px; }
     .results-head { flex-direction: column; align-items: stretch; gap: .7rem; }
-    .sortsel { width: 100%; font-size: 14px; padding: 10px; }
-
+    .rh-right { flex-direction: column; align-items: stretch; }
+    .sortsel, .btn-copy { width: 100%; font-size: 14px; padding: 10px; }
     .cards { grid-template-columns: 1fr; gap: 1.1rem; }
     .card-t { font-size: 13.5px; }
     .card-facts { font-size: 12px; }
     .card-body { padding: .85rem .9rem 1rem; }
-
-    .pager { gap: .7rem; margin-top: 1.6rem; }
     .pager button { padding: 11px 18px; font-size: 13px; flex: 1; }
-    .pager .pinfo { font-size: 12px; white-space: nowrap; }
 
-    /* The toggle. list-style:none + ::marker for Safari, which still paints a
-       disclosure triangle when only ::-webkit-details-marker is cleared. */
+    /* The whole rail collapses behind one toggle: ten groups unfolded is well
+       over a screen on a 390px display, which pushed every listing below the
+       fold. Opened by script above this breakpoint, where there is room. */
     .filterbox > summary {
       display: flex; justify-content: space-between; align-items: center;
       cursor: pointer; list-style: none; padding: .25rem 0;
@@ -169,11 +216,10 @@
     }
     .filterbox[open] > summary > span:first-child::after { transform: rotate(180deg); }
     .filterbox[open] > summary {
-      margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line-2);
+      margin-bottom: .9rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line-2);
     }
     .ft-active { font-size: 12px; color: var(--blue); }
   }
-
   @media (max-width: 430px) {
     .nav-inner { gap: .5rem; padding: .6rem 1rem; }
     .nav-links { gap: .75rem; }
@@ -204,72 +250,66 @@
   </section>
 
   <div id="app" style="display:none">
+    <div class="layout">
 
-    <!-- Filters -->
-    <section id="filters" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
-      <!-- A <details> so the phone gets a collapsed panel with no JS to hide it.
-           Nine chip groups unfold to well over a screen's worth on a 390px
-           display, which pushed every listing below the fold. Opened by script
-           above the mobile breakpoint, where there is room for all of it. -->
-      <details class="filterbox" id="filterbox">
-        <summary>
-          <span>Filtros</span>
-          <span class="ft-active" id="factive"></span>
-        </summary>
-      <div class="filters">
-        <div class="filter-search">
-          <input id="q" type="search" placeholder="Buscar por título, cidade ou imobiliária…" autocomplete="off">
+      <aside class="side tile" id="filters">
+        <details class="filterbox" id="filterbox">
+          <summary><span>Filtros</span><span class="ft-active" id="factive"></span></summary>
+          <div class="filters">
+            <div class="filter-search">
+              <input id="q" type="search" placeholder="Buscar cidade, título…" autocomplete="off">
+            </div>
+            <details class="fdrop" open><summary>Minha seleção<span class="fsel" id="s-mark"></span><span class="caret">▾</span></summary><div class="fchips" id="f-mark"></div></details>
+            <details class="fdrop" open><summary>Perfil<span class="fsel" id="s-only"></span><span class="caret">▾</span></summary><div class="fchips" id="f-only"></div></details>
+            <details class="fdrop" open><summary>Aluguel<span class="fsel" id="s-rent"></span><span class="caret">▾</span></summary><div class="fchips" id="f-rent"></div></details>
+            <details class="fdrop" open><summary>Terreno<span class="fsel" id="s-land"></span><span class="caret">▾</span></summary><div class="fchips" id="f-land"></div></details>
+            <details class="fdrop"><summary>Distância<span class="fsel" id="s-band"></span><span class="caret">▾</span></summary><div class="fchips" id="f-band"></div></details>
+            <details class="fdrop"><summary>Tipo<span class="fsel" id="s-pt"></span><span class="caret">▾</span></summary><div class="fchips" id="f-pt"></div></details>
+            <details class="fdrop"><summary>Quartos<span class="fsel" id="s-bed"></span><span class="caret">▾</span></summary><div class="fchips" id="f-bed"></div></details>
+            <details class="fdrop"><summary>Tem<span class="fsel" id="s-feat"></span><span class="caret">▾</span></summary><div class="fchips" id="f-feat"></div></details>
+            <details class="fdrop"><summary>Cidade<span class="fsel" id="s-city"></span><span class="caret">▾</span></summary><div class="fchips" id="f-city"></div></details>
+            <details class="fdrop"><summary>Apareceu<span class="fsel" id="s-recency"></span><span class="caret">▾</span></summary><div class="fchips" id="f-recency"></div></details>
+            <button class="btn-clear" id="clear">limpar filtros</button>
+          </div>
+        </details>
+      </aside>
+
+      <section id="results">
+        <div class="results-head">
+          <h2>Imóveis <span class="rcount" id="fcount">0</span></h2>
+          <div class="rh-right">
+            <button class="btn-copy" id="copyfav" disabled>copiar favoritos</button>
+            <select class="sortsel" id="sort">
+              <option value="new">mais recentes primeiro</option>
+              <option value="rent">menor aluguel</option>
+              <option value="land">maior terreno</option>
+              <option value="ppm">melhor custo por m²</option>
+              <option value="near">mais perto de Campinas</option>
+              <option value="drop">maior queda de preço</option>
+            </select>
+          </div>
         </div>
-        <div class="fgroup"><span class="flabel">Perfil</span><div class="fchips" id="f-only"></div></div>
-        <div class="fgroup"><span class="flabel">Aluguel</span><div class="fchips" id="f-rent"></div></div>
-        <div class="fgroup"><span class="flabel">Terreno</span><div class="fchips" id="f-land"></div></div>
-        <div class="fgroup"><span class="flabel">Distância</span><div class="fchips" id="f-band"></div></div>
-        <div class="fgroup"><span class="flabel">Tipo</span><div class="fchips" id="f-pt"></div></div>
-        <div class="fgroup"><span class="flabel">Quartos</span><div class="fchips" id="f-bed"></div></div>
-        <div class="fgroup"><span class="flabel">Tem</span><div class="fchips" id="f-feat"></div></div>
-        <div class="fgroup"><span class="flabel">Cidade</span><div class="fchips" id="f-city"></div></div>
-        <div class="fgroup"><span class="flabel">Apareceu</span><div class="fchips" id="f-recency"></div></div>
-        <div class="filter-foot">
-          <button class="btn-clear" id="clear">limpar filtros</button>
+        <div class="cards" id="list"></div>
+        <div class="pager">
+          <button id="prev">← anterior</button>
+          <span class="pinfo" id="pinfo">–</span>
+          <button id="next">próxima →</button>
         </div>
-      </div>
-      </details>
-    </section>
+      </section>
 
-    <!-- Results -->
-    <section id="results" class="tile tile-pad-lg" style="margin-bottom:var(--section-gap)">
-      <div class="results-head">
-        <!-- The match count lives here, not in the filter panel: on a phone that
-             panel is collapsed most of the time, and this is the number you
-             actually watch while filtering. -->
-        <h2>Imóveis <span class="rcount" id="fcount">0</span></h2>
-        <select class="sortsel" id="sort">
-          <option value="new">mais recentes primeiro</option>
-          <option value="rent">menor aluguel</option>
-          <option value="land">maior terreno</option>
-          <option value="ppm">melhor custo por m²</option>
-          <option value="near">mais perto de Campinas</option>
-          <option value="drop">maior queda de preço</option>
-        </select>
-      </div>
-      <div class="cards" id="list"></div>
-      <div class="pager">
-        <button id="prev">← anterior</button>
-        <span class="pinfo" id="pinfo">–</span>
-        <button id="next">próxima →</button>
-      </div>
-    </section>
-
+    </div>
   </div>
 
   <div class="loading" id="loading">carregando os anúncios…</div>
 
 </main>
 
+<div class="toast" id="toast"></div>
+
 <footer class="footer">
   <div class="footer-inner">
     <p>Busca pessoal de imóvel · dados públicos dos portais, atualizados diariamente</p>
-    <p>Sempre confirme no anúncio antes de decidir qualquer coisa · <a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/rentals-dashboard">como isso funciona</a></p>
+    <p>Suas marcações ficam salvas neste navegador · <a href="https://github.com/rodrigo-carfon/rodrigo-carfon.github.io/tree/master/rentals-dashboard">como isso funciona</a></p>
   </div>
 </footer>
 
@@ -277,12 +317,13 @@
 /* Countryside Rentals — client-side search over the columnar data.json.
    Inlined (not a separate app.js) so the markup and its logic always deploy
    together — a cached old script against new markup can't happen.
-   No framework. Filter, sort, look at the photos, open the ad — nothing else. */
+   No framework, no backend: filter, mark, open the ad. */
 (function () {
   "use strict";
   var D, L, N, GEN;                  // dict, columns, count, generated date
   var searchable = [];               // per-row lowercased "title city agency"
-  var filters = { q: "", recency: null, only: false };
+  var byUid = {};                    // uid -> row index
+  var filters = { q: "", recency: null, only: false, mark: "" };
   var sortKey = "new";
   var page = 0, PAGE = 24;
   var filtered = [];
@@ -295,10 +336,61 @@
   var daysAgo = function (n) { var d = new Date(GEN); d.setDate(d.getDate() - n);
     return d.toISOString().slice(0, 10); };
 
+  /* ── the reader's own marks ────────────────────────────────────────────
+     There is no backend and there never will be one — this is a static page on
+     GitHub Pages. Marks live in this browser's localStorage, keyed on the
+     listing's stable uid (never its row index: the base is rebuilt daily and
+     rows move). Each entry keeps a small copy of the listing so a favourite
+     survives its ad being taken down — it can still be copied out even when the
+     listing itself has left the base.
+     The trade-off, stated plainly in the footer: marks are per-browser. Another
+     phone, another browser, or clearing site data means starting over. */
+  var LS = "cr-marks-v1";
+  var marks = {};
+  try { marks = JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch (e) { marks = {}; }
+  var warnedSave = false;
+  function saveMarks() {
+    try { localStorage.setItem(LS, JSON.stringify(marks)); }
+    catch (e) {
+      if (!warnedSave) { toast("Não consegui salvar — o navegador está bloqueando."); warnedSave = true; }
+    }
+  }
+  function markOf(i) { var m = marks[L.uid[i]]; return m ? (m.m || "") : ""; }
+  function noteOf(i) { var m = marks[L.uid[i]]; return (m && m.n) || ""; }
+  function snapOf(i) {
+    return { t: L.title[i], r: L.rent[i], a: L.land[i],
+             c: D.city[L.city[i]], k: L.km[i], u: L.url[i] };
+  }
+  function setMark(i, m) {
+    var uid = L.uid[i], cur = marks[uid] || {};
+    if (cur.m === m) m = "";                       // tapping the same one clears it
+    if (!m && !cur.n) delete marks[uid];
+    else { cur.m = m; cur.s = snapOf(i); marks[uid] = cur; }
+    saveMarks();
+  }
+  function setNote(i, text) {
+    var uid = L.uid[i], cur = marks[uid] || {};
+    text = (text || "").slice(0, 280);
+    if (!text && !cur.m) delete marks[uid];
+    else { cur.n = text; cur.s = snapOf(i); marks[uid] = cur; }
+    saveMarks();
+  }
+  function countMark(m) {
+    var n = 0, k;
+    for (k in marks) if (marks[k].m === m) n++;
+    return n;
+  }
+
+  var toastT;
+  function toast(msg) {
+    var el = $("toast"); el.textContent = msg; el.classList.add("on");
+    clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove("on"); }, 2800);
+  }
+
   // ── numeric range facets ──────────────────────────────────────────────
   // Rent and land are continuous; chips need buckets. The rent edges are the
-  // ones the search is calibrated on, so "R$6–10k" and "R$10–14k" line up with
-  // the target profile instead of cutting across it.
+  // ones the search is calibrated on, so "R$6–10 mil" and "R$10–14 mil" line up
+  // with the target profile instead of cutting across it.
   var RENT_BUCKETS = [["até R$4 mil", 0, 4000], ["R$4–6 mil", 4000, 6000],
                       ["R$6–10 mil", 6000, 10000], ["R$10–14 mil", 10000, 14000],
                       ["acima de R$14 mil", 14000, Infinity]];
@@ -321,13 +413,13 @@
     for (var i = 0; i < N; i++) {
       searchable[i] = (L.title[i] + " " + D.city[L.city[i]] + " " +
                        D.advertiser[L.adv[i]]).toLowerCase();
+      byUid[L.uid[i]] = i;
     }
     buildChips();
     wire();
     $("meta").textContent = "atualizado em " + GEN.split("-").reverse().join("/") + " · " +
       N.toLocaleString("pt-BR") + " imóveis num raio de " + data.radius_km +
-      " km de " + data.origin + " · " + (data.total_base || N).toLocaleString("pt-BR") +
-      " no histórico · coletado de VivaReal, ZAP e OLX";
+      " km de " + data.origin;
     $("loading").style.display = "none";
     $("app").style.display = "block";
     apply();
@@ -355,8 +447,16 @@
     for (var i = 0; i < N; i++) { var v = col[i]; if (v != null && v >= lo && v < hi) n++; }
     return n;
   }
+  // One chip in a group behaving like a radio button (my-marks, recency).
+  function exclusive(host, value, key) {
+    return function (el) {
+      filters[key] = value;
+      [].forEach.call(host.children, function (x) { x.classList.remove("on"); });
+      el.classList.add("on");
+    };
+  }
+
   function buildChips() {
-    // dictionary-backed facets, ordered by frequency over the whole base
     Object.keys(DICT_FACETS).forEach(function (f) {
       var counts = {}, i, k;
       for (i = 0; i < N; i++) {
@@ -366,11 +466,11 @@
       }
       var order = Object.keys(counts).map(Number)
         .sort(function (a, b) { return counts[b] - counts[a]; });
-      // 116 towns is more chips than anyone can scan — show the busiest and let
-      // the search box reach the rest (it indexes the town name).
-      if (f === "city") order = order.slice(0, 18);
-      // Distance is the one ordered facet — it must read near→far, not by
-      // frequency and not alphabetically ("up to 25 km" would sort last).
+      // Over a hundred towns is more chips than anyone can scan — show the
+      // busiest and let the search box reach the rest (it indexes the town).
+      if (f === "city") order = order.slice(0, 20);
+      // Distance is the one ordered facet: it must read near->far, not by
+      // frequency and not alphabetically ("até 25 km" would sort last).
       if (f === "band") order.sort(function (a, b) {
         return BAND_ORDER.indexOf(D.band[a]) - BAND_ORDER.indexOf(D.band[b]); });
       var host = $("f-" + f);
@@ -393,37 +493,45 @@
       filters.only = !filters.only; el.classList.toggle("on", filters.only);
     }, "match");
 
-    // These carry counts: with the KPI row gone, "how many turned up today" —
-    // the whole point of running this daily — has to live somewhere, and the
-    // chip that filters to it is the honest place for it.
+    buildMarkChips();
+
+    // Recency carries counts: with no KPI row, "how many turned up today" — the
+    // reason this runs daily — has to live next to the control that acts on it.
     var opts = [["qualquer data", null], ["hoje", 0], ["7 dias", 7], ["30 dias", 30]];
     var host = $("f-recency");
     opts.forEach(function (o, idx) {
       var n = null;
       if (o[1] != null) {
         var cut = daysAgo(o[1]); n = 0;
-        for (var i = 0; i < N; i++) if (L.seen[i] >= cut) n++;
+        for (var i2 = 0; i2 < N; i2++) if (L.seen[i2] >= cut) n++;
       }
-      var c = chip(host, o[0], n, function (el) {
-        filters.recency = o[1];
-        [].forEach.call(host.children, function (x) { x.classList.remove("on"); });
-        el.classList.add("on");
-      });
+      var c = chip(host, o[0], n, exclusive(host, o[1], "recency"));
       if (idx === 0) c.classList.add("on");
     });
   }
 
-  // The filter panel is a <details> that ships closed, which is what a phone
-  // wants. Anything wider gets it open and the toggle hidden. Re-checked on
-  // resize so a rotation to landscape can't leave a desktop-width layout with
-  // its filters collapsed behind a summary that CSS has hidden.
+  // Rebuilt whenever a mark changes, so the counts stay honest.
+  function buildMarkChips() {
+    var host = $("f-mark");
+    host.innerHTML = "";
+    var opts = [["tudo", "", null], ["★ favoritos", "fav", countMark("fav")],
+                ["sem marca", "none", null], ["descartados", "out", countMark("out")]];
+    opts.forEach(function (o) {
+      var c = chip(host, o[0], o[2], exclusive(host, o[1], "mark"));
+      if (filters.mark === o[1]) c.classList.add("on");
+    });
+    $("copyfav").disabled = countMark("fav") === 0;
+  }
+
+  // The rail is a <details> that ships closed, which is what a phone wants.
+  // Anything wider gets it open and the toggle hidden. Re-checked on resize so
+  // a rotation to landscape can't leave a desktop-width layout with its filters
+  // collapsed behind a summary that CSS has hidden.
   var MOBILE = 720;
   function syncFilterBox() {
     if (window.innerWidth > MOBILE) $("filterbox").open = true;
   }
 
-  // How many filters are on, for the collapsed summary — otherwise the panel
-  // hides the fact that a filter is narrowing the list.
   function activeCount() {
     var n = 0;
     Object.keys(DICT_FACETS).concat(["rent", "land", "bed"])
@@ -431,13 +539,27 @@
     if (filters.q) n++;
     if (filters.recency != null) n++;
     if (filters.only) n++;
+    if (filters.mark) n++;
     return n;
+  }
+  // Each dropdown shows how many of its own chips are on, so a collapsed group
+  // can never hide the fact that it is narrowing the list.
+  function badgeGroups() {
+    Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) {
+      $("s-" + f).textContent = filters[f].size || "";
+    });
+    $("s-only").textContent = filters.only ? "1" : "";
+    $("s-mark").textContent = filters.mark ? "1" : "";
+    $("s-recency").textContent = filters.recency != null ? "1" : "";
+    var a = activeCount();
+    $("factive").textContent = a ? a + (a > 1 ? " filtros ativos" : " filtro ativo") : "";
   }
 
   function wire() {
     var t;
     syncFilterBox();
     window.addEventListener("resize", syncFilterBox);
+
     $("q").addEventListener("input", function (e) {
       clearTimeout(t); t = setTimeout(function () {
         filters.q = e.target.value.trim().toLowerCase(); page = 0; apply();
@@ -445,37 +567,66 @@
     });
     $("sort").addEventListener("change", function (e) { sortKey = e.target.value; page = 0; render(); });
     $("clear").addEventListener("click", function () {
-      filters.q = ""; filters.recency = null; filters.only = false; $("q").value = "";
+      filters.q = ""; filters.recency = null; filters.only = false; filters.mark = "";
+      $("q").value = "";
       Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) { filters[f].clear(); });
       document.querySelectorAll(".fchips .fchip.on").forEach(function (c) { c.classList.remove("on"); });
       [].forEach.call($("f-recency").children, function (c, i) { c.classList.toggle("on", i === 0); });
+      [].forEach.call($("f-mark").children, function (c, i) { c.classList.toggle("on", i === 0); });
       page = 0; apply();
     });
     $("prev").addEventListener("click", function () { if (page > 0) { page--; render(); scrollTop(); } });
     $("next").addEventListener("click", function () {
       if ((page + 1) * PAGE < filtered.length) { page++; render(); scrollTop(); } });
+    $("copyfav").addEventListener("click", copyFavourites);
 
-    // Photo gallery — one delegated handler for every card on the page.
+    // One delegated handler for every card: gallery arrows and mark buttons.
     $("list").addEventListener("click", function (e) {
-      var btn = e.target.closest(".ph-nav"); if (!btn) return;
-      var box = btn.closest(".card-ph"), img = box.querySelector("img");
-      if (!img) return;          // the photo failed and the node is gone
-      var ids = box.dataset.ph.split(",");
-      var at = (+box.dataset.at + (btn.classList.contains("next") ? 1 : -1) + ids.length) % ids.length;
-      box.dataset.at = at;
-      img.src = photoURL(ids[at]);
-      box.querySelector(".ph-count").textContent = (at + 1) + "/" + ids.length;
+      var nav = e.target.closest(".ph-nav");
+      if (nav) {
+        var box = nav.closest(".card-ph"), img = box.querySelector("img");
+        if (!img) return;                    // the photo failed and the node is gone
+        var ids = box.dataset.ph.split(",");
+        var at = (+box.dataset.at + (nav.classList.contains("next") ? 1 : -1) + ids.length) % ids.length;
+        box.dataset.at = at;
+        img.src = photoURL(ids[at]);
+        box.querySelector(".ph-count").textContent = (at + 1) + "/" + ids.length;
+        return;
+      }
+      var mb = e.target.closest(".mkb");
+      if (!mb) return;
+      var i = byUid[mb.dataset.uid];
+      if (i == null) return;
+      setMark(i, mb.classList.contains("fav") ? "fav" : "out");
+      buildMarkChips();
+      // Re-filter rather than just repaint: discarding hides the card, and
+      // "só favoritos" has to react the moment something stops being one.
+      apply(true);
+    });
+    $("list").addEventListener("input", function (e) {
+      var n = e.target.closest(".note");
+      if (!n) return;
+      var i = byUid[n.dataset.uid];
+      if (i != null) setNote(i, n.value);
     });
   }
   function scrollTop() { $("results").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
-  // ── filter → filtered index array ─────────────────────────────────────
-  function apply() {
+  // ── filter -> filtered index array ────────────────────────────────────
+  // keepPage: a mark toggled mid-list shouldn't throw you back to page 1.
+  function apply(keepPage) {
     var cutoff = filters.recency == null ? null : daysAgo(filters.recency);
     var q = filters.q, f = filters;
     filtered = [];
     outer:
     for (var i = 0; i < N; i++) {
+      var mk = markOf(i);
+      // Discarded listings are out of the way by default — that is the point of
+      // discarding — but never deleted: the "descartados" chip brings them back.
+      if (f.mark === "") { if (mk === "out") continue; }
+      else if (f.mark === "none") { if (mk) continue; }
+      else if (mk !== f.mark) continue;
+
       if (f.only && !L.match[i]) continue;
       if (f.pt.size && !f.pt.has(L.pt[i])) continue;
       if (f.band.size && !f.band.has(L.band[i])) continue;
@@ -493,8 +644,9 @@
       filtered.push(i);
     }
     $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
-    var a = activeCount();
-    $("factive").textContent = a ? a + (a > 1 ? " filtros ativos" : " filtro ativo") : "";
+    badgeGroups();
+    if (!keepPage) page = 0;
+    if (page * PAGE >= filtered.length) page = Math.max(0, Math.ceil(filtered.length / PAGE) - 1);
     render();
   }
   function inBucket(set, buckets, v, inclusive) {
@@ -514,8 +666,8 @@
     return "https://resizedimgs.vivareal.com/img/vr-listing/" + id +
            "/photo.jpg?action=crop&dimension=" + (w || 480) + "x" + (h || 320);
   }
+  function drop(i) { return (L.rent0[i] && L.rent[i] && L.rent0[i] > L.rent[i]) ? L.rent0[i] - L.rent[i] : 0; }
   function sortIdx(arr) {
-    var a = arr.slice();
     var by = {
       rent: function (x, y) { return (L.rent[x] || 1e9) - (L.rent[y] || 1e9); },
       land: function (x, y) { return (L.land[y] || 0) - (L.land[x] || 0); },
@@ -525,9 +677,8 @@
       new:  function (x, y) { return L.seen[x] < L.seen[y] ? 1 : L.seen[x] > L.seen[y] ? -1 :
                                      (L.rent[x] || 0) - (L.rent[y] || 0); }
     };
-    return a.sort(by[sortKey] || by.new);
+    return arr.slice().sort(by[sortKey] || by.new);
   }
-  function drop(i) { return (L.rent0[i] && L.rent[i] && L.rent0[i] > L.rent[i]) ? L.rent0[i] - L.rent[i] : 0; }
 
   function render() {
     var idx = sortIdx(filtered), start = page * PAGE;
@@ -540,15 +691,22 @@
   }
 
   function card(i) {
-    var ph = L.ph[i] || [], badges = [];
+    var ph = L.ph[i] || [], badges = [], uid = esc(L.uid[i]);
     if (L.seen[i] === GEN) badges.push('<span class="cb new">novo</span>');
     if (L.match[i]) badges.push('<span class="cb match">no perfil</span>');
     if (drop(i)) badges.push('<span class="cb drop">↓ baixou</span>');
 
-    // The CDN 403s any request carrying a Referer from this domain, so the
-    // images are requested with referrerpolicy="no-referrer". Outbound links to
-    // the listing deliberately keep their referrer — that traffic is the one
-    // thing this page gives back to the portals.
+    var mk = markOf(i), note = noteOf(i);
+    var marker = '<div class="mk">' +
+      '<button class="mkb fav' + (mk === "fav" ? " on" : "") + '" data-uid="' + uid +
+        '" type="button" title="Interessante" aria-label="Marcar como interessante">★</button>' +
+      '<button class="mkb out' + (mk === "out" ? " on" : "") + '" data-uid="' + uid +
+        '" type="button" title="Não interessa" aria-label="Descartar">✕</button></div>';
+
+    // The CDN 403s any request carrying a Referer from this domain, so images
+    // are requested with referrerpolicy="no-referrer". Outbound links to the
+    // listing deliberately keep theirs — that traffic is what this page gives
+    // back to the portals.
     var fb = '<a class="ph-fallback" href="' + esc(L.url[i]) +
              '" target="_blank" rel="noopener">ver fotos no anúncio ↗</a>';
     var photo = ph.length
@@ -563,9 +721,9 @@
             '<button class="ph-nav next" type="button" aria-label="próxima foto">›</button>' +
             '<span class="ph-count">1/' + ph.length + "</span>"
           : "") +
-        '<div class="card-badges">' + badges.join("") + "</div></div>"
+        '<div class="card-badges">' + badges.join("") + "</div>" + marker + "</div>"
       : '<div class="card-ph noimg">' + fb +
-        '<div class="card-badges">' + badges.join("") + "</div></div>";
+        '<div class="card-badges">' + badges.join("") + "</div>" + marker + "</div>";
 
     var facts = [];
     if (L.land[i]) facts.push(n0(L.land[i]) + " m² de terreno");
@@ -573,22 +731,62 @@
     if (L.built[i]) facts.push(n0(L.built[i]) + " m² construídos");
     var geo = (L.km[i] != null ? Math.round(L.km[i]) + " km" : "—") +
               (L.approx[i] ? "≈" : "") + " de Campinas";
-
     var feats = (L.feat[i] || []).slice(0, 4).map(function (fi) {
       return '<span class="ftag">' + esc(D.feature[fi]) + "</span>"; }).join("");
-
     var was = drop(i) ? '<span class="was">antes ' + brl(L.rent0[i]) + "</span>" : "";
     var nads = L.nads[i] > 1 ? " · em " + L.nads[i] + " anúncios" : "";
 
-    return '<div class="card">' + photo + '<div class="card-body">' +
+    return '<div class="card' + (mk ? " " + mk : "") + '">' + photo + '<div class="card-body">' +
       '<div class="card-rent">' + brl(L.rent[i]) + '<span class="mo">/mês</span>' + was + "</div>" +
       '<div class="card-t"><a href="' + esc(L.url[i]) + '" target="_blank" rel="noopener">' +
         esc(L.title[i]) + "</a></div>" +
       '<div class="card-facts">' + esc(D.property_type[L.pt[i]]) + '<span class="sep">·</span>' +
         esc(D.city[L.city[i]]) + "<br>" + facts.join('<span class="sep">·</span>') + "<br>" + geo + "</div>" +
       (feats ? '<div class="card-feats">' + feats + "</div>" : "") +
+      '<input class="note' + (note ? " filled" : "") + '" data-uid="' + uid +
+        '" value="' + esc(note) + '" placeholder="anotação…" maxlength="280">' +
       '<div class="card-foot">' + esc(D.advertiser[L.adv[i]] || "—") + nads + "</div>" +
       "</div></div>";
+  }
+
+  /* Favourites out as plain text, not a file: the destination is a WhatsApp
+     message. Includes favourites whose ad has since come down — that is what
+     the stored copy inside each mark is for. */
+  function copyFavourites() {
+    var lines = [], gone = 0, uid;
+    for (uid in marks) {
+      if (marks[uid].m !== "fav") continue;
+      var i = byUid[uid], s = marks[uid].s || {}, note = marks[uid].n || "";
+      var rent, land, city, km, url, off = "";
+      if (i != null) {
+        rent = L.rent[i]; land = L.land[i]; city = D.city[L.city[i]];
+        km = L.km[i]; url = L.url[i];
+      } else {
+        rent = s.r; land = s.a; city = s.c; km = s.k; url = s.u;
+        off = "  (saiu do ar)"; gone++;
+      }
+      lines.push(brl(rent) + "/mês · " + n0(land) + " m² · " + (city || "?") +
+                 (km != null ? " · " + Math.round(km) + " km" : "") + off +
+                 (note ? "\n  nota: " + note : "") + "\n  " + (url || ""));
+    }
+    if (!lines.length) { toast("Nenhum favorito ainda."); return; }
+    var text = "Chácaras que eu gostei (" + lines.length + "):\n\n" + lines.join("\n\n");
+    var done = function () {
+      toast(lines.length + " favorito" + (lines.length > 1 ? "s" : "") + " copiado" +
+            (lines.length > 1 ? "s" : "") + (gone ? " · " + gone + " saiu do ar" : ""));
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text, done); });
+    } else legacyCopy(text, done);
+  }
+  function legacyCopy(text, done) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:absolute;left:-9999px";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); }
+    catch (e) { toast("Não consegui copiar."); }
+    document.body.removeChild(ta);
   }
 })();
 </script>

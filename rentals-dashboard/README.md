@@ -69,6 +69,27 @@ glue-api (vivareal / zap / olx)
    data.json            → projects/countryside-rentals/index.html
 ```
 
+## Keeping / discarding, on a page with no backend
+
+The reader marks a listing ★ (interessante) or ✕ (descartado) and can leave a
+short note on it. Discarded listings drop out of the default view but are never
+deleted — a chip brings them back. "Copiar favoritos" puts the whole shortlist
+on the clipboard as plain text, because the destination is a WhatsApp message,
+not a file.
+
+All of it lives in the browser's `localStorage`, keyed on the listing's
+`uid` — which is why `uid` is now a column in the snapshot. Keying on row
+position would scramble every mark overnight: the base is rebuilt daily and rows
+move as listings come and go. Each mark also stores a small copy of the listing
+(rent, area, town, url) so a favourite still exports correctly after its ad is
+taken down.
+
+Two honest limits, both surfaced in the page footer:
+
+- **Marks are per-browser.** Another phone, another browser, or clearing site
+  data starts over. A static page on GitHub Pages has nowhere else to put them.
+- **They are not visible to anyone else.** "Copiar favoritos" is the hand-off.
+
 ## The target profile
 
 Calibrated on the rental being replaced — **6.000 m² at R$10.000/month**. A

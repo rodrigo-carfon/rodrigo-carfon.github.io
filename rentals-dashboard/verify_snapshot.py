@@ -26,7 +26,7 @@ PAGE = HERE.parent / "projects" / "countryside-rentals" / "index.html"
 
 # Every L.<key> and D.<key> the page reads. Kept explicit rather than scraped
 # from the HTML, so a typo on either side is caught instead of mirrored.
-COLUMNS = ["title", "url", "city", "st", "pt", "adv", "por", "band", "km", "lat",
+COLUMNS = ["uid", "title", "url", "city", "st", "pt", "adv", "por", "band", "km", "lat",
            "lon", "rent", "condo", "land", "built", "ppm", "bed", "suite", "bath",
            "park", "feat", "ph", "match", "pub", "seen", "nads", "rent0", "approx"]
 DICTS = ["city", "state", "property_type", "advertiser", "portals", "band", "feature"]

@@ -60,7 +60,6 @@
   }
   .fchip:hover { border-color: var(--blue); }
   .fchip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
-  .fchip.match.on { background: var(--teal); border-color: var(--teal); }
   .fchip .c { opacity: .6; margin-left: 4px; }
   .filter-search input {
     width: 100%; background: var(--tile-2); border: 1px solid var(--line); border-radius: 9px;
@@ -72,7 +71,6 @@
     border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; cursor: pointer;
     width: 100%; margin-top: .8rem; }
   .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
-  .fhint { font-size: 11.5px; color: var(--ink-3); line-height: 1.45; margin: 0 0 .55rem; }
   .btn-apply { display: none; }
   .filterbox > summary { display: none; }
 
@@ -119,7 +117,7 @@
   .card-badges { position: absolute; left: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 58%; }
   .cb { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .04em;
     padding: 2px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; }
-  .cb.new { background: var(--amber); } .cb.match { background: var(--teal); }
+  .cb.new { background: var(--amber); }
   .cb.drop { background: var(--blue); }
 
   /* ── keep / discard ──────────────────────────────────────────────────── */
@@ -290,7 +288,6 @@
               <input id="q" type="search" placeholder="Buscar cidade, título…" autocomplete="off">
             </div>
             <details class="fdrop" id="g-mark" open><summary>Minha seleção<span class="fsel" id="s-mark"></span><span class="caret">▾</span></summary><div class="fchips" id="f-mark"></div></details>
-            <details class="fdrop" open><summary>Perfil buscado<span class="fsel" id="s-only"></span><span class="caret">▾</span></summary><div class="fhint" id="hint-only"></div><div class="fchips" id="f-only"></div></details>
             <details class="fdrop" open><summary>Aluguel<span class="fsel" id="s-rent"></span><span class="caret">▾</span></summary><div class="fchips" id="f-rent"></div></details>
             <details class="fdrop" open><summary>Terreno<span class="fsel" id="s-land"></span><span class="caret">▾</span></summary><div class="fchips" id="f-land"></div></details>
             <details class="fdrop"><summary>Distância<span class="fsel" id="s-band"></span><span class="caret">▾</span></summary><div class="fchips" id="f-band"></div></details>
@@ -364,7 +361,7 @@
   var D, L, N, GEN;                  // dict, columns, count, generated date
   var searchable = [];               // per-row lowercased "title city agency"
   var byUid = {};                    // uid -> row index
-  var filters = { q: "", recency: null, only: false, mark: "" };
+  var filters = { q: "", recency: null, mark: "" };
   var sortKey = "new";
   var page = 0, PAGE = 24;
   var filtered = [];
@@ -456,12 +453,6 @@
                        D.advertiser[L.adv[i]]).toLowerCase();
       byUid[L.uid[i]] = i;
     }
-    var mr = data.match_rule || {};
-    if (mr.rent_min) {
-      $("hint-only").textContent =
-        "Aluguel de " + brl(mr.rent_min) + " a " + brl(mr.rent_max) + " com " +
-        n0(mr.land_min) + " m² de terreno ou mais — a faixa da chácara de hoje.";
-    }
     buildChips();
     wire();
     $("meta").textContent = "atualizado em " + GEN.split("-").reverse().join("/") + " · " +
@@ -534,12 +525,6 @@
     BED_BUCKETS.forEach(function (b, i) {
       chip($("f-bed"), b[0], bucketCount(L.bed, b[1], b[2] + 1), toggleSet(filters.bed, i)); });
 
-    var nMatch = 0;
-    for (var i = 0; i < N; i++) if (L.match[i]) nMatch++;
-    chip($("f-only"), "só o perfil buscado", nMatch, function (el) {
-      filters.only = !filters.only; el.classList.toggle("on", filters.only);
-    }, "match");
-
     buildMarkChips();
 
     // Recency carries counts: with no KPI row, "how many turned up today" — the
@@ -593,7 +578,6 @@
       .forEach(function (f) { n += filters[f].size; });
     if (filters.q) n++;
     if (filters.recency != null) n++;
-    if (filters.only) n++;
     if (filters.mark) n++;
     return n;
   }
@@ -603,7 +587,6 @@
     Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) {
       $("s-" + f).textContent = filters[f].size || "";
     });
-    $("s-only").textContent = filters.only ? "1" : "";
     $("s-mark").textContent = filters.mark ? "1" : "";
     $("s-recency").textContent = filters.recency != null ? "1" : "";
     var a = activeCount();
@@ -622,7 +605,7 @@
     });
     $("sort").addEventListener("change", function (e) { sortKey = e.target.value; page = 0; render(); });
     $("clear").addEventListener("click", function () {
-      filters.q = ""; filters.recency = null; filters.only = false; filters.mark = "";
+      filters.q = ""; filters.recency = null; filters.mark = "";
       $("q").value = "";
       Object.keys(DICT_FACETS).concat(["rent", "land", "bed"]).forEach(function (f) { filters[f].clear(); });
       document.querySelectorAll(".fchips .fchip.on").forEach(function (c) { c.classList.remove("on"); });
@@ -686,7 +669,6 @@
       else if (f.mark === "none") { if (mk) continue; }
       else if (mk !== f.mark) continue;
 
-      if (f.only && !L.match[i]) continue;
       if (f.pt.size && !f.pt.has(L.pt[i])) continue;
       if (f.band.size && !f.band.has(L.band[i])) continue;
       if (f.city.size && !f.city.has(L.city[i])) continue;
@@ -754,7 +736,6 @@
   function card(i) {
     var ph = L.ph[i] || [], badges = [], uid = esc(L.uid[i]);
     if (L.seen[i] === GEN) badges.push('<span class="cb new">novo</span>');
-    if (L.match[i]) badges.push('<span class="cb match">no perfil</span>');
     if (drop(i)) badges.push('<span class="cb drop">↓ baixou</span>');
 
     var mk = markOf(i), note = noteOf(i);

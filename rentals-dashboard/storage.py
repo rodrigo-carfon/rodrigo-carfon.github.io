@@ -214,7 +214,8 @@ def prune(conn, keep_days=180, today=None):
     return cur.rowcount
 
 
-def export_snapshot(conn, out_path, active_days=10, today=None, max_raw_mb=4):
+def export_snapshot(conn, out_path, active_days=10, today=None, max_raw_mb=4,
+                    match_rule=None):
     """Write the dictionary-encoded JSON the dashboard reads.
 
     Only listings still being advertised are served: `active_days` tolerates a
@@ -306,8 +307,12 @@ def export_snapshot(conn, out_path, active_days=10, today=None, max_raw_mb=4):
         cols["approx"].append(approx or 0)
 
     total_base = conn.execute("SELECT COUNT(*) FROM listings").fetchone()[0]
+    # Ship the match thresholds rather than let the page restate them: the rule
+    # lives in classify.py, and a hard-coded caption in the HTML would quietly
+    # start lying the first time those constants move.
     payload = {"generated": today, "count": len(rows), "total_base": total_base,
                "radius_km": 200, "origin": "Campinas",
+               "match_rule": match_rule or {},
                "dict": dicts, "listings": cols}
     text = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 

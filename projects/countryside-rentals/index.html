@@ -72,6 +72,8 @@
     border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; cursor: pointer;
     width: 100%; margin-top: .8rem; }
   .btn-clear:hover { color: var(--ink); border-color: var(--ink-3); }
+  .fhint { font-size: 11.5px; color: var(--ink-3); line-height: 1.45; margin: 0 0 .55rem; }
+  .btn-apply { display: none; }
   .filterbox > summary { display: none; }
 
   /* ── results ─────────────────────────────────────────────────────────── */
@@ -229,10 +231,23 @@
       content: "▾"; color: var(--ink-3); margin-left: .5rem; display: inline-block;
       transition: transform .15s;
     }
-    .filterbox[open] > summary > span:first-child::after { transform: rotate(180deg); }
+    /* An explicit ✕ when open, not a rotated chevron: this is the way out and
+       it should not need interpreting. */
+    .filterbox[open] > summary > span:first-child::after { content: "✕"; }
+    /* Pinned under the nav while the panel is open, so the way out is always
+       one tap away no matter how far down the groups you have scrolled. The
+       negative margin lets it cover the tile padding it scrolls over. */
     .filterbox[open] > summary {
-      margin-bottom: .9rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line-2);
+      position: sticky; top: 44px; z-index: 6; background: var(--tile);
+      margin: 0 -1rem .9rem; padding: .6rem 1rem .75rem;
+      border-bottom: 1px solid var(--line-2);
     }
+    .btn-apply {
+      display: block; width: 100%; margin-top: .55rem; padding: 13px;
+      background: var(--blue); color: #fff; border: none; border-radius: 9px;
+      font-family: var(--mono); font-size: 14px; cursor: pointer;
+    }
+    .btn-apply b { font-weight: 600; }
     .ft-active { font-size: 12px; color: var(--blue); }
   }
   @media (max-width: 430px) {
@@ -275,7 +290,7 @@
               <input id="q" type="search" placeholder="Buscar cidade, título…" autocomplete="off">
             </div>
             <details class="fdrop" id="g-mark" open><summary>Minha seleção<span class="fsel" id="s-mark"></span><span class="caret">▾</span></summary><div class="fchips" id="f-mark"></div></details>
-            <details class="fdrop" open><summary>Perfil<span class="fsel" id="s-only"></span><span class="caret">▾</span></summary><div class="fchips" id="f-only"></div></details>
+            <details class="fdrop" open><summary>Perfil buscado<span class="fsel" id="s-only"></span><span class="caret">▾</span></summary><div class="fhint" id="hint-only"></div><div class="fchips" id="f-only"></div></details>
             <details class="fdrop" open><summary>Aluguel<span class="fsel" id="s-rent"></span><span class="caret">▾</span></summary><div class="fchips" id="f-rent"></div></details>
             <details class="fdrop" open><summary>Terreno<span class="fsel" id="s-land"></span><span class="caret">▾</span></summary><div class="fchips" id="f-land"></div></details>
             <details class="fdrop"><summary>Distância<span class="fsel" id="s-band"></span><span class="caret">▾</span></summary><div class="fchips" id="f-band"></div></details>
@@ -285,6 +300,11 @@
             <details class="fdrop"><summary>Cidade<span class="fsel" id="s-city"></span><span class="caret">▾</span></summary><div class="fchips" id="f-city"></div></details>
             <details class="fdrop"><summary>Apareceu<span class="fsel" id="s-recency"></span><span class="caret">▾</span></summary><div class="fchips" id="f-recency"></div></details>
             <button class="btn-clear" id="clear">limpar filtros</button>
+            <!-- Mobile only. The panel is tall enough that the summary is off
+                 screen by the time you have set anything, so closing it meant
+                 scrolling back up to a rotated chevron. This says what it does
+                 and carries the number the filters just produced. -->
+            <button class="btn-apply" id="closefilters" type="button">ver <b id="fcount2">0</b> imóveis</button>
           </div>
         </details>
       </aside>
@@ -435,6 +455,12 @@
       searchable[i] = (L.title[i] + " " + D.city[L.city[i]] + " " +
                        D.advertiser[L.adv[i]]).toLowerCase();
       byUid[L.uid[i]] = i;
+    }
+    var mr = data.match_rule || {};
+    if (mr.rent_min) {
+      $("hint-only").textContent =
+        "Aluguel de " + brl(mr.rent_min) + " a " + brl(mr.rent_max) + " com " +
+        n0(mr.land_min) + " m² de terreno ou mais — a faixa da chácara de hoje.";
     }
     buildChips();
     wire();
@@ -608,6 +634,10 @@
     $("next").addEventListener("click", function () {
       if ((page + 1) * PAGE < filtered.length) { page++; render(); scrollTop(); } });
     $("copyfav").addEventListener("click", copyFavourites);
+    $("closefilters").addEventListener("click", function () {
+      $("filterbox").open = false;
+      $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
 
     // One delegated handler for every card: gallery arrows and mark buttons.
     $("list").addEventListener("click", function (e) {
@@ -672,7 +702,9 @@
       if (q && searchable[i].indexOf(q) === -1) continue;
       filtered.push(i);
     }
-    $("fcount").textContent = filtered.length.toLocaleString("pt-BR");
+    var shown = filtered.length.toLocaleString("pt-BR");
+    $("fcount").textContent = shown;
+    $("fcount2").textContent = shown;
     badgeGroups();
     if (!keepPage) page = 0;
     if (page * PAGE >= filtered.length) page = Math.max(0, Math.ceil(filtered.length / PAGE) - 1);

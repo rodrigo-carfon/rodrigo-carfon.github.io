@@ -79,6 +79,21 @@ def main():
     bad = [v for row in L["feat"] for v in row if not (0 <= v < hi)]
     check(not bad, f"feat → dict.feature ({hi} entries), {len(bad)} out of range")
 
+    print("")
+    print("-- the match rule the page describes is the one classify.py applies --")
+    import classify
+    mr = d.get("match_rule") or {}
+    check(mr.get("rent_min") == classify.MATCH_RENT_MIN
+          and mr.get("rent_max") == classify.MATCH_RENT_MAX
+          and mr.get("land_min") == classify.MATCH_LAND_MIN,
+          f"snapshot match_rule {mr} matches classify.py")
+    flagged = sum(1 for i in range(N)
+                  if L["rent"][i] and L["land"][i]
+                  and classify.MATCH_RENT_MIN <= L["rent"][i] <= classify.MATCH_RENT_MAX
+                  and L["land"][i] >= classify.MATCH_LAND_MIN)
+    check(flagged == sum(L["match"]),
+          f"match column agrees with that rule ({flagged} flagged)")
+
     print("\n── the page's hard-coded labels exist in the data ──")
     page = io.open(PAGE, encoding="utf-8").read()
     m = re.search(r"var BAND_ORDER = \[(.*?)\];", page, re.S)

@@ -144,7 +144,11 @@ def main():
           f"{pruned} pruned (>180d) · {total} total in rentals.db")
 
     # ── export served snapshot ──
-    n, mb = storage.export_snapshot(conn, str(JSON_PATH))
+    n, mb = storage.export_snapshot(conn, str(JSON_PATH), match_rule={
+        "rent_min": classify.MATCH_RENT_MIN,
+        "rent_max": classify.MATCH_RENT_MAX,
+        "land_min": classify.MATCH_LAND_MIN,
+    })
     conn.close()
     rel = os.path.relpath(JSON_PATH, HERE.parent)
     print(f"  snapshot: {n} listings → {rel} ({mb:.2f} MB raw)")

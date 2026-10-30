@@ -1,3 +1,3 @@
 ticker,commodity,commodity_pt,unit,exchange,contract_lbs,last_date,last_close,day_change_pct,vol_21d_annual_pct,drawdown_pct,pct_from_high_pct,high_52w,low_52w,risk_flag,contract_notional_usd,corr_coffee_cotton_63d
-KC=F,Coffee (Arabica),Coffee,US¢/lb,ICE,37500,2026-10-28,286.35,-2.52,34.1,-34.8,-32.3,422.7,244.4,WARN,107381.0,0.06
-CT=F,Cotton No.2,Cotton,US¢/lb,ICE,50000,2026-10-28,78.34,0.36,25.9,-24.0,-14.6,91.7,61.06,OK,39170.0,0.06
+KC=F,Coffee (Arabica),Coffee,US¢/lb,ICE,37500,2026-10-29,286.55,-0.07,33.9,-34.7,-32.2,422.7,244.4,WARN,107456.0,0.05
+CT=F,Cotton No.2,Cotton,US¢/lb,ICE,50000,2026-10-29,78.52,0.47,25.8,-23.8,-14.4,91.7,61.06,OK,39260.0,0.05
